@@ -3,7 +3,14 @@
 01, Jan, 2019
 
 MN is a minimal support library that i use and helps me in my "Pure Coding" style.
-Let's get a quick tour of it's content. Remember this is a quick tour browse the header files for full documentation and to view the full interface nearly each function is documented inline in the code.
+
+I think the way C was intended is to build your own tools and abstractions on top of the language the C standard library provides both an example and a bare minimum library to use in your application, You need to build your own tools and abstractions that suites you and the programs you intend to build, so feel free to take it change it to suite your needs, also if you wanted to add new features to it send them to me and I'll see what i can do.
+
+You can communicate with me through e-mail moustapha.saad.abdelhamed@gmail.com
+
+The library is licensed under BSD-3 and you can find it here [MN](https://gitlab.com/MoustaphaSaad/mn)
+
+Let's get a quick tour of it's content. Remember this is a quick tour browse the header files for full documentation and to view the full interface nearly each function is documented in-line in the code.
 
 ## Memory
 
