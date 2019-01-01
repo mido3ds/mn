@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?> 
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+  <!-- Types -->
+  <Type Name="mn::Buf&lt;char&gt;">
+    <DisplayString Condition="count == 0">empty</DisplayString>
+    <DisplayString Condition="count != 0" Encoding="Utf8">{ptr,[count]s8}</DisplayString>
+  </Type>
+
+  <Type Name="mn::Buf&lt;*&gt;">
+    <Intrinsic Name="capacity" Expression="cap"/>
+    <DisplayString Condition="count == 0">empty</DisplayString>
+    <DisplayString Condition="count != 0">{{ count={count} }}</DisplayString>
+    <Expand>
+      <Item Name="[capacity]" ExcludeView="simple">cap</Item>
+      <Item Name="[Allocator]" ExcludeView="simple">allocator</Item>
+      <ArrayItems>
+        <Size>count</Size>
+        <ValuePointer>ptr</ValuePointer>
+      </ArrayItems>
+    </Expand>
+  </Type>
+
+  <Type Name="mn::Map&lt;*&gt;">
+    <DisplayString Condition="count == 0">empty</DisplayString>
+    <DisplayString Condition="count != 0">{{ count={count} }}</DisplayString>
+    <Expand>
+      <CustomListItems>
+        <Variable Name="i" InitialValue="0"/>
+        <Loop>
+          <If Condition="i >= (flags.count)">
+            <Break/>
+          </If>
+          <If Condition="i == 0">
+            <Item Name="Key">"Value",sb</Item>
+          </If>
+          <If Condition="flags.ptr[i] == 1">
+            <Item Name="{values.ptr[i].key}">values.ptr[i].value</Item>
+          </If>
+          <Exec>i = i + 1</Exec>
+        </Loop>
+      </CustomListItems>
+    </Expand>
+  </Type>
+  
+</AutoVisualizer>
