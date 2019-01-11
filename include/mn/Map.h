@@ -399,12 +399,6 @@ namespace mn
 	inline static void
 	map_clear(Map<TKey, TValue, THash>& self)
 	{
-		for(auto it = map_begin_mut(self);
-			it != map_end_mut(self);
-			it = map_next_mut(self, it))
-		{
-			destruct(*it);
-		}
 		buf_fill(self.flags, HASH_FLAGS::HASH_EMPTY);
 		self.count = 0;
 	}
@@ -605,7 +599,6 @@ namespace mn
 		if(index == self.flags.count)
 			return false;
 		self.flags[index] = HASH_FLAGS::HASH_DELETED;
-		destruct(self.values[index]);
 		--self.count;
 		return true;
 	}
@@ -629,7 +622,6 @@ namespace mn
 		if(self.flags[index] == HASH_FLAGS::HASH_USED)
 		{
 			self.flags[index] = HASH_FLAGS::HASH_DELETED;
-			destruct(self.values[index]);
 			--self.count;
 			return true;
 		}

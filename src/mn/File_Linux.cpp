@@ -13,6 +13,9 @@
 #include <dirent.h>
 #include <linux/limits.h>
 
+//to supress warnings in release mode
+#define UNUSED(x) ((void)(x))
+
 namespace mn
 {
 	Block
@@ -280,6 +283,7 @@ namespace mn
 	{
 		int result = ::chdir(path);
 		assert(result == 0 && "chdir failed");
+		UNUSED(result);
 	}
 
 	Str

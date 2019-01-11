@@ -2,6 +2,9 @@
 #include "mn/Memory_Stream.h"
 #include "mn/Pool.h"
 
+//to supress warnings in release mode
+#define UNUSED(x) ((void)(x))
+
 namespace mn
 {
 	struct Internal_Stream
@@ -215,6 +218,7 @@ namespace mn
 	{
 		Internal_Stream* self = (Internal_Stream*)stream;
 		bool res = false;
+		UNUSED(res);
 		switch (self->kind)
 		{
 			case Internal_Stream::KIND_FILE:
@@ -240,7 +244,7 @@ namespace mn
 	{
 		Internal_Stream* self = (Internal_Stream*)stream;
 		bool res = false;
-
+		UNUSED(res);
 		switch (self->kind)
 		{
 			case Internal_Stream::KIND_FILE:
@@ -266,7 +270,7 @@ namespace mn
 	{
 		Internal_Stream* self = (Internal_Stream*)stream;
 		bool res = false;
-
+		UNUSED(res);
 		switch (self->kind)
 		{
 			case Internal_Stream::KIND_FILE:

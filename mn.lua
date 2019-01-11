@@ -1,8 +1,6 @@
 project "mn"
 	language "C++"
 	kind "SharedLib"
-	targetdir (bin_path .. "/%{cfg.platform}/%{cfg.buildcfg}/")
-	location  (build_path .. "/%{prj.name}/")
 
 	files
 	{
@@ -13,11 +11,7 @@ project "mn"
 
 	includedirs
 	{
-		"include/",
-	}
-
-	links
-	{
+		"include/"
 	}
 
 	--language configuration
@@ -28,8 +22,7 @@ project "mn"
 	--linux configuration
 	filter "system:linux"
 		defines { "OS_LINUX" }
-		linkoptions {"-pthread"}
-		buildoptions { "-Wno-missing-braces" }
+		linkoptions {"-pthread", "-ldl"}
 
 	filter { "system:linux", "configurations:debug" }
 		linkoptions {"-rdynamic"}
@@ -48,15 +41,17 @@ project "mn"
 	--os agnostic configuration
 	filter "configurations:debug"
 		targetsuffix "d"
-		defines {"DEBUG", "MN_DLL"}
+		defines
+		{
+			"DEBUG",
+			"MN_DLL"
+		}
 		symbols "On"
 
 	filter "configurations:release"
-		defines {"NDEBUG", "MN_DLL"}
+		defines
+		{
+			"NDEBUG",
+			"MN_DLL"
+		}
 		optimize "On"
-
-	filter "platforms:x86"
-		architecture "x32"
-
-	filter "platforms:x64"
-		architecture "x64"

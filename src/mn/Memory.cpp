@@ -7,6 +7,13 @@
 #include <stdio.h>
 #include <atomic>
 
+#if USE_TRACY
+#include <Tracy.hpp>
+#endif
+
+//to supress warnings in release mode
+#define UNUSED(x) ((void)(x))
+
 namespace mn
 {
 	struct Arena_Node
@@ -393,6 +400,11 @@ namespace mn
 		if(allocator == clib_allocator)
 		{
 			void* ptr = ::malloc(size);
+
+			#if USE_TRACY
+				TracyAllocS(ptr, size, 20);
+			#endif
+
 			#if ENABLE_SIMPLE_LEAK_DETECTION
 			if(ptr)
 			{
@@ -417,6 +429,7 @@ namespace mn
 				size_t free_memory = self->stack.memory.size - used_memory;
 				assert(free_memory >= size &&
 					   "Stack allocator doesn't have enough memory");
+				UNUSED(free_memory);
 
 				char* ptr = self->stack.alloc_head;
 				self->stack.alloc_head = ptr + size;
@@ -462,6 +475,9 @@ namespace mn
 				--_simple_leak_detector.allocation_count;
 				_simple_leak_detector.allocation_size -= block.size;
 			}
+			#endif
+			#if USE_TRACY
+				TracyFreeS(block.ptr, 20);
 			#endif
 			::free(block.ptr);
 			return;

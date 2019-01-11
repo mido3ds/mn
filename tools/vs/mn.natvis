@@ -20,6 +20,26 @@
     </Expand>
   </Type>
 
+  <Type Name="mn::Ring&lt;*&gt;">
+    <Intrinsic Name="capacity" Expression="cap"/>
+    <DisplayString Condition="count == 0">empty</DisplayString>
+    <DisplayString Condition="count != 0">{{ count={count} }}</DisplayString>
+    <Expand>
+      <Item Name="[capacity]" ExcludeView="simple">cap</Item>
+      <Item Name="[Allocator]" ExcludeView="simple">allocator</Item>
+      <CustomListItems>
+        <Variable Name="i" InitialValue="0"/>
+        <Loop>
+          <If Condition="i == count">
+            <Break/>
+          </If>
+          <Item Name="{i}">ptr[(i + head) % cap]</Item>
+          <Exec>i = i + 1</Exec>
+        </Loop>
+      </CustomListItems>
+    </Expand>
+  </Type>
+
   <Type Name="mn::Map&lt;*&gt;">
     <DisplayString Condition="count == 0">empty</DisplayString>
     <DisplayString Condition="count != 0">{{ count={count} }}</DisplayString>

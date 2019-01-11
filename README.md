@@ -397,3 +397,21 @@ mutex_unlock(mtx);
 //don't forget to free the mutex
 mutex_free(mtx);
 ```
+
+## Thread
+
+Let's make a thread
+
+```C++
+void my_func(void* arg)
+{
+	printfmt("Hello, from another thread\n");
+}
+
+//we create a thread which will start in `my_func` with arg: `nullptr`
+Thread th = thread_new(my_func, nullptr);
+//we wait for the thread to finish
+thread_join(th);
+//we destroy the thread
+thread_free(th);
+```

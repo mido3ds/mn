@@ -3,6 +3,8 @@
 #include "mn/Exports.h"
 #include "mn/Base.h"
 
+#include <stdint.h>
+
 namespace mn
 {
 	/**
@@ -15,9 +17,11 @@ namespace mn
 
 	/**
 	 * @brief      Creates a new mutex
+	 *
+	 * @param[in]  name  The mutex name
 	 */
 	API_MN Mutex
-	mutex_new();
+	mutex_new(const char* name = "Mutex");
 
 	/**
 	 * @brief      Locks the given mutex
@@ -53,4 +57,28 @@ namespace mn
 	{
 		mutex_free(mutex);
 	}
+
+
+	//Thread API
+	MS_HANDLE(Thread);
+
+	using Thread_Func = void(*)(void*);
+
+	API_MN Thread
+	thread_new(Thread_Func func, void* arg, const char* name = "Thread");
+
+	API_MN void
+	thread_free(Thread thread);
+
+	inline static void
+	destruct(Thread thread)
+	{
+		thread_free(thread);
+	}
+
+	API_MN void
+	thread_join(Thread thread);
+
+	API_MN void
+	thread_sleep(uint32_t milliseconds);
 }
