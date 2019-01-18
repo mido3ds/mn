@@ -112,8 +112,6 @@ namespace mn
 	void
 	thread_join(Thread thread)
 	{
-		ZONE("thread_join");
-
 		IThread* self = (IThread*)thread;
 		if(self->handle)
 		{
@@ -125,7 +123,6 @@ namespace mn
 	void
 	thread_sleep(uint32_t milliseconds)
 	{
-		ZONE("thread_sleep");
 		Sleep(DWORD(milliseconds));
 	}
 }
