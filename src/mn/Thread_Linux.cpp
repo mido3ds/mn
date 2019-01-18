@@ -80,6 +80,59 @@ namespace mn
 	}
 
 
+	//Mutex_RW API
+	struct IMutex_RW
+	{
+		pthread_rwlock_t lock;
+		const char* name;
+	};
+
+	Mutex_RW
+	mutex_rw_new(const char* name)
+	{
+		IMutex_RW* self = alloc<IMutex_RW>();
+		pthread_rwlock_init(&self->lock, NULL);
+		self->name = name;
+		return (Mutex_RW)self;
+	}
+
+	void
+	mutex_rw_free(Mutex_RW mutex)
+	{
+		IMutex_RW* self = (IMutex_RW*)mutex;
+		pthread_rwlock_destroy(&self->lock);
+		free(self);
+	}
+
+	void
+	mutex_read_lock(Mutex_RW mutex)
+	{
+		IMutex_RW* self = (IMutex_RW*)mutex;
+		pthread_rwlock_rdlock(&self->lock);
+	}
+
+	void
+	mutex_read_unlock(Mutex_RW mutex)
+	{
+		IMutex_RW* self = (IMutex_RW*)mutex;
+		pthread_rwlock_unlock(&self->lock);
+	}
+
+	void
+	mutex_write_lock(Mutex_RW mutex)
+	{
+		IMutex_RW* self = (IMutex_RW*)mutex;
+		pthread_rwlock_wrlock(&self->lock);
+	}
+
+	void
+	mutex_write_unlock(Mutex_RW mutex)
+	{
+		IMutex_RW* self = (IMutex_RW*)mutex;
+		pthread_rwlock_unlock(&self->lock);
+	}
+
+
 	//Thread
 	struct IThread
 	{

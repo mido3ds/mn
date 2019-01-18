@@ -59,6 +59,34 @@ namespace mn
 	}
 
 
+	//Read preferring multi-reader single-writer mutex
+	MS_HANDLE(Mutex_RW);
+
+	API_MN Mutex_RW
+	mutex_rw_new(const char* name = "Mutex_RW");
+
+	API_MN void
+	mutex_rw_free(Mutex_RW mutex);
+
+	inline static void
+	destruct(Mutex_RW mutex)
+	{
+		mutex_rw_free(mutex);
+	}
+
+	API_MN void
+	mutex_read_lock(Mutex_RW mutex);
+
+	API_MN void
+	mutex_read_unlock(Mutex_RW mutex);
+
+	API_MN void
+	mutex_write_lock(Mutex_RW mutex);
+
+	API_MN void
+	mutex_write_unlock(Mutex_RW mutex);
+
+
 	//Thread API
 	MS_HANDLE(Thread);
 
