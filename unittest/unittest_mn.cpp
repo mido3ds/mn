@@ -9,6 +9,8 @@
 #include <mn/Virtual_Memory.h>
 #include <mn/IO.h>
 #include <mn/Str_Intern.h>
+#include <mn/Ring.h>
+#include <mn/OS.h>
 
 using namespace mn;
 
@@ -341,5 +343,70 @@ TEST_CASE("Str_Intern", "[mn]")
 		CHECK(is == str_intern(intern, begin, end));
 
 		str_intern_free(intern);
+	}
+}
+
+TEST_CASE("Ring", "[mn]")
+{
+	SECTION("Case 01")
+	{
+		allocator_push(leak_detector());
+
+		Ring<int> r = ring_new<int>();
+
+		for(int i = 0; i < 10; ++i)
+			ring_push_back(r, i);
+
+		for(size_t i = 0; i < r.count; ++i)
+			CHECK(r[i] == i);
+
+		for(int i = 0; i < 10; ++i)
+			ring_push_front(r, i);
+
+		for(int i = 9; i >= 0; --i)
+		{
+			CHECK(ring_back(r) == i);
+			ring_pop_back(r);
+		}
+
+		for(int i = 9; i >= 0; --i)
+		{
+			CHECK(ring_front(r) == i);
+			ring_pop_front(r);
+		}
+
+		ring_free(r);
+
+		allocator_pop();
+	}
+
+	SECTION("Case 02")
+	{
+		allocator_push(leak_detector());
+		Ring<Str> r = ring_new<Str>();
+
+		for(int i = 0; i < 10; ++i)
+			ring_push_back(r, str_from_c("Mostafa"));
+
+		for(int i = 0; i < 10; ++i)
+			ring_push_front(r, str_from_c("Saad"));
+
+		for(int i = 4; i >= 0; --i)
+		{
+			CHECK(ring_back(r) == "Mostafa");
+			str_free(ring_back(r));
+			ring_pop_back(r);
+		}
+
+		for(int i = 4; i >= 0; --i)
+		{
+			CHECK(ring_front(r) == "Saad");
+			str_free(ring_front(r));
+			ring_pop_front(r);
+		}
+
+		destruct(r);
+
+		allocator_pop();
 	}
 }

@@ -15,6 +15,20 @@ namespace mn
 		size_t count;
 		size_t cap;
 		size_t head;
+
+		inline T&
+		operator[](size_t ix)
+		{
+			assert(ix < count);
+			return ptr[(head + ix) % cap];
+		}
+
+		inline const T&
+		operator[](size_t ix) const
+		{
+			assert(ix < count);
+			return ptr[(head + ix) % cap];
+		}
 	};
 
 	template<typename T>

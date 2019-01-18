@@ -5,14 +5,10 @@ project "mn"
 	files
 	{
 		"include/**.h",
-		"include/**.hpp",
 		"src/**.cpp"
 	}
 
-	includedirs
-	{
-		"include/"
-	}
+	includedirs "include"
 
 	--language configuration
 	warnings "Extra"
@@ -22,7 +18,7 @@ project "mn"
 	--linux configuration
 	filter "system:linux"
 		defines { "OS_LINUX" }
-		linkoptions {"-pthread", "-ldl"}
+		linkoptions {"-pthread"}
 
 	filter { "system:linux", "configurations:debug" }
 		linkoptions {"-rdynamic"}
@@ -55,3 +51,9 @@ project "mn"
 			"MN_DLL"
 		}
 		optimize "On"
+
+	filter "platforms:x86"
+		architecture "x32"
+
+	filter "platforms:x64"
+		architecture "x64"

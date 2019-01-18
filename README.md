@@ -210,6 +210,34 @@ for(const char* it = name.ptr;
 str_free(name);
 ```
 
+## Ring
+
+Ring is a circular buffer used mainly as queue
+
+```C++
+Ring<int> q = ring_new<int>();
+
+//insert the elements into the q
+for(int i = 0; i < 10; ++i)
+{
+	if(i % 2 == 0)
+		ring_push_back(q, i);
+	else
+		ring_push_front(q, i);
+}
+
+//loop over the elements in the ring
+for(size_t i = 0; i < q.count; ++i)
+	printfmt("{}\n", q[i]);
+
+//pop until the ring is empty
+while(q.count)
+{
+	printfmt("front: {}, back: {}\n", ring_front(q), ring_back(q));
+	ring_pop_front(q);
+}
+```
+
 ## Map
 
 Map is an open-addressing hash map implementation

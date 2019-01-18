@@ -8,9 +8,3 @@ workspace "mn"
 
 	include "mn"
 	include "unittest"
-
-	filter "platforms:x86"
-		architecture "x32"
-
-	filter "platforms:x64"
-		architecture "x64"

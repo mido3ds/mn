@@ -7,10 +7,6 @@
 #include <stdio.h>
 #include <atomic>
 
-#if USE_TRACY
-#include <Tracy.hpp>
-#endif
-
 //to supress warnings in release mode
 #define UNUSED(x) ((void)(x))
 
@@ -401,10 +397,6 @@ namespace mn
 		{
 			void* ptr = ::malloc(size);
 
-			#if USE_TRACY
-				TracyAllocS(ptr, size, 20);
-			#endif
-
 			#if ENABLE_SIMPLE_LEAK_DETECTION
 			if(ptr)
 			{
@@ -475,9 +467,6 @@ namespace mn
 				--_simple_leak_detector.allocation_count;
 				_simple_leak_detector.allocation_size -= block.size;
 			}
-			#endif
-			#if USE_TRACY
-				TracyFreeS(block.ptr, 20);
 			#endif
 			::free(block.ptr);
 			return;
