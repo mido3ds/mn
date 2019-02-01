@@ -140,11 +140,26 @@ namespace mn
 		return _stderr;
 	}
 
+	struct STDIN_Mutex_Wrapper
+	{
+		Mutex mtx;
+
+		STDIN_Mutex_Wrapper()
+		{
+			mtx = mutex_new();
+		}
+
+		~STDIN_Mutex_Wrapper()
+		{
+			mutex_free(mtx);
+		}
+	};
+
 	Mutex
 	_mutex_stdin()
 	{
-		static Mutex _stdout_mtx = mutex_new();
-		return _stdout_mtx;
+		static STDIN_Mutex_Wrapper _stdin_mtx;
+		return _stdin_mtx.mtx;
 	}
 
 	File
