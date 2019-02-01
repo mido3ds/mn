@@ -74,11 +74,26 @@ namespace mn
 		return file;
 	}
 
+	struct STDOUT_Mutex_Wrapper
+	{
+		Mutex mtx;
+
+		STDOUT_Mutex_Wrapper()
+		{
+			mtx = mutex_new();
+		}
+
+		~STDOUT_Mutex_Wrapper()
+		{
+			mutex_free(mtx);
+		}
+	};
+
 	Mutex
 	_mutex_stdout()
 	{
-		static Mutex _stdout_mtx = mutex_new();
-		return _stdout_mtx;
+		static STDOUT_Mutex_Wrapper _stdout_mtx;
+		return _stdout_mtx.mtx;
 	}
 
 	File
