@@ -111,11 +111,26 @@ namespace mn
 		return file;
 	}
 
+	struct STDERR_Mutex_Wrapper
+	{
+		Mutex mtx;
+
+		STDERR_Mutex_Wrapper()
+		{
+			mtx = mutex_new();
+		}
+
+		~STDERR_Mutex_Wrapper()
+		{
+			mutex_free(mtx);
+		}
+	};
+
 	Mutex
 	_mutex_stderr()
 	{
-		static Mutex _stdout_mtx = mutex_new();
-		return _stdout_mtx;
+		static STDERR_Mutex_Wrapper _stderr_mtx;
+		return _stderr_mtx.mtx;
 	}
 
 	File
