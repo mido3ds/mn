@@ -209,6 +209,12 @@ namespace mn
 		return hasher(ptr, len, seed);
 	}
 
+	inline static size_t
+	murmur_hash(const Block& block, size_t seed = 0xc70f6907UL)
+	{
+		return murmur_hash(block.ptr, block.size, seed);
+	}
+
 	template<>
 	struct Hash<float>
 	{
