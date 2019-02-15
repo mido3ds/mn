@@ -70,7 +70,7 @@ namespace mn
 	 */
 	template<typename T>
 	inline static Block
-	block_from(T&& value)
+	block_from(const T& value)
 	{
 		return Block {(void*)&value, sizeof(T)};
 	}

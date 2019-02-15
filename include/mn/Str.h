@@ -210,6 +210,9 @@ namespace mn
 	API_MN void
 	str_null_terminate(Str& self);
 
+	API_MN void
+	str_resize(Str& self, size_t size);
+
 	/**
 	 * @brief      Clears the string
 	 *

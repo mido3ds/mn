@@ -104,6 +104,14 @@ namespace mn
 	}
 
 	void
+	str_resize(Str& self, size_t size)
+	{
+		buf_resize(self, size + 1);
+		--self.count;
+		self.ptr[self.count] = '\0';
+	}
+
+	void
 	str_clear(Str& self)
 	{
 		buf_clear(self);
