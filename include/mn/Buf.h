@@ -423,4 +423,11 @@ namespace mn
 	{
 		return buf_clone(other);
 	}
+
+	template<typename T>
+	inline static Block
+	block_from(const Buf<T>& b)
+	{
+		return Block{ b.ptr, b.count * sizeof(T) };
+	}
 }
