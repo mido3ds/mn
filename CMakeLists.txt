@@ -35,8 +35,8 @@ target_include_directories(${PROJECT_NAME}
 	PUBLIC ${PROJECT_SOURCE_DIR}/include
 )
 
-option(UNITTEST	"Enables unittest building" ON)
+option(MN_UNITTEST "Enables mn unittest building" ON)
 
-if(UNITTEST)
+if(MN_UNITTEST)
 	add_subdirectory(unittest)
 endif()
