@@ -89,6 +89,9 @@ namespace mn
 	API_MN void
 	memory_stream_cursor_move(Memory_Stream& self, int64_t offset);
 
+	API_MN void
+	memory_stream_cursor_set(Memory_Stream& self, int64_t abs);
+
 	/**
 	 * @brief      Moves the cursor to the start of the memory stream
 	 *
