@@ -24,7 +24,6 @@ elseif(UNIX)
 	add_definitions(-DOS_LINUX=1)
 endif()
 
-message(${SRC})
 add_library(${PROJECT_NAME} SHARED ${SRC})
 
 target_compile_definitions(${PROJECT_NAME}
