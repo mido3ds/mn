@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.10)
 project(mn LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_DEBUG_POSTFIX d)
 
 # Output directory specification
 if(${CMAKE_SIZEOF_VOID_P} MATCHES 8)
@@ -34,4 +35,8 @@ target_include_directories(${PROJECT_NAME}
 	PUBLIC ${PROJECT_SOURCE_DIR}/include
 )
 
-add_subdirectory(unittest)
+option(UNITTEST	"Enables unittest building" ON)
+
+if(UNITTEST)
+	add_subdirectory(unittest)
+endif()
