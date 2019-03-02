@@ -30,6 +30,9 @@ namespace mn
 	API_MN Stream
 	stream_stdin();
 
+	API_MN Stream
+	stream_tmp();
+
 	/**
 	 * @brief      Returns a stream of the given file
 	 *

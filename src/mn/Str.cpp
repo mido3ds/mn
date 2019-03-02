@@ -74,6 +74,14 @@ namespace mn
 	}
 
 	void
+	str_resize(Str& self, size_t size)
+	{
+		buf_resize(self, size + 1);
+		self.count -= 1;
+		self.ptr[self.count] = '\0';
+	}
+
+	void
 	str_push(Str& self, const char* str)
 	{
 		size_t str_len = ::strlen(str);
