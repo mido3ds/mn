@@ -149,9 +149,6 @@ namespace mn
 		return 0;
 	}
 
-	API_MN void
-	str_resize(Str& self, size_t size);
-
 	/**
 	 * @brief      Pushes the second string into the first one
 	 *
