@@ -177,6 +177,62 @@ namespace mn
 	{
 		Sleep(DWORD(milliseconds));
 	}
+
+
+	//Limbo
+	struct ILimbo
+	{
+		CRITICAL_SECTION cs;
+		CONDITION_VARIABLE cv;
+		const char* name;
+	};
+
+	Limbo
+	limbo_new(const char* name)
+	{
+		ILimbo* self = alloc<ILimbo>();
+		InitializeCriticalSectionAndSpinCount(&self->cs, 4096);
+		self->cv = CONDITION_VARIABLE_INIT;
+		self->name = name;
+		return (Limbo)self;
+	}
+
+	void
+	limbo_free(Limbo limbo)
+	{
+		ILimbo* self = (ILimbo*)limbo;
+		DeleteCriticalSection(&self->cs);
+		free(self);
+	}
+
+	void
+	limbo_lock(Limbo limbo, Limbo_Predicate* pred)
+	{
+		ILimbo* self = (ILimbo*)limbo;
+
+		EnterCriticalSection(&self->cs);
+
+		while(pred->should_wake() == false)
+			SleepConditionVariableCS(&self->cv, &self->cs, INFINITE);
+	}
+
+	void
+	limbo_unlock_one(Limbo limbo)
+	{
+		ILimbo* self = (ILimbo*)limbo;
+
+		LeaveCriticalSection(&self->cs);
+		WakeConditionVariable(&self->cv);
+	}
+
+	void
+	limbo_unlock_all(Limbo limbo)
+	{
+		ILimbo* self = (ILimbo*)limbo;
+
+		LeaveCriticalSection(&self->cs);
+		WakeAllConditionVariable(&self->cv);
+	}
 }
 
 #endif

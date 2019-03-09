@@ -109,4 +109,51 @@ namespace mn
 
 	API_MN void
 	thread_sleep(uint32_t milliseconds);
+
+
+	//Condition Variable + Mutex Combo
+	struct Limbo_Predicate
+	{
+		virtual bool should_wake() = 0;
+	};
+
+	MS_HANDLE(Limbo);
+
+	API_MN Limbo
+	limbo_new(const char* name);
+
+	API_MN void
+	limbo_free(Limbo limbo);
+
+	//wait for the predicate to be true
+	API_MN void
+	limbo_lock(Limbo limbo, Limbo_Predicate* pred);
+
+	//leaves the limbo + notify one combo
+	API_MN void
+	limbo_unlock_one(Limbo limbo);
+
+	//leaves the limbo + notify all combo
+	API_MN void
+	limbo_unlock_all(Limbo limbo);
+
+	template<typename T>
+	struct Limbo_Lambda final: Limbo_Predicate
+	{
+		T predicate;
+
+		Limbo_Lambda(T&& pred)
+			:predicate(pred)
+		{}
+
+		bool should_wake() override { return predicate(); }
+	};
+
+	template<typename TPredicate>
+	inline static void
+	limbo_lock(Limbo limbo, TPredicate&& pred)
+	{
+		Limbo_Lambda lambda(pred);
+		limbo_lock(limbo, &lambda);
+	}
 }
