@@ -15,14 +15,30 @@ namespace mn
 	struct IMutex
 	{
 		const char* name;
-		HANDLE handle;
+		CRITICAL_SECTION cs;
+	};
+
+	struct Allocators_Mutex
+	{
+		IMutex self;
+
+		Allocators_Mutex()
+		{
+			self.name = "allocators mutex";
+			InitializeCriticalSectionAndSpinCount(&self.cs, 1<<14);
+		}
+
+		~Allocators_Mutex()
+		{
+			DeleteCriticalSection(&self.cs);
+		}
 	};
 
 	Mutex
 	_allocators_mutex()
 	{
-		static IMutex mtx{ "allocators mutex", CreateMutex(NULL,FALSE, L"allocators mutex") };
-		return (Mutex)&mtx;
+		static Allocators_Mutex mtx;
+		return (Mutex)&mtx.self;
 	}
 
 	Mutex
@@ -30,8 +46,7 @@ namespace mn
 	{
 		IMutex* self = alloc<IMutex>();
 		self->name = name;
-		self->handle = CreateMutexA(NULL, FALSE, name);
-		assert(self->handle != INVALID_HANDLE_VALUE);
+		InitializeCriticalSectionAndSpinCount(&self->cs, 1<<14);
 		return (Mutex)self;
 	}
 
@@ -39,24 +54,21 @@ namespace mn
 	mutex_lock(Mutex mutex)
 	{
 		IMutex* self = (IMutex*)mutex;
-		DWORD result = WaitForSingleObject(self->handle, INFINITE);
-		assert(result == WAIT_OBJECT_0);
+		EnterCriticalSection(&self->cs);
 	}
 
 	void
 	mutex_unlock(Mutex mutex)
 	{
 		IMutex* self = (IMutex*)mutex;
-		BOOL result = ReleaseMutex(self->handle);
-		assert(result == TRUE);
+		LeaveCriticalSection(&self->cs);
 	}
 
 	void
 	mutex_free(Mutex mutex)
 	{
 		IMutex* self = (IMutex*)mutex;
-		BOOL result = CloseHandle(self->handle);
-		assert(result == TRUE);
+		DeleteCriticalSection(&self->cs);
 		free(self);
 	}
 
