@@ -273,6 +273,47 @@ namespace mn
 		--self.count;
 	}
 
+	template<typename T, typename TLambda>
+	inline static void
+	buf_remove_if(Buf<T>& self, TLambda&& pred)
+	{
+		T* begin_it = self.ptr;
+		T* end_it = self.ptr + self.count;
+		T* front_it = self.ptr;
+
+		for(T* it = begin_it; it != end_it; ++it)
+		{
+			if(pred(*it) == false)
+			{
+				*front_it = *it;
+				++front_it;
+			}
+		}
+
+		self.count -= end_it - front_it;
+	}
+
+	template<typename T>
+	inline static void
+	buf_remove(Buf<T>& self, size_t ix)
+	{
+		assert(ix < self.count);
+		if(ix + 1 != self.count)
+		{
+			T tmp = self.ptr[self.count - 1];
+			self.ptr[self.count - 1] = self.ptr[ix];
+			self.ptr[ix] = tmp;
+		}
+		--self.count;
+	}
+
+	template<typename T>
+	inline static void
+	buf_remove(Buf<T>& self, T* it)
+	{
+		buf_remove(self, it - self.ptr);
+	}
+
 	/**
 	 * @brief      Returns a const ref to the last element off the buf
 	 */
