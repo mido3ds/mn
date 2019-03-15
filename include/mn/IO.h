@@ -1429,6 +1429,34 @@ namespace mn
 	}
 
 	template<typename ... TArgs>
+	inline static Str
+	strf(Str str, const char* format, TArgs&& ... args)
+	{
+		Stream stream = stream_tmp();
+		stream_cursor_move_to_start(stream);
+		size_t size = vprintf(stream, format, std::forward<TArgs>(args)...);
+		stream_cursor_move_to_start(stream);
+		size_t count = str.count;
+		str_resize(str, count + size);
+		stream_read(stream, Block{str.ptr + count, size});
+		return str;
+	}
+
+	template<typename ... TArgs>
+	inline static Str
+	strf(Allocator allocator, const char* format, TArgs&& ... args)
+	{
+		return strf(str_with_allocator(allocator), format, std::forward<TArgs>(args)...);
+	}
+
+	template<typename ... TArgs>
+	inline static Str
+	strf(const char* format, TArgs&& ... args)
+	{
+		return strf(str_new(), format, std::forward<TArgs>(args)...);
+	}
+
+	template<typename ... TArgs>
 	inline static size_t
 	printfmt(const char* format, TArgs&& ... args)
 	{
