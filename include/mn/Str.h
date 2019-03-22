@@ -210,6 +210,12 @@ namespace mn
 	API_MN void
 	str_null_terminate(Str& self);
 
+	/**
+	 * @brief      Resizes the string to the given size
+	 *
+	 * @param      self  The string
+	 * @param[in]  size  The size
+	 */
 	API_MN void
 	str_resize(Str& self, size_t size);
 

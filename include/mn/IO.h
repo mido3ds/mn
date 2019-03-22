@@ -1414,6 +1414,14 @@ namespace mn
 		return result;
 	}
 
+	/**
+	 * @brief      Writes a formatted string
+	 *
+	 * @param[in]  format  The format to write
+	 * @param      args    The arguments to use in the format
+	 *
+	 * @return     A String containing the formatted string (uses tmp allocator)
+	 */
 	template<typename ... TArgs>
 	inline static Str
 	str_tmpf(const char* format, TArgs&& ... args)
@@ -1428,6 +1436,15 @@ namespace mn
 		return result;
 	}
 
+	/**
+	 * @brief      Writes into the given string a formatted string
+	 *
+	 * @param[in]  str     The string to write into
+	 * @param[in]  format  The format to write
+	 * @param      args    The arguments to use in the format
+	 *
+	 * @return     The resized and written into version of the given string
+	 */
 	template<typename ... TArgs>
 	inline static Str
 	strf(Str str, const char* format, TArgs&& ... args)
@@ -1442,6 +1459,15 @@ namespace mn
 		return str;
 	}
 
+	/**
+	 * @brief      Creates a new string given the allocator with the formatted string written into it
+	 *
+	 * @param[in]  allocator  The allocator
+	 * @param[in]  format     The format to write
+	 * @param      args       The arguments to use in the format
+	 *
+	 * @return     The newly created string
+	 */
 	template<typename ... TArgs>
 	inline static Str
 	strf(Allocator allocator, const char* format, TArgs&& ... args)
@@ -1449,6 +1475,14 @@ namespace mn
 		return strf(str_with_allocator(allocator), format, std::forward<TArgs>(args)...);
 	}
 
+	/**
+	 * @brief      Creates a new string with the top allocator
+	 *
+	 * @param[in]  format  The format to write
+	 * @param      args    The arguments to use in the format
+	 *
+	 * @return     The newly created string
+	 */
 	template<typename ... TArgs>
 	inline static Str
 	strf(const char* format, TArgs&& ... args)

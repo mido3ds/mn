@@ -89,6 +89,12 @@ namespace mn
 	API_MN void
 	memory_stream_cursor_move(Memory_Stream& self, int64_t offset);
 
+	/**
+	 * @brief      Moves the cursor to the given absolute position
+	 *
+	 * @param      self  The memory stream
+	 * @param[in]  abs   The absolute position
+	 */
 	API_MN void
 	memory_stream_cursor_set(Memory_Stream& self, int64_t abs);
 

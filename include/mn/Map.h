@@ -209,6 +209,14 @@ namespace mn
 		return hasher(ptr, len, seed);
 	}
 
+	/**
+	 * @brief      Given a block of memory does a murmur hash on it
+	 *
+	 * @param[in]  block  The block to hash
+	 * @param[in]  seed   The seed (optional)
+	 *
+	 * @return     The hash value of the given memory
+	 */
 	inline static size_t
 	murmur_hash(const Block& block, size_t seed = 0xc70f6907UL)
 	{

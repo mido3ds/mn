@@ -273,6 +273,12 @@ namespace mn
 		--self.count;
 	}
 
+	/**
+	 * @brief      Removes any data which the predicate returns true on
+	 *
+	 * @param      self     The buf
+	 * @param      pred     The predicate
+	 */
 	template<typename T, typename TLambda>
 	inline static void
 	buf_remove_if(Buf<T>& self, TLambda&& pred)
@@ -293,6 +299,12 @@ namespace mn
 		self.count -= end_it - front_it;
 	}
 
+	/**
+	 * @brief      Removes the element in the given index (will not keep order)
+	 *
+	 * @param      self  The buf
+	 * @param[in]  ix    The index
+	 */
 	template<typename T>
 	inline static void
 	buf_remove(Buf<T>& self, size_t ix)
@@ -307,6 +319,12 @@ namespace mn
 		--self.count;
 	}
 
+	/**
+	 * @brief      Removes the element the iterator points to
+	 *
+	 * @param      self  The buf
+	 * @param      it    The iterator
+	 */
 	template<typename T>
 	inline static void
 	buf_remove(Buf<T>& self, T* it)
