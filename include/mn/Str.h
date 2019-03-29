@@ -210,6 +210,48 @@ namespace mn
 	API_MN void
 	str_null_terminate(Str& self);
 
+	API_MN bool
+	str_prefix(const Str& self, const Str& prefix);
+
+	inline static bool
+	str_prefix(const Str& self, const char* prefix)
+	{
+		return str_prefix(self, str_lit(prefix));
+	}
+
+	inline static bool
+	str_prefix(const char* self, const Str& prefix)
+	{
+		return str_prefix(str_lit(self), prefix);
+	}
+
+	inline static bool
+	str_prefix(const char* self, const char* prefix)
+	{
+		return str_prefix(str_lit(self), str_lit(prefix));
+	}
+
+	API_MN bool
+	str_suffix(const Str& self, const Str& suffix);
+
+	inline static bool
+	str_suffix(const Str& self, const char* suffix)
+	{
+		return str_suffix(self, str_lit(suffix));
+	}
+
+	inline static bool
+	str_suffix(const char* self, const Str& suffix)
+	{
+		return str_suffix(str_lit(self), suffix);
+	}
+
+	inline static bool
+	str_suffix(const char* self, const char* suffix)
+	{
+		return str_suffix(str_lit(self), str_lit(suffix));
+	}
+
 	/**
 	 * @brief      Resizes the string to the given size
 	 *
