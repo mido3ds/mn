@@ -103,6 +103,22 @@ namespace mn
 		self.ptr[self.count] = '\0';
 	}
 
+	bool
+	str_prefix(const Str& self, const Str& prefix)
+	{
+		if(self.count < prefix.count)
+			return false;
+		return ::memcmp(self.ptr, prefix.ptr, prefix.count) == 0;
+	}
+
+	bool
+	str_suffix(const Str& self, const Str& suffix)
+	{
+		if(self.count < suffix.count)
+			return false;
+		return ::memcmp(self.ptr + self.count - suffix.count, suffix.ptr, suffix.count) == 0;
+	}
+
 	void
 	str_resize(Str& self, size_t size)
 	{
