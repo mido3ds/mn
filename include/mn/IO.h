@@ -1323,7 +1323,7 @@ namespace mn
 
 	template<typename ... TArgs>
 	inline static size_t
-	vprintf(Stream stream, const char* format, TArgs&& ... args)
+	vprintf(Stream stream, const char* str_format, TArgs&& ... args)
 	{
 		size_t result = 0;
 		Generic_Print_Str_Value values[] = { args... };
@@ -1336,11 +1336,11 @@ namespace mn
 
 		//we go forward until we encounter a { then we write
 		//the chunk defined by [rune_back_it, rune_forward_it)
-		auto rune_forward_it = format;
+		auto rune_forward_it = str_format;
 		auto rune_back_it = rune_forward_it;
-		auto rune_end = format + ::strlen(format);
+		auto rune_end = str_format + ::strlen(str_format);
 
-		//loop through the format string
+		//loop through the str_format string
 		while(rune_forward_it != rune_end)
 		{
 			int32_t c = *rune_forward_it;

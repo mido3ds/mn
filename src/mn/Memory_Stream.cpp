@@ -68,7 +68,7 @@ namespace mn
 	memory_stream_cursor_set(Memory_Stream& self, int64_t abs)
 	{
 		assert(abs >= 0);
-		assert(abs <= self.str.count);
+		assert(size_t(abs) <= self.str.count);
 		self.cursor = abs;
 	}
 

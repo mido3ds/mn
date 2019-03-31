@@ -75,7 +75,7 @@ namespace mn
 		if(self.count + added_size <= self.cap)
 			return;
 
-		size_t next_cap = self.cap * 1.5f;
+		size_t next_cap = size_t(self.cap * 1.5f);
 		size_t accurate_cap = self.count + added_size;
 		size_t request_cap = next_cap > accurate_cap ? next_cap : accurate_cap;
 		Block new_block = alloc_from(self.allocator, request_cap * sizeof(T), alignof(T));

@@ -17,14 +17,14 @@ namespace mn
 	to_os_encoding(const Str& utf8)
 	{
 		int size_needed = MultiByteToWideChar(CP_UTF8,
-			MB_PRECOMPOSED, utf8.ptr, utf8.count, NULL, 0);
+			MB_PRECOMPOSED, utf8.ptr, int(utf8.count), NULL, 0);
 
 		//+1 for the null termination
 		size_t required_size = (size_needed + 1) * sizeof(WCHAR);
 		Block buffer = alloc_from(allocator_tmp(), required_size, alignof(WCHAR));
 
 		size_needed = MultiByteToWideChar(CP_UTF8,
-			MB_PRECOMPOSED, utf8.ptr, utf8.cap, (LPWSTR)buffer.ptr, buffer.size);
+			MB_PRECOMPOSED, utf8.ptr, int(utf8.cap), (LPWSTR)buffer.ptr, int(buffer.size));
 		return buffer;
 	}
 
@@ -38,7 +38,7 @@ namespace mn
 	_from_os_encoding(Block os_str, Allocator allocator)
 	{
 		int size_needed = WideCharToMultiByte(CP_UTF8, NULL, (LPWSTR)os_str.ptr,
-			os_str.size / sizeof(WCHAR), NULL, 0, NULL, NULL);
+			int(os_str.size) / sizeof(WCHAR), NULL, 0, NULL, NULL);
 		if (size_needed == 0)
 			return str_with_allocator(allocator);
 
@@ -46,7 +46,7 @@ namespace mn
 		buf_resize(buffer, size_needed);
 
 		size_needed = WideCharToMultiByte(CP_UTF8, NULL, (LPWSTR)os_str.ptr,
-			os_str.size / sizeof(WCHAR), buffer.ptr, buffer.count, NULL, NULL);
+			int(os_str.size) / sizeof(WCHAR), buffer.ptr, int(buffer.count), NULL, NULL);
 		--buffer.count;
 		return buffer;
 	}
@@ -272,7 +272,7 @@ namespace mn
 			mtx = _mutex_stderr();
 
 		if (mtx) mutex_lock(mtx);
-			WriteFile(handle.windows_handle, data.ptr, data.size, &bytes_written, NULL);
+			WriteFile(handle.windows_handle, data.ptr, DWORD(data.size), &bytes_written, NULL);
 		if (mtx) mutex_unlock(mtx);
 		return bytes_written;
 	}
@@ -286,7 +286,7 @@ namespace mn
 			mtx = _mutex_stdin();
 
 		if(mtx) mutex_lock(mtx);
-			ReadFile(handle.windows_handle, data.ptr, data.size, &bytes_read, NULL);
+			ReadFile(handle.windows_handle, data.ptr, DWORD(data.size), &bytes_read, NULL);
 		if(mtx) mutex_unlock(mtx);
 		return bytes_read;
 	}
@@ -362,7 +362,7 @@ namespace mn
 	Str&
 	path_sanitize(Str& path)
 	{
-		char prev = '\0';
+		int32_t prev = '\0';
 		char *it_write = path.ptr;
 		const char *it_read = path.ptr;
 		//skip all the /, \ on front

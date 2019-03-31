@@ -90,9 +90,8 @@ namespace mn
 		File file = file_open(filename, io_mode, open_mode);
 		if(file_valid(file) == false)
 		{
+			assert(false && "Cannot open file");
 			return nullptr;
-			assert(false &&
-				   "Cannot open file");
 		}
 		
 		Internal_Stream* self = _stream_pool()->get();
