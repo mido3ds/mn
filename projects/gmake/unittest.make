@@ -16,7 +16,7 @@ ifeq ($(config),debug_x86)
   TARGET = $(TARGETDIR)/unittest
   OBJDIR = obj/x86/debug/unittest
   DEFINES += -DOS_LINUX
-  INCLUDES += -I../../unittest/Catch2/single_include -I../../include
+  INCLUDES += -I../../unittest/doctest -I../../include
   FORCE_INCLUDE +=
   ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
   ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m32
@@ -43,7 +43,7 @@ ifeq ($(config),debug_x64)
   TARGET = $(TARGETDIR)/unittest
   OBJDIR = obj/x64/debug/unittest
   DEFINES += -DOS_LINUX
-  INCLUDES += -I../../unittest/Catch2/single_include -I../../include
+  INCLUDES += -I../../unittest/doctest -I../../include
   FORCE_INCLUDE +=
   ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
   ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64
@@ -70,7 +70,7 @@ ifeq ($(config),release_x86)
   TARGET = $(TARGETDIR)/unittest
   OBJDIR = obj/x86/release/unittest
   DEFINES += -DOS_LINUX
-  INCLUDES += -I../../unittest/Catch2/single_include -I../../include
+  INCLUDES += -I../../unittest/doctest -I../../include
   FORCE_INCLUDE +=
   ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
   ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m32
@@ -97,7 +97,7 @@ ifeq ($(config),release_x64)
   TARGET = $(TARGETDIR)/unittest
   OBJDIR = obj/x64/release/unittest
   DEFINES += -DOS_LINUX
-  INCLUDES += -I../../unittest/Catch2/single_include -I../../include
+  INCLUDES += -I../../unittest/doctest -I../../include
   FORCE_INCLUDE +=
   ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
   ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64

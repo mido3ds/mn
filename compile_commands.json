@@ -104,12 +104,12 @@
           {
             "directory": "W:/Projects/mn/projects/export-compile-commands",
             "file": "W:/Projects/mn/unittest/unittest_main.cpp",
-            "command": "cc -MMD -MP -DOS_WINDOWS -IW:/Projects/mn/unittest/Catch2/single_include -IW:/Projects/mn/include -m64 /utf-8 -o W:/Projects/mn/projects/export-compile-commands/obj/x64/debug/unittest/unittest_main.o -MF W:/Projects/mn/projects/export-compile-commands/obj/x64/debug/unittest/unittest_main.d -c W:/Projects/mn/unittest/unittest_main.cpp"
+            "command": "cc -MMD -MP -DOS_WINDOWS -IW:/Projects/mn/unittest/Catch2/single_include -IW:/Projects/mn/unittest/doctest -IW:/Projects/mn/include -m64 /utf-8 -o W:/Projects/mn/projects/export-compile-commands/obj/x64/debug/unittest/unittest_main.o -MF W:/Projects/mn/projects/export-compile-commands/obj/x64/debug/unittest/unittest_main.d -c W:/Projects/mn/unittest/unittest_main.cpp"
           }
 ,
           {
             "directory": "W:/Projects/mn/projects/export-compile-commands",
             "file": "W:/Projects/mn/unittest/unittest_mn.cpp",
-            "command": "cc -MMD -MP -DOS_WINDOWS -IW:/Projects/mn/unittest/Catch2/single_include -IW:/Projects/mn/include -m64 /utf-8 -o W:/Projects/mn/projects/export-compile-commands/obj/x64/debug/unittest/unittest_mn.o -MF W:/Projects/mn/projects/export-compile-commands/obj/x64/debug/unittest/unittest_mn.d -c W:/Projects/mn/unittest/unittest_mn.cpp"
+            "command": "cc -MMD -MP -DOS_WINDOWS -IW:/Projects/mn/unittest/Catch2/single_include -IW:/Projects/mn/unittest/doctest -IW:/Projects/mn/include -m64 /utf-8 -o W:/Projects/mn/projects/export-compile-commands/obj/x64/debug/unittest/unittest_mn.o -MF W:/Projects/mn/projects/export-compile-commands/obj/x64/debug/unittest/unittest_mn.d -c W:/Projects/mn/unittest/unittest_mn.cpp"
           }
 ]

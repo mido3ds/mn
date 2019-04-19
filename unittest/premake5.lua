@@ -10,7 +10,7 @@ project "unittest"
 
 	includedirs
 	{
-		"Catch2/single_include",
+		"doctest",
 		"../include"
 	}
 

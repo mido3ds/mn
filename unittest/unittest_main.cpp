@@ -1,2 +1,11 @@
-#define CATCH_CONFIG_MAIN  // This tells Catch to provide a main() - only do this in one cpp file
-#include <catch2/catch.hpp>
+#define DOCTEST_CONFIG_IMPLEMENT
+#include <doctest/doctest.h>
+
+int main(int argc, char** argv) {
+	doctest::Context context;
+	context.applyCommandLine(argc, argv);
+	int res = context.run(); // run
+	if (context.shouldExit()) // important - query flags (and --exit) rely on the user doing this
+		return res;
+	return res;
+}
