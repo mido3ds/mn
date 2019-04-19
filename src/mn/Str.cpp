@@ -35,6 +35,11 @@ namespace mn
 			   "Invalid substring");
 
 		Str self = str_with_allocator(allocator);
+
+		//this is an empty string
+		if(end == begin)
+			return self;
+
 		buf_resize(self, (end - begin) + 1);
 		--self.count;
 		::memcpy(self.ptr, begin, self.count);
@@ -101,6 +106,54 @@ namespace mn
 			return;
 		buf_reserve(self, 1);
 		self.ptr[self.count] = '\0';
+	}
+
+	size_t
+	str_find(const Str& self, const Str& target, size_t start)
+	{
+		assert(start < self.count);
+
+		for (size_t i = start; i <= self.count - target.count; ++i)
+			if (::memcmp(self.ptr + i, target.ptr, target.count) == 0)
+				return i;
+
+		return size_t(-1);
+	}
+
+	Buf<Str>
+	str_split(const Str& self, const Str& delim, bool skip_empty, Allocator allocator)
+	{
+		Buf<Str> result = buf_with_allocator<Str>(allocator);
+
+		size_t current_index = 0;
+
+		while (true)
+		{
+			if (current_index + delim.count > self.count)
+				break;
+
+			size_t delim_index = str_find(self, delim, current_index);
+
+			if (delim_index == -size_t(1))
+				break;
+
+			bool skip = skip_empty && current_index == delim_index;
+
+			if (!skip)
+				buf_push(result, str_from_substr(self.ptr + current_index, self.ptr + delim_index, allocator));
+
+			current_index = delim_index + delim.count;
+
+			if (current_index == self.count)
+				break;
+		}
+
+		if (current_index != self.count)
+			buf_push(result, str_from_substr(self.ptr + current_index, self.ptr + self.count, allocator));
+		else if (!skip_empty && current_index == self.count)
+			buf_push(result, str_with_allocator(allocator));
+
+		return result;
 	}
 
 	bool

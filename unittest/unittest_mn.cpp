@@ -148,6 +148,83 @@ TEST_CASE("str", "[mn]")
 		CHECK(str == "aaaaa");
 		str_free(str);
 	}
+
+	SECTION("Case 06")
+	{
+		CHECK(str_find("hello world", "hello world", 0) == 0);
+		CHECK(str_find("hello world", "hello"      , 0) == 0);
+		CHECK(str_find("hello world", "hello"      , 1) == -1);
+		CHECK(str_find("hello world", "world"      , 0) == 6);
+		CHECK(str_find("hello world", "ld"         , 0) == 9);
+	}
+
+	SECTION("Case 03")
+	{
+		auto res = str_split(",A,B,C,", ",", true);
+		CHECK(res.count == 3);
+		CHECK(res[0] == "A");
+		CHECK(res[1] == "B");
+		CHECK(res[2] == "C");
+		destruct(res);
+
+		res = str_split("A,B,C", ",", false);
+		CHECK(res.count == 3);
+		CHECK(res[0] == "A");
+		CHECK(res[1] == "B");
+		CHECK(res[2] == "C");
+		destruct(res);
+
+		res = str_split(",A,B,C,", ",", false);
+		CHECK(res.count == 5);
+		CHECK(res[0] == "");
+		CHECK(res[1] == "A");
+		CHECK(res[2] == "B");
+		CHECK(res[3] == "C");
+		CHECK(res[4] == "");
+		destruct(res);
+
+		res = str_split("A", ";;;", true);
+		CHECK(res.count == 1);
+		CHECK(res[0] == "A");
+		destruct(res);
+
+		res = str_split("", ",", false);
+		CHECK(res.count == 1);
+		CHECK(res[0] == "");
+		destruct(res);
+
+		res = str_split("", ",", true);
+		CHECK(res.count == 0);
+		destruct(res);
+
+		res = str_split(",,,,,", ",", true);
+		CHECK(res.count == 0);
+		destruct(res);
+
+		res = str_split(",,,", ",", false);
+		CHECK(res.count == 4);
+		CHECK(res[0] == "");
+		CHECK(res[1] == "");
+		CHECK(res[2] == "");
+		CHECK(res[3] == "");
+		destruct(res);
+
+		res = str_split(",,,", ",,", false);
+		CHECK(res.count == 2);
+		CHECK(res[0] == "");
+		CHECK(res[1] == ",");
+		destruct(res);
+
+		res = str_split("test", ",,,,,,,,", false);
+		CHECK(res.count == 1);
+		CHECK(res[0] == "test");
+		destruct(res);
+
+		res = str_split("test", ",,,,,,,,", true);
+		CHECK(res.count == 1);
+		CHECK(res[0] == "test");
+		destruct(res);
+	}
 }
 
 TEST_CASE("map", "[mn]")

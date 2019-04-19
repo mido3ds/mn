@@ -12,7 +12,6 @@ dist-bin
 **/obj
 **/.vscode
 **/*.sublime-workspace
-**/*.sublime-project
 **/bin/
 **/build/
 **/Makefile

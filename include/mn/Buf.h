@@ -81,6 +81,34 @@ namespace mn
 	}
 
 	/**
+	 * @brief      Creates a buf with resized to the given count
+	 *
+	 * @param[in]  count  The count
+	 */
+	template<typename T>
+	inline static Buf<T>
+	buf_with_count(size_t count)
+	{
+		Buf<T> self = buf_new<T>();
+		buf_resize(self, count);
+		return self;
+	}
+
+	/**
+	 * @brief      Creates a buf with capacity to hold the given count
+	 *
+	 * @param[in]  cap  The capacity
+	 */
+	template<typename T>
+	inline static Buf<T>
+	buf_with_capacity(size_t cap)
+	{
+		Buf<T> self = buf_new<T>();
+		buf_reserve(self, cap);
+		return self;
+	}
+
+	/**
 	 * @brief      Frees the given buf
 	 */
 	template<typename T>
@@ -120,6 +148,46 @@ namespace mn
 		for(size_t i = 0; i < self.count; ++i)
 			destruct(self[i]);
 		buf_free(self);
+	}
+
+	/**
+	 * @brief      indexes the buffer with signed integers like python
+	 * buf_of(self, 0) = self[0]
+	 * buf_of(self, 1) = self[1]
+	 * buf_of(self, -1) = self[self.count - 1]
+	 *
+	 * @param      self  The buffer
+	 * @param[in]  ix    The index
+	 */
+	template<typename T>
+	inline static T&
+	buf_of(Buf<T>& self, int ix)
+	{
+		if(ix < 0)
+			ix = self.count + ix;
+		assert(ix >= 0);
+		assert(ix < self.count);
+		return self.ptr[ix];
+	}
+
+	/**
+	 * @brief      indexes the buffer with signed integers like python
+	 * buf_of(self, 0) = self[0]
+	 * buf_of(self, 1) = self[1]
+	 * buf_of(self, -1) = self[self.count - 1]
+	 *
+	 * @param      self  The buffer
+	 * @param[in]  ix    The index
+	 */
+	template<typename T>
+	inline static const T&
+	buf_of(const Buf<T>& self, int ix)
+	{
+		if(ix < 0)
+			ix = self.count + ix;
+		assert(ix >= 0);
+		assert(ix < self.count);
+		return self.ptr[ix];
 	}
 
 	/**

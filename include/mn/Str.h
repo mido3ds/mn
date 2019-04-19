@@ -210,42 +210,200 @@ namespace mn
 	API_MN void
 	str_null_terminate(Str& self);
 
+	/**
+	 * @brief      Searches for the given string
+	 *
+	 * @param[in]  self    The string to search in
+	 * @param[in]  target  The target string to find
+	 * @param[in]  start   The start index to begin the search with
+	 *
+	 * @return     index of the found target or size_t(-1) instead
+	 */
+	API_MN size_t
+	str_find(const Str& self, const Str& target, size_t start);
+
+	/**
+	 * @brief      Searches for the given string
+	 *
+	 * @param[in]  self    The string to search in
+	 * @param[in]  target  The target string to find
+	 * @param[in]  start   The start index to begin the search with
+	 *
+	 * @return     index of the found target or size_t(-1) instead
+	 */
+	inline static size_t
+	str_find(const Str& self, const char* target, size_t start)
+	{
+		return str_find(self, str_lit(target), start);
+	}
+
+	/**
+	 * @brief      Searches for the given string
+	 *
+	 * @param[in]  self    The string to search in
+	 * @param[in]  target  The target string to find
+	 * @param[in]  start   The start index to begin the search with
+	 *
+	 * @return     index of the found target or size_t(-1) instead
+	 */
+	inline static size_t
+	str_find(const char* self, const Str& target, size_t start)
+	{
+		return str_find(str_lit(self), target, start);
+	}
+
+	/**
+	 * @brief      Searches for the given string
+	 *
+	 * @param[in]  self    The string to search in
+	 * @param[in]  target  The target string to find
+	 * @param[in]  start   The start index to begin the search with
+	 *
+	 * @return     index of the found target or size_t(-1) instead
+	 */
+	inline static size_t
+	str_find(const char* self, const char* target, size_t start)
+	{
+		return str_find(str_lit(self), str_lit(target), start);
+	}
+
+	/**
+	 * @brief      Splits the string with the given delimiter
+	 *
+	 * @param[in]  self        The string
+	 * @param[in]  delim       The delimiter to split with
+	 * @param[in]  skip_empty  determines whether we shouldn't return empty strings or not
+	 * @param[in]  allocator   The allocator [optional] default is the tmp allocator
+	 */
+	API_MN Buf<Str>
+	str_split(const Str& self, const Str& delim, bool skip_empty, Allocator allocator = allocator_tmp());
+
+	/**
+	 * @brief      Splits the string with the given delimiter
+	 *
+	 * @param[in]  self        The string
+	 * @param[in]  delim       The delimiter to split with
+	 * @param[in]  skip_empty  determines whether we shouldn't return empty strings or not
+	 * @param[in]  allocator   The allocator [optional] default is the tmp allocator
+	 */
+	inline static Buf<Str>
+	str_split(const Str& self, const char* delim, bool skip_empty, Allocator allocator = allocator_tmp())
+	{
+		return str_split(self, str_lit(delim), skip_empty, allocator);
+	}
+
+	/**
+	 * @brief      Splits the string with the given delimiter
+	 *
+	 * @param[in]  self        The string
+	 * @param[in]  delim       The delimiter to split with
+	 * @param[in]  skip_empty  determines whether we shouldn't return empty strings or not
+	 * @param[in]  allocator   The allocator [optional] default is the tmp allocator
+	 */
+	inline static Buf<Str>
+	str_split(const char* self, const Str& delim, bool skip_empty, Allocator allocator = allocator_tmp())
+	{
+		return str_split(str_lit(self), delim, skip_empty, allocator);
+	}
+
+	/**
+	 * @brief      Splits the string with the given delimiter
+	 *
+	 * @param[in]  self        The string
+	 * @param[in]  delim       The delimiter to split with
+	 * @param[in]  skip_empty  determines whether we shouldn't return empty strings or not
+	 * @param[in]  allocator   The allocator [optional] default is the tmp allocator
+	 */
+	inline static Buf<Str>
+	str_split(const char* self, const char* delim, bool skip_empty, Allocator allocator = allocator_tmp())
+	{
+		return str_split(str_lit(self), str_lit(delim), skip_empty, allocator);
+	}
+
+	/**
+	 * @brief      Checks if the string is starting with the given prefix
+	 *
+	 * @param[in]  self    The string
+	 * @param[in]  prefix  The prefix
+	 */
 	API_MN bool
 	str_prefix(const Str& self, const Str& prefix);
 
+	/**
+	 * @brief      Checks if the string is starting with the given prefix
+	 *
+	 * @param[in]  self    The string
+	 * @param[in]  prefix  The prefix
+	 */
 	inline static bool
 	str_prefix(const Str& self, const char* prefix)
 	{
 		return str_prefix(self, str_lit(prefix));
 	}
 
+	/**
+	 * @brief      Checks if the string is starting with the given prefix
+	 *
+	 * @param[in]  self    The string
+	 * @param[in]  prefix  The prefix
+	 */
 	inline static bool
 	str_prefix(const char* self, const Str& prefix)
 	{
 		return str_prefix(str_lit(self), prefix);
 	}
 
+	/**
+	 * @brief      Checks if the string is starting with the given prefix
+	 *
+	 * @param[in]  self    The string
+	 * @param[in]  prefix  The prefix
+	 */
 	inline static bool
 	str_prefix(const char* self, const char* prefix)
 	{
 		return str_prefix(str_lit(self), str_lit(prefix));
 	}
 
+	/**
+	 * @brief      Checks if the string is ending with the given suffix
+	 *
+	 * @param[in]  self    The string
+	 * @param[in]  suffix  The suffix
+	 */
 	API_MN bool
 	str_suffix(const Str& self, const Str& suffix);
 
+	/**
+	 * @brief      Checks if the string is ending with the given suffix
+	 *
+	 * @param[in]  self    The string
+	 * @param[in]  suffix  The suffix
+	 */
 	inline static bool
 	str_suffix(const Str& self, const char* suffix)
 	{
 		return str_suffix(self, str_lit(suffix));
 	}
 
+	/**
+	 * @brief      Checks if the string is ending with the given suffix
+	 *
+	 * @param[in]  self    The string
+	 * @param[in]  suffix  The suffix
+	 */
 	inline static bool
 	str_suffix(const char* self, const Str& suffix)
 	{
 		return str_suffix(str_lit(self), suffix);
 	}
 
+	/**
+	 * @brief      Checks if the string is ending with the given suffix
+	 *
+	 * @param[in]  self    The string
+	 * @param[in]  suffix  The suffix
+	 */
 	inline static bool
 	str_suffix(const char* self, const char* suffix)
 	{
