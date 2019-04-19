@@ -1832,6 +1832,12 @@ namespace mn
 		}
 	}
 
+	inline static size_t
+	readln(Str& value)
+	{
+		return readln(reader_stdin(), value);
+	}
+
 	inline static void
 	_variadic_read_string_helper(Reader, size_t&)
 	{
