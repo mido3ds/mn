@@ -134,7 +134,7 @@ namespace mn
 
 			size_t delim_index = str_find(self, delim, current_index);
 
-			if (delim_index == -size_t(1))
+			if (delim_index == size_t(-1))
 				break;
 
 			bool skip = skip_empty && current_index == delim_index;

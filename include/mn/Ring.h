@@ -156,7 +156,6 @@ namespace mn
 	ring_pop_back(Ring<T>& self)
 	{
 		assert(self.count > 0);
-		const size_t ix = (self.head + self.count - 1) % self.cap;
 		--self.count;
 	}
 
