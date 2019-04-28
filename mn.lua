@@ -10,6 +10,8 @@ function libmn.use()
 
 	filter "system:linux"
 		linkoptions {"-pthread"}
+
+	filter {}
 end
 
 project "mn"
