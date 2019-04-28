@@ -1,7 +1,4 @@
 #include "mn/Virtual_Memory.h"
-
-#if OS_WINDOWS
-
 #include "mn/Memory.h"
 
 #include <assert.h>
@@ -29,5 +26,3 @@ namespace mn
 		assert(result != NULL);
 	}
 }
-
-#endif

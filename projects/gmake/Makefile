@@ -24,6 +24,22 @@ ifeq ($(config),release_x64)
   mn_config = release_x64
   unittest_config = release_x64
 endif
+ifeq ($(config),debugstatic_x86)
+  mn_config = debugstatic_x86
+  unittest_config = debugstatic_x86
+endif
+ifeq ($(config),debugstatic_x64)
+  mn_config = debugstatic_x64
+  unittest_config = debugstatic_x64
+endif
+ifeq ($(config),releasestatic_x86)
+  mn_config = releasestatic_x86
+  unittest_config = releasestatic_x86
+endif
+ifeq ($(config),releasestatic_x64)
+  mn_config = releasestatic_x64
+  unittest_config = releasestatic_x64
+endif
 
 PROJECTS := mn unittest
 
@@ -55,6 +71,10 @@ help:
 	@echo "  debug_x64"
 	@echo "  release_x86"
 	@echo "  release_x64"
+	@echo "  debugstatic_x86"
+	@echo "  debugstatic_x64"
+	@echo "  releasestatic_x86"
+	@echo "  releasestatic_x64"
 	@echo ""
 	@echo "TARGETS:"
 	@echo "   all (default)"

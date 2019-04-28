@@ -1,7 +1,4 @@
 #include "mn/Thread.h"
-
-#if OS_WINDOWS
-
 #include "mn/Memory.h"
 
 #include <assert.h>
@@ -135,7 +132,7 @@ namespace mn
 		const char* name;
 	};
 
-	DWORD
+	DWORD WINAPI
 	_thread_start(LPVOID user_data)
 	{
 		IThread* self = (IThread*)user_data;
@@ -246,5 +243,3 @@ namespace mn
 		WakeAllConditionVariable(&self->cv);
 	}
 }
-
-#endif

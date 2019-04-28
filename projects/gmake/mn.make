@@ -15,7 +15,7 @@ ifeq ($(config),debug_x86)
   TARGETDIR = ../../bin/x86/debug
   TARGET = $(TARGETDIR)/libmnd.so
   OBJDIR = obj/x86/debug/mn
-  DEFINES += -DOS_LINUX -DDEBUG -DMN_DLL
+  DEFINES += -DOS_LINUX -DDEBUG -DMN_SHARED -DMN_DLL
   INCLUDES += -I../../include
   FORCE_INCLUDE +=
   ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
@@ -42,7 +42,7 @@ ifeq ($(config),debug_x64)
   TARGETDIR = ../../bin/x64/debug
   TARGET = $(TARGETDIR)/libmnd.so
   OBJDIR = obj/x64/debug/mn
-  DEFINES += -DOS_LINUX -DDEBUG -DMN_DLL
+  DEFINES += -DOS_LINUX -DDEBUG -DMN_SHARED -DMN_DLL
   INCLUDES += -I../../include
   FORCE_INCLUDE +=
   ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
@@ -69,7 +69,7 @@ ifeq ($(config),release_x86)
   TARGETDIR = ../../bin/x86/release
   TARGET = $(TARGETDIR)/libmn.so
   OBJDIR = obj/x86/release/mn
-  DEFINES += -DOS_LINUX -DNDEBUG -DMN_DLL
+  DEFINES += -DOS_LINUX -DNDEBUG -DMN_SHARED -DMN_DLL
   INCLUDES += -I../../include
   FORCE_INCLUDE +=
   ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
@@ -96,7 +96,7 @@ ifeq ($(config),release_x64)
   TARGETDIR = ../../bin/x64/release
   TARGET = $(TARGETDIR)/libmn.so
   OBJDIR = obj/x64/release/mn
-  DEFINES += -DOS_LINUX -DNDEBUG -DMN_DLL
+  DEFINES += -DOS_LINUX -DNDEBUG -DMN_SHARED -DMN_DLL
   INCLUDES += -I../../include
   FORCE_INCLUDE +=
   ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
@@ -118,12 +118,116 @@ all: prebuild prelink $(TARGET)
 
 endif
 
+ifeq ($(config),debugstatic_x86)
+  RESCOMP = windres
+  TARGETDIR = ../../bin/x86/debugStatic
+  TARGET = $(TARGETDIR)/libmnd.a
+  OBJDIR = obj/x86/debugStatic/mn
+  DEFINES += -DOS_LINUX -DDEBUG
+  INCLUDES += -I../../include
+  FORCE_INCLUDE +=
+  ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
+  ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m32 -g -Wall -Wextra
+  ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m32 -g -Wall -Wextra -std=c++17
+  ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
+  LIBS +=
+  LDDEPS +=
+  ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib32 -m32 -pthread -rdynamic
+  LINKCMD = $(AR) -rcs "$@" $(OBJECTS)
+  define PREBUILDCMDS
+  endef
+  define PRELINKCMDS
+  endef
+  define POSTBUILDCMDS
+  endef
+all: prebuild prelink $(TARGET)
+	@:
+
+endif
+
+ifeq ($(config),debugstatic_x64)
+  RESCOMP = windres
+  TARGETDIR = ../../bin/x64/debugStatic
+  TARGET = $(TARGETDIR)/libmnd.a
+  OBJDIR = obj/x64/debugStatic/mn
+  DEFINES += -DOS_LINUX -DDEBUG
+  INCLUDES += -I../../include
+  FORCE_INCLUDE +=
+  ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
+  ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -g -Wall -Wextra
+  ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -g -Wall -Wextra -std=c++17
+  ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
+  LIBS +=
+  LDDEPS +=
+  ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib64 -m64 -pthread -rdynamic
+  LINKCMD = $(AR) -rcs "$@" $(OBJECTS)
+  define PREBUILDCMDS
+  endef
+  define PRELINKCMDS
+  endef
+  define POSTBUILDCMDS
+  endef
+all: prebuild prelink $(TARGET)
+	@:
+
+endif
+
+ifeq ($(config),releasestatic_x86)
+  RESCOMP = windres
+  TARGETDIR = ../../bin/x86/releaseStatic
+  TARGET = $(TARGETDIR)/libmn.a
+  OBJDIR = obj/x86/releaseStatic/mn
+  DEFINES += -DOS_LINUX -DNDEBUG
+  INCLUDES += -I../../include
+  FORCE_INCLUDE +=
+  ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
+  ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m32 -O2 -Wall -Wextra
+  ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m32 -O2 -Wall -Wextra -std=c++17
+  ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
+  LIBS +=
+  LDDEPS +=
+  ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib32 -m32 -s -pthread
+  LINKCMD = $(AR) -rcs "$@" $(OBJECTS)
+  define PREBUILDCMDS
+  endef
+  define PRELINKCMDS
+  endef
+  define POSTBUILDCMDS
+  endef
+all: prebuild prelink $(TARGET)
+	@:
+
+endif
+
+ifeq ($(config),releasestatic_x64)
+  RESCOMP = windres
+  TARGETDIR = ../../bin/x64/releaseStatic
+  TARGET = $(TARGETDIR)/libmn.a
+  OBJDIR = obj/x64/releaseStatic/mn
+  DEFINES += -DOS_LINUX -DNDEBUG
+  INCLUDES += -I../../include
+  FORCE_INCLUDE +=
+  ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
+  ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -O2 -Wall -Wextra
+  ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -O2 -Wall -Wextra -std=c++17
+  ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
+  LIBS +=
+  LDDEPS +=
+  ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib64 -m64 -s -pthread
+  LINKCMD = $(AR) -rcs "$@" $(OBJECTS)
+  define PREBUILDCMDS
+  endef
+  define PRELINKCMDS
+  endef
+  define POSTBUILDCMDS
+  endef
+all: prebuild prelink $(TARGET)
+	@:
+
+endif
+
 OBJECTS := \
 	$(OBJDIR)/Base.o \
-	$(OBJDIR)/Debug_Linux.o \
-	$(OBJDIR)/Debug_WinOS.o \
-	$(OBJDIR)/File_Linux.o \
-	$(OBJDIR)/File_WinOS.o \
 	$(OBJDIR)/Memory.o \
 	$(OBJDIR)/Memory_Stream.o \
 	$(OBJDIR)/OS.o \
@@ -132,10 +236,10 @@ OBJECTS := \
 	$(OBJDIR)/Str.o \
 	$(OBJDIR)/Str_Intern.o \
 	$(OBJDIR)/Stream.o \
-	$(OBJDIR)/Thread_Linux.o \
-	$(OBJDIR)/Thread_WinOS.o \
-	$(OBJDIR)/Virtual_Memory_Linux.o \
-	$(OBJDIR)/Virtual_Memory_WinOS.o \
+	$(OBJDIR)/Debug.o \
+	$(OBJDIR)/File.o \
+	$(OBJDIR)/Thread.o \
+	$(OBJDIR)/Virtual_Memory.o \
 
 RESOURCES := \
 
@@ -197,18 +301,6 @@ endif
 $(OBJDIR)/Base.o: ../../src/mn/Base.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/Debug_Linux.o: ../../src/mn/Debug_Linux.cpp
-	@echo $(notdir $<)
-	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/Debug_WinOS.o: ../../src/mn/Debug_WinOS.cpp
-	@echo $(notdir $<)
-	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/File_Linux.o: ../../src/mn/File_Linux.cpp
-	@echo $(notdir $<)
-	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/File_WinOS.o: ../../src/mn/File_WinOS.cpp
-	@echo $(notdir $<)
-	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/Memory.o: ../../src/mn/Memory.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
@@ -233,16 +325,16 @@ $(OBJDIR)/Str_Intern.o: ../../src/mn/Str_Intern.cpp
 $(OBJDIR)/Stream.o: ../../src/mn/Stream.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/Thread_Linux.o: ../../src/mn/Thread_Linux.cpp
+$(OBJDIR)/Debug.o: ../../src/mn/linux/Debug.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/Thread_WinOS.o: ../../src/mn/Thread_WinOS.cpp
+$(OBJDIR)/File.o: ../../src/mn/linux/File.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/Virtual_Memory_Linux.o: ../../src/mn/Virtual_Memory_Linux.cpp
+$(OBJDIR)/Thread.o: ../../src/mn/linux/Thread.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/Virtual_Memory_WinOS.o: ../../src/mn/Virtual_Memory_WinOS.cpp
+$(OBJDIR)/Virtual_Memory.o: ../../src/mn/linux/Virtual_Memory.cpp
 	@echo $(notdir $<)
 	$(SILENT) $(CXX) $(ALL_CXXFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 

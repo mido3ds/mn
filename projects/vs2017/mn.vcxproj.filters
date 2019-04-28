@@ -13,6 +13,9 @@
     <Filter Include="src\mn">
       <UniqueIdentifier>{774E661C-63F0-90F2-4CAB-A44638EC1743}</UniqueIdentifier>
     </Filter>
+    <Filter Include="src\mn\winos">
+      <UniqueIdentifier>{B65B02CE-A2BE-9172-4B44-CA2837865DF5}</UniqueIdentifier>
+    </Filter>
     <Filter Include="tools">
       <UniqueIdentifier>{36DF7010-A2F3-98C1-6B75-3C21D74895F2}</UniqueIdentifier>
     </Filter>
@@ -80,18 +83,6 @@
     <ClCompile Include="..\..\src\mn\Base.cpp">
       <Filter>src\mn</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\mn\Debug_Linux.cpp">
-      <Filter>src\mn</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\mn\Debug_WinOS.cpp">
-      <Filter>src\mn</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\mn\File_Linux.cpp">
-      <Filter>src\mn</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\src\mn\File_WinOS.cpp">
-      <Filter>src\mn</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\mn\Memory.cpp">
       <Filter>src\mn</Filter>
     </ClCompile>
@@ -116,17 +107,17 @@
     <ClCompile Include="..\..\src\mn\Stream.cpp">
       <Filter>src\mn</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\mn\Thread_Linux.cpp">
-      <Filter>src\mn</Filter>
+    <ClCompile Include="..\..\src\mn\winos\Debug.cpp">
+      <Filter>src\mn\winos</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\mn\Thread_WinOS.cpp">
-      <Filter>src\mn</Filter>
+    <ClCompile Include="..\..\src\mn\winos\File.cpp">
+      <Filter>src\mn\winos</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\mn\Virtual_Memory_Linux.cpp">
-      <Filter>src\mn</Filter>
+    <ClCompile Include="..\..\src\mn\winos\Thread.cpp">
+      <Filter>src\mn\winos</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\src\mn\Virtual_Memory_WinOS.cpp">
-      <Filter>src\mn</Filter>
+    <ClCompile Include="..\..\src\mn\winos\Virtual_Memory.cpp">
+      <Filter>src\mn\winos</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

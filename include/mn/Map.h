@@ -79,29 +79,16 @@ namespace mn
 	#undef TRIVIAL_HASH
 
 	//MurmurHashUnaligned2
-	template<size_t ptr_size>
-	struct _Hash_Bytes
+	inline static size_t
+	_murmur_hash_unaligned2(const void* ptr, size_t len, size_t seed)
 	{
-		inline size_t
-		operator()(const void*, size_t, size_t)
-		{
-			static_assert(ptr_size == 0, "there's no hash function defined for this architecture pointer size");
-			return 0;
-		}
-	};
-
-	//4 byte pointer size architectures
-	template<>
-	struct _Hash_Bytes<4>
-	{
-		inline size_t
-		operator()(const void* ptr, size_t len, size_t seed)
+		if constexpr (sizeof(void*) == 4)
 		{
 			const size_t m = 0x5bd1e995;
 			size_t hash = seed ^ len;
 			const unsigned char* buffer = static_cast<const unsigned char*>(ptr);
 
-			while(len >= 4)
+			while (len >= 4)
 			{
 				size_t k = *reinterpret_cast<const size_t*>(buffer);
 				k *= m;
@@ -113,19 +100,19 @@ namespace mn
 				len -= 4;
 			}
 
-			if(len == 3)
+			if (len == 3)
 			{
 				hash ^= static_cast<unsigned char>(buffer[2]) << 16;
 				--len;
 			}
 
-			if(len == 2)
+			if (len == 2)
 			{
 				hash ^= static_cast<unsigned char>(buffer[1]) << 8;
 				--len;
 			}
 
-			if(len == 1)
+			if (len == 1)
 			{
 				hash ^= static_cast<unsigned char>(buffer[0]);
 				hash *= m;
@@ -137,32 +124,23 @@ namespace mn
 			hash ^= hash >> 15;
 			return hash;
 		}
-	};
-
-	//8 byte pointer size architectures
-	template<>
-	struct _Hash_Bytes<8>
-	{
-		inline size_t
-		load_bytes(const unsigned char* p, intptr_t n) const
+		else if constexpr (sizeof(void*) == 8)
 		{
-			size_t result = 0;
-			--n;
-			do
-				result = (result << 8) + static_cast<unsigned char>(p[n]);
-			while(--n >= 0);
-			return result;
-		}
+			auto load_bytes = [](const unsigned char* p, intptr_t n) -> size_t
+			{
+				size_t result = 0;
+				--n;
+				do
+					result = (result << 8) + static_cast<unsigned char>(p[n]);
+				while (--n >= 0);
+				return result;
+			};
 
-		inline size_t
-		shift_mix(size_t v) const
-		{
-			return v ^ (v >> 47);
-		}
+			auto shift_mix = [](size_t v) -> size_t
+			{
+				return v ^ (v >> 47);
+			};
 
-		inline size_t
-		operator()(const void* ptr, size_t len, size_t seed)
-		{
 			static const size_t mul = (static_cast<size_t>(0xc6a4a793UL) << 32UL) + static_cast<size_t>(0x5bd1e995UL);
 
 			const unsigned char* const buffer = static_cast<const unsigned char*>(ptr);
@@ -171,7 +149,7 @@ namespace mn
 			const unsigned char* const end = buffer + len_aligned;
 
 			size_t hash = seed ^ (len * mul);
-			for(const unsigned char* p = buffer;
+			for (const unsigned char* p = buffer;
 				p != end;
 				p += 8)
 			{
@@ -180,7 +158,7 @@ namespace mn
 				hash *= mul;
 			}
 
-			if((len & 0x7) != 0)
+			if ((len & 0x7) != 0)
 			{
 				const size_t data = load_bytes(end, len & 0x7);
 				hash ^= data;
@@ -191,7 +169,7 @@ namespace mn
 			hash = shift_mix(hash);
 			return hash;
 		}
-	};
+	}
 
 	/**
 	 * @brief      Given a block of memory does a murmur hash on it
@@ -205,8 +183,7 @@ namespace mn
 	inline static size_t
 	murmur_hash(const void* ptr, size_t len, size_t seed = 0xc70f6907UL)
 	{
-		static _Hash_Bytes<sizeof(void*)> hasher;
-		return hasher(ptr, len, seed);
+		return _murmur_hash_unaligned2(ptr, len, seed);
 	}
 
 	/**
@@ -254,40 +231,6 @@ namespace mn
 		}
 	};
 
-	template<size_t ptr_size>
-	struct _Hash_Mixer
-	{
-		inline size_t
-		operator()(size_t, size_t) const
-		{
-			static_assert(ptr_size == 0, "there's no hash mixer function defined for this architecture pointer size");
-			return 0;
-		}
-	};
-
-	template<>
-	struct _Hash_Mixer<4>
-	{
-		inline size_t
-		operator()(size_t a, size_t b) const
-		{
-			return (b + 0x9e3779b9 + (a << 6) + (a >> 2));
-		}
-	};
-
-	template<>
-	struct _Hash_Mixer<8>
-	{
-		inline size_t
-		operator()(size_t a, size_t b) const
-		{
-			a ^= b;
-			a *= 0xff51afd7ed558ccd;
-			a ^= a >> 32;
-			return a;
-		}
-	};
-
 	/**
 	 * @brief      Mixes two hash values together
 	 *
@@ -297,8 +240,17 @@ namespace mn
 	inline static size_t
 	hash_mix(size_t a, size_t b)
 	{
-		static _Hash_Mixer<sizeof(size_t)> mixer;
-		return mixer(a, b);
+		if constexpr (sizeof(size_t) == 4)
+		{
+			return (b + 0x9e3779b9 + (a << 6) + (a >> 2));
+		}
+		else if constexpr (sizeof(size_t) == 8)
+		{
+			a ^= b;
+			a *= 0xff51afd7ed558ccd;
+			a ^= a >> 32;
+			return a;
+		}
 	}
 
 

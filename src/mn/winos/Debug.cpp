@@ -1,7 +1,4 @@
 #include "mn/Debug.h"
-
-#if OS_WINDOWS
-
 #include "mn/Str.h"
 
 #include <assert.h>
@@ -65,5 +62,3 @@ namespace mn
 		return str;
 	}
 }
-
-#endif

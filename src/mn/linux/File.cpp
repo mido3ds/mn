@@ -1,7 +1,5 @@
 #include "mn/File.h"
 
-#if OS_LINUX
-
 #define _LARGEFILE64_SOURCE 1
 #include <sys/sysinfo.h>
 #include <sys/stat.h>
@@ -466,5 +464,3 @@ namespace mn
 		return i == files.count;
 	}
 }
-
-#endif

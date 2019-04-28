@@ -1679,13 +1679,18 @@ namespace mn
 		return reader_skip(reader, parsed_size); \
 	}
 
-	READ_STR_SIGNED(char)
 	READ_STR_SIGNED(int8_t)
 	READ_STR_SIGNED(int16_t)
 	READ_STR_SIGNED(int32_t)
 	READ_STR_SIGNED(int64_t)
 
 	#undef READ_STR_SIGNED
+
+	inline static size_t
+	read_str(Reader reader, char& value)
+	{
+		return reader_read(reader, block_from(value));
+	}
 
 	//unsigned functions
 	#define READ_STR_UNSIGNED(TYPE) \

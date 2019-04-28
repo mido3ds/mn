@@ -1,7 +1,5 @@
 #include "mn/Virtual_Memory.h"
 
-#if OS_LINUX
-
 #include <sys/mman.h>
 
 namespace mn
@@ -22,5 +20,3 @@ namespace mn
 		munmap(block.ptr, block.size);
 	}
 }
-
-#endif

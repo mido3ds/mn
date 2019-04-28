@@ -15,16 +15,16 @@ ifeq ($(config),debug_x86)
   TARGETDIR = ../../bin/x86/debug
   TARGET = $(TARGETDIR)/unittest
   OBJDIR = obj/x86/debug/unittest
-  DEFINES += -DOS_LINUX
+  DEFINES += -DOS_LINUX -DDEBUG
   INCLUDES += -I../../unittest/doctest -I../../include
   FORCE_INCLUDE +=
   ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
-  ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m32
-  ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m32 -std=c++17
+  ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m32 -g -Wall -Wextra
+  ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m32 -g -Wall -Wextra -std=c++17
   ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
   LIBS += ../../bin/x86/debug/libmnd.so
   LDDEPS += ../../bin/x86/debug/libmnd.so
-  ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib32 -Wl,-rpath,'$$ORIGIN' -m32 -s -pthread -rdynamic
+  ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib32 -Wl,-rpath,'$$ORIGIN' -m32 -pthread
   LINKCMD = $(CXX) -o "$@" $(OBJECTS) $(RESOURCES) $(ALL_LDFLAGS) $(LIBS)
   define PREBUILDCMDS
   endef
@@ -42,16 +42,16 @@ ifeq ($(config),debug_x64)
   TARGETDIR = ../../bin/x64/debug
   TARGET = $(TARGETDIR)/unittest
   OBJDIR = obj/x64/debug/unittest
-  DEFINES += -DOS_LINUX
+  DEFINES += -DOS_LINUX -DDEBUG
   INCLUDES += -I../../unittest/doctest -I../../include
   FORCE_INCLUDE +=
   ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
-  ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64
-  ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -std=c++17
+  ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -g -Wall -Wextra
+  ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -g -Wall -Wextra -std=c++17
   ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
   LIBS += ../../bin/x64/debug/libmnd.so
   LDDEPS += ../../bin/x64/debug/libmnd.so
-  ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib64 -Wl,-rpath,'$$ORIGIN' -m64 -s -pthread -rdynamic
+  ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib64 -Wl,-rpath,'$$ORIGIN' -m64 -pthread
   LINKCMD = $(CXX) -o "$@" $(OBJECTS) $(RESOURCES) $(ALL_LDFLAGS) $(LIBS)
   define PREBUILDCMDS
   endef
@@ -69,12 +69,12 @@ ifeq ($(config),release_x86)
   TARGETDIR = ../../bin/x86/release
   TARGET = $(TARGETDIR)/unittest
   OBJDIR = obj/x86/release/unittest
-  DEFINES += -DOS_LINUX
+  DEFINES += -DOS_LINUX -DNDEBUG
   INCLUDES += -I../../unittest/doctest -I../../include
   FORCE_INCLUDE +=
   ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
-  ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m32
-  ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m32 -std=c++17
+  ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m32 -O2 -Wall -Wextra
+  ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m32 -O2 -Wall -Wextra -std=c++17
   ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
   LIBS += ../../bin/x86/release/libmn.so
   LDDEPS += ../../bin/x86/release/libmn.so
@@ -96,16 +96,124 @@ ifeq ($(config),release_x64)
   TARGETDIR = ../../bin/x64/release
   TARGET = $(TARGETDIR)/unittest
   OBJDIR = obj/x64/release/unittest
-  DEFINES += -DOS_LINUX
+  DEFINES += -DOS_LINUX -DNDEBUG
   INCLUDES += -I../../unittest/doctest -I../../include
   FORCE_INCLUDE +=
   ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
-  ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64
-  ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -std=c++17
+  ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -O2 -Wall -Wextra
+  ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -O2 -Wall -Wextra -std=c++17
   ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
   LIBS += ../../bin/x64/release/libmn.so
   LDDEPS += ../../bin/x64/release/libmn.so
   ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib64 -Wl,-rpath,'$$ORIGIN' -m64 -s -pthread
+  LINKCMD = $(CXX) -o "$@" $(OBJECTS) $(RESOURCES) $(ALL_LDFLAGS) $(LIBS)
+  define PREBUILDCMDS
+  endef
+  define PRELINKCMDS
+  endef
+  define POSTBUILDCMDS
+  endef
+all: prebuild prelink $(TARGET)
+	@:
+
+endif
+
+ifeq ($(config),debugstatic_x86)
+  RESCOMP = windres
+  TARGETDIR = ../../bin/x86/debugStatic
+  TARGET = $(TARGETDIR)/unittest
+  OBJDIR = obj/x86/debugStatic/unittest
+  DEFINES += -DOS_LINUX -DDEBUG
+  INCLUDES += -I../../unittest/doctest -I../../include
+  FORCE_INCLUDE +=
+  ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
+  ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m32 -g -Wall -Wextra
+  ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m32 -g -Wall -Wextra -std=c++17
+  ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
+  LIBS += ../../bin/x86/debugStatic/libmnd.a
+  LDDEPS += ../../bin/x86/debugStatic/libmnd.a
+  ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib32 -m32 -pthread
+  LINKCMD = $(CXX) -o "$@" $(OBJECTS) $(RESOURCES) $(ALL_LDFLAGS) $(LIBS)
+  define PREBUILDCMDS
+  endef
+  define PRELINKCMDS
+  endef
+  define POSTBUILDCMDS
+  endef
+all: prebuild prelink $(TARGET)
+	@:
+
+endif
+
+ifeq ($(config),debugstatic_x64)
+  RESCOMP = windres
+  TARGETDIR = ../../bin/x64/debugStatic
+  TARGET = $(TARGETDIR)/unittest
+  OBJDIR = obj/x64/debugStatic/unittest
+  DEFINES += -DOS_LINUX -DDEBUG
+  INCLUDES += -I../../unittest/doctest -I../../include
+  FORCE_INCLUDE +=
+  ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
+  ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -g -Wall -Wextra
+  ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -g -Wall -Wextra -std=c++17
+  ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
+  LIBS += ../../bin/x64/debugStatic/libmnd.a
+  LDDEPS += ../../bin/x64/debugStatic/libmnd.a
+  ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib64 -m64 -pthread
+  LINKCMD = $(CXX) -o "$@" $(OBJECTS) $(RESOURCES) $(ALL_LDFLAGS) $(LIBS)
+  define PREBUILDCMDS
+  endef
+  define PRELINKCMDS
+  endef
+  define POSTBUILDCMDS
+  endef
+all: prebuild prelink $(TARGET)
+	@:
+
+endif
+
+ifeq ($(config),releasestatic_x86)
+  RESCOMP = windres
+  TARGETDIR = ../../bin/x86/releaseStatic
+  TARGET = $(TARGETDIR)/unittest
+  OBJDIR = obj/x86/releaseStatic/unittest
+  DEFINES += -DOS_LINUX -DNDEBUG
+  INCLUDES += -I../../unittest/doctest -I../../include
+  FORCE_INCLUDE +=
+  ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
+  ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m32 -O2 -Wall -Wextra
+  ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m32 -O2 -Wall -Wextra -std=c++17
+  ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
+  LIBS += ../../bin/x86/releaseStatic/libmn.a
+  LDDEPS += ../../bin/x86/releaseStatic/libmn.a
+  ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib32 -m32 -s -pthread
+  LINKCMD = $(CXX) -o "$@" $(OBJECTS) $(RESOURCES) $(ALL_LDFLAGS) $(LIBS)
+  define PREBUILDCMDS
+  endef
+  define PRELINKCMDS
+  endef
+  define POSTBUILDCMDS
+  endef
+all: prebuild prelink $(TARGET)
+	@:
+
+endif
+
+ifeq ($(config),releasestatic_x64)
+  RESCOMP = windres
+  TARGETDIR = ../../bin/x64/releaseStatic
+  TARGET = $(TARGETDIR)/unittest
+  OBJDIR = obj/x64/releaseStatic/unittest
+  DEFINES += -DOS_LINUX -DNDEBUG
+  INCLUDES += -I../../unittest/doctest -I../../include
+  FORCE_INCLUDE +=
+  ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
+  ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -O2 -Wall -Wextra
+  ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -O2 -Wall -Wextra -std=c++17
+  ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
+  LIBS += ../../bin/x64/releaseStatic/libmn.a
+  LDDEPS += ../../bin/x64/releaseStatic/libmn.a
+  ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib64 -m64 -s -pthread
   LINKCMD = $(CXX) -o "$@" $(OBJECTS) $(RESOURCES) $(ALL_LDFLAGS) $(LIBS)
   define PREBUILDCMDS
   endef

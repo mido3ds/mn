@@ -1,7 +1,4 @@
 #include "mn/Thread.h"
-
-#if OS_LINUX
-
 #include "mn/Pool.h"
 #include "mn/Memory.h"
 
@@ -186,5 +183,3 @@ namespace mn
 		usleep(milliseconds * 1000);
 	}
 }
-
-#endif

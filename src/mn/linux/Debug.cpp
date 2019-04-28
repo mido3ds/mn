@@ -1,7 +1,5 @@
 #include "mn/Debug.h"
 
-#if OS_LINUX
-
 #include <cxxabi.h>
 #include <execinfo.h>
 
@@ -72,5 +70,3 @@ namespace mn
 		return str;
 	}
 }
-
-#endif

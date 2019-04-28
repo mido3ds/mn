@@ -1,7 +1,5 @@
 #include "mn/File.h"
 
-#if OS_WINDOWS
-
 #define NOMINMAX
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
@@ -644,4 +642,3 @@ namespace mn
 		return i == files.count;
 	}
 }
-#endif

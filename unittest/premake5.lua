@@ -10,28 +10,7 @@ project "unittest"
 
 	includedirs
 	{
-		"doctest",
-		"../include"
+		"doctest"
 	}
 
-	links
-	{
-		"mn"
-	}
-
-	cppdialect "c++17"
-	systemversion "latest"
-
-	filter "system:linux"
-		defines { "OS_LINUX" }
-		linkoptions {"-pthread"}
-
-	filter { "system:linux", "configurations:debug" }
-		linkoptions {"-rdynamic"}
-
-	filter "system:windows"
-		defines { "OS_WINDOWS" }
-		buildoptions {"/utf-8"}
-
-	filter { "system:windows", "configurations:debug" }
-		links {"dbghelp"}
+	libmn.use()
