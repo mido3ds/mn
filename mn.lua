@@ -8,6 +8,9 @@ function libmn.use()
 	filter "configurations:*Static"
 		staticruntime "On"
 
+	filter "configurations:debug or release"
+		defines {"MN_SHARED"}
+
 	filter "system:linux"
 		linkoptions {"-pthread"}
 
