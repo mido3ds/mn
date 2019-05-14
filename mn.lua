@@ -9,7 +9,7 @@ function libmn.use()
 		staticruntime "On"
 
 	filter "configurations:debug or release"
-		defines {"MN_SHARED"}
+		defines {"MN_DLL=0"}
 
 	filter "system:linux"
 		linkoptions {"-pthread"}
@@ -33,7 +33,7 @@ project "mn"
 		kind "StaticLib"
 
 	filter "configurations:debug or release"
-		defines {"MN_SHARED", "MN_DLL"}
+		defines {"MN_DLL=1"}
 		kind "SharedLib"
 
 	--linux configuration
