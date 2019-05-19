@@ -49,7 +49,7 @@ TEST_CASE("arena allocator")
 	CHECK(allocator_top() == arena);
 
 	for (int i = 0; i < 1000; ++i)
-		int* ptr = alloc<int>();
+		alloc<int>();
 
 	allocator_pop();
 	CHECK(allocator_top() == clib_allocator);

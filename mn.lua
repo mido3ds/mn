@@ -5,10 +5,10 @@ function libmn.use()
 	includedirs "%{libmn.path}/include"
 	links "mn"
 
-	filter "configurations:*Static"
+	filter "platforms:static"
 		staticruntime "On"
 
-	filter "configurations:debug or release"
+	filter "platforms:shared"
 		defines {"MN_DLL=0"}
 
 	filter "system:linux"
@@ -28,11 +28,11 @@ project "mn"
 
 	includedirs "include"
 
-	filter "configurations:debugStatic or releaseStatic"
+	filter "platforms:static"
 		staticruntime "On"
 		kind "StaticLib"
 
-	filter "configurations:debug or release"
+	filter "platforms:shared"
 		defines {"MN_DLL=1"}
 		kind "SharedLib"
 
@@ -41,7 +41,7 @@ project "mn"
 		linkoptions {"-pthread"}
 		files {"src/mn/linux/**.cpp"}
 
-	filter { "system:linux", "configurations:debug*" }
+	filter { "system:linux", "configurations:debug" }
 		linkoptions {"-rdynamic"}
 
 
@@ -49,7 +49,7 @@ project "mn"
 	filter "system:windows"
 		files {"src/mn/winos/**.cpp"}
 
-	filter { "system:windows", "configurations:debug*" }
+	filter { "system:windows", "configurations:debug" }
 		links {"dbghelp"}
 
 	filter { "system:windows", "action:vs*"}

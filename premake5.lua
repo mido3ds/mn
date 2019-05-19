@@ -1,20 +1,16 @@
-require "export-compile-commands"
-
+-- require "export-compile-commands"
 workspace "mn"
-	configurations {"debug", "release", "debugStatic", "releaseStatic"}
-	platforms {"x86", "x64"}
+	configurations {"debug", "release"}
+	platforms {"static", "shared"}
 	targetdir "bin/%{cfg.platform}/%{cfg.buildcfg}/"
+	location "build"
 	startproject "unittest"
-	defaultplatform "x64"
-
-	if _ACTION then
-		location ("projects/" .. _ACTION)
-	end
 
 	--language configuration
 	warnings "Extra"
 	cppdialect "c++17"
 	systemversion "latest"
+	architecture "x64"
 
 	--linux configuration
 	filter "system:linux"
@@ -25,23 +21,17 @@ workspace "mn"
 		defines { "OS_WINDOWS" }
 
 	--os agnostic configuration
-	filter {"configurations:debug*", "kind:SharedLib or StaticLib"}
+	filter "configurations:debug"
 		targetsuffix "d"
 
-	filter "configurations:debug*"
+	filter "configurations:debug"
 		defines { "DEBUG" }
 		symbols "On"
 
-	filter "configurations:release*"
+	filter "configurations:release"
 		defines { "NDEBUG" }
 		symbols "Off"
 		optimize "On"
-
-	filter "platforms:x86"
-		architecture "x32"
-
-	filter "platforms:x64"
-		architecture "x64"
 
 	include "mn"
 	include "unittest"

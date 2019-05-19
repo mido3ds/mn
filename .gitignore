@@ -12,17 +12,11 @@ dist-bin
 **/obj
 **/.vscode
 **/*.sublime-workspace
+**/*.sublime-project
 **/bin/
 **/build/
 **/Makefile
 forge/generated/*
-!projects/gmake/Makefile
-!projects/gmake/mn.make
-!projects/gmake/unittest.make
-!projects/vs2017/mn.sln
-!projects/vs2017/mn.vcxproj
-!projects/vs2017/mn.vcxproj.filters
-!projects/vs2017/unittest.vcxproj
 
 # User-specific files
 *.suo
