@@ -21,7 +21,7 @@ workspace "mn"
 		defines { "OS_WINDOWS" }
 
 	--os agnostic configuration
-	filter "configurations:debug"
+	filter {"configurations:debug", "kind:SharedLib or StaticLib"}
 		targetsuffix "d"
 
 	filter "configurations:debug"

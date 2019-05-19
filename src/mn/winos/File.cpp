@@ -1,4 +1,5 @@
 #include "mn/File.h"
+#include "mn/OS.h"
 
 #define NOMINMAX
 #define WIN32_LEAN_AND_MEAN
@@ -8,6 +9,8 @@
 
 #include "mn/Thread.h"
 #include "mn/OS.h"
+
+#include <chrono>
 
 namespace mn
 {
@@ -19,7 +22,7 @@ namespace mn
 
 		//+1 for the null termination
 		size_t required_size = (size_needed + 1) * sizeof(WCHAR);
-		Block buffer = alloc_from(allocator_tmp(), required_size, alignof(WCHAR));
+		Block buffer = alloc_from(memory::tmp(), required_size, alignof(WCHAR));
 
 		size_needed = MultiByteToWideChar(CP_UTF8,
 			MB_PRECOMPOSED, utf8.ptr, int(utf8.cap), (LPWSTR)buffer.ptr, int(buffer.size));
@@ -36,7 +39,7 @@ namespace mn
 	_from_os_encoding(Block os_str, Allocator allocator)
 	{
 		int size_needed = WideCharToMultiByte(CP_UTF8, NULL, (LPWSTR)os_str.ptr,
-			int(os_str.size) / sizeof(WCHAR), NULL, 0, NULL, NULL);
+			int(os_str.size / sizeof(WCHAR)), NULL, 0, NULL, NULL);
 		if (size_needed == 0)
 			return str_with_allocator(allocator);
 
@@ -44,7 +47,7 @@ namespace mn
 		buf_resize(buffer, size_needed);
 
 		size_needed = WideCharToMultiByte(CP_UTF8, NULL, (LPWSTR)os_str.ptr,
-			int(os_str.size) / sizeof(WCHAR), buffer.ptr, int(buffer.count), NULL, NULL);
+			int(os_str.size / sizeof(WCHAR)), buffer.ptr, int(buffer.count), NULL, NULL);
 		--buffer.count;
 		return buffer;
 	}
@@ -52,7 +55,7 @@ namespace mn
 	Str
 	from_os_encoding(Block os_str)
 	{
-		return _from_os_encoding(os_str, allocator_tmp());
+		return _from_os_encoding(os_str, memory::tmp());
 	}
 
 
@@ -72,26 +75,30 @@ namespace mn
 		return file;
 	}
 
-	struct STDOUT_Mutex_Wrapper
+	struct Mutex_Stdout_Wrapper
 	{
 		Mutex mtx;
 
-		STDOUT_Mutex_Wrapper()
+		Mutex_Stdout_Wrapper()
 		{
-			mtx = mutex_new();
+			allocator_push(memory::clib());
+				mtx = mutex_new("Stdout Mutex");
+			allocator_pop();
 		}
 
-		~STDOUT_Mutex_Wrapper()
+		~Mutex_Stdout_Wrapper()
 		{
-			mutex_free(mtx);
+			allocator_push(memory::clib());
+				mutex_free(mtx);
+			allocator_pop();
 		}
 	};
 
 	Mutex
 	_mutex_stdout()
 	{
-		static STDOUT_Mutex_Wrapper _stdout_mtx;
-		return _stdout_mtx.mtx;
+		static Mutex_Stdout_Wrapper wrapper;
+		return wrapper.mtx;
 	}
 
 	File
@@ -109,26 +116,30 @@ namespace mn
 		return file;
 	}
 
-	struct STDERR_Mutex_Wrapper
+	struct Mutex_Stderr_Wrapper
 	{
 		Mutex mtx;
 
-		STDERR_Mutex_Wrapper()
+		Mutex_Stderr_Wrapper()
 		{
-			mtx = mutex_new();
+			allocator_push(memory::clib());
+				mtx = mutex_new("Stderr Mutex");
+			allocator_pop();
 		}
 
-		~STDERR_Mutex_Wrapper()
+		~Mutex_Stderr_Wrapper()
 		{
-			mutex_free(mtx);
+			allocator_push(memory::clib());
+				mutex_free(mtx);
+			allocator_pop();
 		}
 	};
 
 	Mutex
 	_mutex_stderr()
 	{
-		static STDERR_Mutex_Wrapper _stderr_mtx;
-		return _stderr_mtx.mtx;
+		static Mutex_Stderr_Wrapper wrapper;
+		return wrapper.mtx;
 	}
 
 	File
@@ -138,16 +149,16 @@ namespace mn
 		return _stderr;
 	}
 
-	struct STDIN_Mutex_Wrapper
+	struct Mutex_Stdin_Wrapper
 	{
 		Mutex mtx;
 
-		STDIN_Mutex_Wrapper()
+		Mutex_Stdin_Wrapper()
 		{
-			mtx = mutex_new();
+			mtx = mutex_new("Stdin Mutex");
 		}
 
-		~STDIN_Mutex_Wrapper()
+		~Mutex_Stdin_Wrapper()
 		{
 			mutex_free(mtx);
 		}
@@ -156,8 +167,8 @@ namespace mn
 	Mutex
 	_mutex_stdin()
 	{
-		static STDIN_Mutex_Wrapper _stdin_mtx;
-		return _stdin_mtx.mtx;
+		static Mutex_Stdin_Wrapper wrapper;
+		return wrapper.mtx;
 	}
 
 	File
@@ -336,13 +347,33 @@ namespace mn
 		return SetFilePointerEx(handle.windows_handle, offset, &position, FILE_END);
 	}
 
+	Str
+	file_content_str(const char* filename, Allocator allocator)
+	{
+		Str str = str_with_allocator(allocator);
+		File f = file_open(filename, IO_MODE::READ, OPEN_MODE::OPEN_ONLY);
+		if(file_valid(f) == false)
+			panic("cannot read file \"{}\"", filename);
+
+		buf_resize(str, file_size(f) + 1);
+		--str.count;
+		str.ptr[str.count] = '\0';
+
+		size_t read_size = file_read(f, Block { str.ptr, str.count });
+		((void)(read_size));
+		assert(read_size == str.count);
+
+		file_close(f);
+		return str;
+	}
+
 
 	//File System api
 	Str
 	path_os_encoding(const char* path)
 	{
 		size_t str_len = ::strlen(path);
-		Str res = str_with_allocator(allocator_tmp());
+		Str res = str_with_allocator(memory::tmp());
 		buf_reserve(res, str_len + 1);
 
 		for (size_t i = 0; i < str_len; ++i)
@@ -357,8 +388,8 @@ namespace mn
 		return res;
 	}
 
-	Str&
-	path_sanitize(Str& path)
+	Str
+	path_sanitize(Str path)
 	{
 		int32_t prev = '\0';
 		char *it_write = path.ptr;
@@ -404,8 +435,8 @@ namespace mn
 		return path;
 	}
 
-	Str&
-	path_normalize(Str& path)
+	Str
+	path_normalize(Str path)
 	{
 		for (char& c : path)
 		{
@@ -445,7 +476,7 @@ namespace mn
 	path_current(Allocator allocator)
 	{
 		DWORD required_size = GetCurrentDirectory(0, NULL);
-		Block os_str = alloc_from(allocator_tmp(), required_size * sizeof(TCHAR), alignof(TCHAR));
+		Block os_str = alloc_from(memory::tmp(), required_size * sizeof(TCHAR), alignof(TCHAR));
 		DWORD written_size = GetCurrentDirectory((DWORD)(os_str.size/sizeof(TCHAR)), (LPWSTR)os_str.ptr);
 		assert((size_t)(written_size+1) == (os_str.size / sizeof(TCHAR)) && "GetCurrentDirectory Failed");
 		Str res = _from_os_encoding(os_str, allocator);
@@ -466,7 +497,7 @@ namespace mn
 	{
 		Block os_path = to_os_encoding(path_os_encoding(path));
 		DWORD required_size = GetFullPathName((LPCWSTR)os_path.ptr, 0, NULL, NULL);
-		Block full_path = alloc_from(allocator_tmp(), required_size * sizeof(TCHAR), alignof(TCHAR));
+		Block full_path = alloc_from(memory::tmp(), required_size * sizeof(TCHAR), alignof(TCHAR));
 		DWORD written_size = GetFullPathName((LPCWSTR)os_path.ptr, required_size, (LPWSTR)full_path.ptr, NULL);
 		assert(written_size+1 == required_size && "GetFullPathName failed");
 		Str res = _from_os_encoding(full_path, allocator);
@@ -474,11 +505,32 @@ namespace mn
 		return res;
 	}
 
+	Str
+	file_directory(const char* path, Allocator allocator)
+	{
+		Str result = str_from_c(path, allocator);
+		path_sanitize(result);
+
+		size_t i = 0;
+		for(i = 1; i <= result.count; ++i)
+		{
+			char c = result[result.count - i];
+			if(c == '/')
+				break;
+		}
+		if (i > result.count)
+			result.count = 0;
+		else
+			result.count -= i;
+		str_null_terminate(result);
+		return result;
+	}
+
 	Buf<Path_Entry>
 	path_entries(const char* path, Allocator allocator)
 	{
 		//add the * at the end
-		Str tmp_path = str_with_allocator(allocator_tmp());
+		Str tmp_path = str_with_allocator(memory::tmp());
 		buf_reserve(tmp_path, ::strlen(path) + 3);
 		str_push(tmp_path, path);
 		if (tmp_path.count && tmp_path[tmp_path.count - 1] != '/')
@@ -523,7 +575,7 @@ namespace mn
 	bool
 	file_copy(const char* src, const char* dst)
 	{
-		//Str tmp = str_with_allocator(allocator_tmp());
+		//Str tmp = str_with_allocator(memory::tmp());
 		//str_pushf(tmp, "\\\\?\\%s", src);
 		Block os_src = to_os_encoding(path_os_encoding(src));
 		//str_clear(tmp);
@@ -535,7 +587,7 @@ namespace mn
 	bool
 	file_remove(const char* path)
 	{
-		//Str tmp = str_with_allocator(allocator_tmp());
+		//Str tmp = str_with_allocator(memory::tmp());
 		//str_pushf(tmp, "\\\\?\\%s", path);
 		Block os_path = to_os_encoding(path_os_encoding(path));
 		return DeleteFile((LPCWSTR)os_path.ptr);
@@ -547,6 +599,34 @@ namespace mn
 		Block os_src = to_os_encoding(path_os_encoding(src));
 		Block os_dst = to_os_encoding(path_os_encoding(dst));
 		return MoveFile((LPCWSTR)os_src.ptr, (LPCWSTR)os_dst.ptr);
+	}
+
+	Str
+	file_tmp(const mn::Str& base, const mn::Str& ext,Allocator allocator)
+	{
+		Str _base;
+		if (base.count != 0)
+			_base = path_normalize(str_clone(base, memory::tmp()));
+		else
+			_base = folder_tmp(memory::tmp());
+
+		Str res;
+		while (true)
+		{
+			res = str_clone(_base, allocator);
+			auto duration_nanos = std::chrono::high_resolution_clock::now().time_since_epoch();
+			uint64_t nanos = std::chrono::duration_cast<std::chrono::duration<uint64_t, std::nano>>(duration_nanos).count();
+			if (ext.count != 0)
+				res = path_join(res, str_tmpf("mn_file_tmp_{}.{}", nanos, ext));
+			else
+				res = path_join(res, str_tmpf("mn_file_tmp_{}", nanos));
+
+			if (path_exists(res) == false)
+				break;
+
+			str_free(res);
+		}
+		return res;
 	}
 
 	bool
@@ -567,8 +647,8 @@ namespace mn
 		if (attributes == INVALID_FILE_ATTRIBUTES)
 			return true;
 
-		Buf<Path_Entry> files = path_entries(path, allocator_tmp());
-		Str tmp_path = str_with_allocator(allocator_tmp());
+		Buf<Path_Entry> files = path_entries(path, memory::tmp());
+		Str tmp_path = str_with_allocator(memory::tmp());
 		for (size_t i = 2; i < files.count; ++i)
 		{
 			str_clear(tmp_path);
@@ -597,7 +677,7 @@ namespace mn
 	bool
 	folder_copy(const char* src, const char* dst)
 	{
-		Buf<Path_Entry> files = path_entries(src, allocator_tmp());
+		Buf<Path_Entry> files = path_entries(src, memory::tmp());
 
 		//create the folder no matter what
 		if (folder_make(dst) == false)
@@ -608,8 +688,8 @@ namespace mn
 			return true;
 
 		size_t i = 0;
-		Str tmp_src = str_with_allocator(allocator_tmp());
-		Str tmp_dst = str_with_allocator(allocator_tmp());
+		Str tmp_src = str_with_allocator(memory::tmp());
+		Str tmp_dst = str_with_allocator(memory::tmp());
 		for (i = 0; i < files.count; ++i)
 		{
 			if(files[i].name != "." && files[i].name != "..")
@@ -640,5 +720,16 @@ namespace mn
 		}
 
 		return i == files.count;
+	}
+
+	Str
+	folder_tmp(Allocator allocator)
+	{
+		DWORD len = GetTempPath(0, NULL);
+		assert(len != 0);
+
+		Block os_path = alloc_from(memory::tmp(), len*sizeof(TCHAR)+1, alignof(TCHAR));
+		GetTempPath(len, (TCHAR*)os_path.ptr);
+		return path_normalize(_from_os_encoding(os_path, allocator));
 	}
 }

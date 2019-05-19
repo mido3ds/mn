@@ -14,7 +14,7 @@ namespace mn
 	TS_Typed_Pool<Internal_Reader>*
 	_reader_pool()
 	{
-		static TS_Typed_Pool<Internal_Reader> _pool(1024, clib_allocator);
+		static TS_Typed_Pool<Internal_Reader> _pool(1024, memory::clib());
 		return &_pool;
 	}
 
@@ -32,6 +32,29 @@ namespace mn
 	{
 		static Internal_Reader _stdin = _reader_stdin();
 		return (Reader)&_stdin;
+	}
+
+	struct Reader_Tmp_Wrapper
+	{
+		Internal_Reader self;
+
+		Reader_Tmp_Wrapper()
+		{
+			self.stream = nullptr;
+			self.buffer = memory_stream_new(memory::clib());
+		}
+
+		~Reader_Tmp_Wrapper()
+		{
+			memory_stream_free(self.buffer);
+		}
+	};
+
+	Reader
+	_reader_tmp()
+	{
+		thread_local Reader_Tmp_Wrapper _reader;
+		return (Reader)&_reader.self;
 	}
 
 	Reader

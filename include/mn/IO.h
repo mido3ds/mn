@@ -1430,7 +1430,7 @@ namespace mn
 		stream_cursor_move_to_start(stream);
 		size_t size = vprintf(stream, format, std::forward<TArgs>(args)...);
 		stream_cursor_move_to_start(stream);
-		Str result = str_with_allocator(allocator_tmp());
+		Str result = str_with_allocator(memory::tmp());
 		str_resize(result, size);
 		stream_read(stream, block_from(result));
 		return result;
@@ -1873,7 +1873,7 @@ namespace mn
 	inline static size_t
 	reads(const Str& str, TArgs&& ... args)
 	{
-		thread_local Reader reader = nullptr;
+		Reader reader = _reader_tmp();
 		reader = reader_wrap_str(reader, str);
 		size_t result = 0;
 		_variadic_read_string_helper(reader, result, std::forward<TArgs>(args)...);

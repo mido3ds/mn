@@ -11,6 +11,7 @@
 #include <mn/Str_Intern.h>
 #include <mn/Ring.h>
 #include <mn/OS.h>
+#include <mn/memory/Leak.h>
 
 using namespace mn;
 
@@ -26,7 +27,6 @@ TEST_CASE("allocation")
 TEST_CASE("stack allocator")
 {
 	Allocator stack = allocator_stack_new(1024);
-	CHECK(allocator_top() == clib_allocator);
 
 	allocator_push(stack);
 	CHECK(allocator_top() == stack);
@@ -35,7 +35,6 @@ TEST_CASE("stack allocator")
 	free(b);
 
 	allocator_pop();
-	CHECK(allocator_top() == clib_allocator);
 
 	allocator_free(stack);
 }
@@ -43,7 +42,6 @@ TEST_CASE("stack allocator")
 TEST_CASE("arena allocator")
 {
 	Allocator arena = allocator_arena_new(512);
-	CHECK(allocator_top() == clib_allocator);
 
 	allocator_push(arena);
 	CHECK(allocator_top() == arena);
@@ -52,7 +50,6 @@ TEST_CASE("arena allocator")
 		alloc<int>();
 
 	allocator_pop();
-	CHECK(allocator_top() == clib_allocator);
 
 	allocator_free(arena);
 }
@@ -60,20 +57,20 @@ TEST_CASE("arena allocator")
 TEST_CASE("tmp allocator")
 {
 	{
-		Str name = str_with_allocator(allocator_tmp());
+		Str name = str_with_allocator(memory::tmp());
 		str_pushf(name, "Name: %s", "Mostafa");
 		CHECK(name == str_lit("Name: Mostafa"));
 	}
 
-	allocator_tmp_free();
+	memory::tmp()->free_all();
 
 	{
-		Str name = str_with_allocator(allocator_tmp());
+		Str name = str_with_allocator(memory::tmp());
 		str_pushf(name, "Name: %s", "Mostafa");
 		CHECK(name == str_lit("Name: Mostafa"));
 	}
 
-	allocator_tmp_free();
+	memory::tmp()->free_all();
 }
 
 TEST_CASE("buf push")
@@ -363,7 +360,7 @@ TEST_CASE("Str_Intern general case")
 
 TEST_CASE("simple data ring case")
 {
-	allocator_push(leak_detector());
+	allocator_push(memory::leak());
 
 	Ring<int> r = ring_new<int>();
 
@@ -395,7 +392,7 @@ TEST_CASE("simple data ring case")
 
 TEST_CASE("complex data ring case")
 {
-	allocator_push(leak_detector());
+	allocator_push(memory::leak());
 	Ring<Str> r = ring_new<Str>();
 
 	for (int i = 0; i < 10; ++i)

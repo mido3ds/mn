@@ -26,7 +26,7 @@ namespace mn
 	TS_Typed_Pool<Internal_Stream>*
 	_stream_pool()
 	{
-		static TS_Typed_Pool<Internal_Stream> _pool(1024, clib_allocator);
+		static TS_Typed_Pool<Internal_Stream> _pool(1024, memory::clib());
 		return &_pool;
 	}
 

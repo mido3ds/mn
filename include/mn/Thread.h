@@ -13,7 +13,7 @@ namespace mn
 	MS_HANDLE(Mutex);
 
 	API_MN Mutex
-	_allocators_mutex();
+	_leak_allocator_mutex();
 
 	/**
 	 * @brief      Creates a new mutex

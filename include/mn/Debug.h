@@ -13,5 +13,5 @@ namespace mn
 	 * @return     A String containing the callstack
 	 */
 	API_MN Str
-	callstack_dump(Allocator allocator = allocator_tmp());
+	callstack_dump(Allocator allocator = memory::tmp());
 }

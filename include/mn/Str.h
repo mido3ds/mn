@@ -276,7 +276,7 @@ namespace mn
 	 * @param[in]  allocator   The allocator [optional] default is the tmp allocator
 	 */
 	API_MN Buf<Str>
-	str_split(const Str& self, const Str& delim, bool skip_empty, Allocator allocator = allocator_tmp());
+	str_split(const Str& self, const Str& delim, bool skip_empty, Allocator allocator = memory::tmp());
 
 	/**
 	 * @brief      Splits the string with the given delimiter
@@ -287,7 +287,7 @@ namespace mn
 	 * @param[in]  allocator   The allocator [optional] default is the tmp allocator
 	 */
 	inline static Buf<Str>
-	str_split(const Str& self, const char* delim, bool skip_empty, Allocator allocator = allocator_tmp())
+	str_split(const Str& self, const char* delim, bool skip_empty, Allocator allocator = memory::tmp())
 	{
 		return str_split(self, str_lit(delim), skip_empty, allocator);
 	}
@@ -301,7 +301,7 @@ namespace mn
 	 * @param[in]  allocator   The allocator [optional] default is the tmp allocator
 	 */
 	inline static Buf<Str>
-	str_split(const char* self, const Str& delim, bool skip_empty, Allocator allocator = allocator_tmp())
+	str_split(const char* self, const Str& delim, bool skip_empty, Allocator allocator = memory::tmp())
 	{
 		return str_split(str_lit(self), delim, skip_empty, allocator);
 	}
@@ -315,7 +315,7 @@ namespace mn
 	 * @param[in]  allocator   The allocator [optional] default is the tmp allocator
 	 */
 	inline static Buf<Str>
-	str_split(const char* self, const char* delim, bool skip_empty, Allocator allocator = allocator_tmp())
+	str_split(const char* self, const char* delim, bool skip_empty, Allocator allocator = memory::tmp())
 	{
 		return str_split(str_lit(self), str_lit(delim), skip_empty, allocator);
 	}

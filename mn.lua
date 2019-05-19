@@ -22,8 +22,10 @@ project "mn"
 
 	files
 	{
-		"include/**.h",
-		"src/mn/*.cpp"
+		"include/mn/*.h",
+		"include/mn/memory/*.h",
+		"src/mn/*.cpp",
+		"src/mn/memory/*.cpp"
 	}
 
 	includedirs "include"

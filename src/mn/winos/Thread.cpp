@@ -15,26 +15,26 @@ namespace mn
 		CRITICAL_SECTION cs;
 	};
 
-	struct Allocators_Mutex
+	struct Leak_Allocator_Mutex
 	{
 		IMutex self;
 
-		Allocators_Mutex()
+		Leak_Allocator_Mutex()
 		{
 			self.name = "allocators mutex";
 			InitializeCriticalSectionAndSpinCount(&self.cs, 1<<14);
 		}
 
-		~Allocators_Mutex()
+		~Leak_Allocator_Mutex()
 		{
 			DeleteCriticalSection(&self.cs);
 		}
 	};
 
 	Mutex
-	_allocators_mutex()
+	_leak_allocator_mutex()
 	{
-		static Allocators_Mutex mtx;
+		static Leak_Allocator_Mutex mtx;
 		return (Mutex)&mtx.self;
 	}
 

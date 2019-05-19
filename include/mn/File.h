@@ -108,6 +108,12 @@ namespace mn
 	API_MN File
 	file_open(const char* filename, IO_MODE io_mode, OPEN_MODE open_mode);
 
+	inline static File
+	file_open(const Str& filename, IO_MODE io_mode, OPEN_MODE open_mode)
+	{
+		return file_open(filename.ptr, io_mode, open_mode);
+	}
+
 	/**
 	 * @brief      Closes a file
 	 */
@@ -175,6 +181,24 @@ namespace mn
 	API_MN bool
 	file_cursor_move_to_end(File handle);
 
+	/**
+	* @brief      A Helper function which given the filename will load the content of it
+	* into the resulting string
+	*
+	* @param[in]  filename   The filename
+	* @param[in]  allocator  The allocator to be used by the resulting string
+	*
+	* @return     A String containing the content of the file
+	*/
+	API_MN Str
+	file_content_str(const char* filename, Allocator allocator = allocator_top());
+
+	inline static Str
+	file_content_str(const Str& filename, Allocator allocator = allocator_top())
+	{
+		return file_content_str(filename.ptr, allocator);
+	}
+
 
 	//File System api
 	/**
@@ -203,17 +227,17 @@ namespace mn
 	/**
 	 * Removes duplicate / and other sanitization stuff
 	 */
-	API_MN Str&
-	path_sanitize(Str& path);
+	API_MN Str
+	path_sanitize(Str path);
 
 	/**
 	 * Converts from the os-specific encoding to standard encoding(linux-like)
 	 */
-	API_MN Str&
-	path_normalize(Str& path);
+	API_MN Str
+	path_normalize(Str path);
 
-	inline static Str&
-	path_join(Str& base)
+	inline static Str
+	path_join(Str base)
 	{
 		return path_sanitize(base);
 	}
@@ -225,12 +249,11 @@ namespace mn
 	 * base_folder/my_folder1/my_folder2/my_file
 	 */
 	template<typename TFirst, typename ... TArgs>
-	inline static Str&
-	path_join(Str& base, TFirst&& first, TArgs&& ... args)
+	inline static Str
+	path_join(Str base, TFirst&& first, TArgs&& ... args)
 	{
-		if (str_suffix(base, "/") == false)
-			str_push(base, "/");
 		str_push(base, std::forward<TFirst>(first));
+		str_push(base, "/");
 		return path_join(base, std::forward<TArgs>(args)...);
 	}
 
@@ -325,6 +348,15 @@ namespace mn
 	path_absolute(const Str& path, Allocator allocator = allocator_top())
 	{
 		return path_absolute(path.ptr, allocator);
+	}
+
+	API_MN Str
+	file_directory(const char* path, Allocator allocator = allocator_top());
+
+	inline static Str
+	file_directory(const Str& path, Allocator allocator = allocator_top())
+	{
+		return file_directory(path.ptr, allocator);
 	}
 
 	struct Path_Entry
@@ -481,6 +513,27 @@ namespace mn
 		return file_move(src.ptr, dst.ptr);
 	}
 
+	API_MN Str
+	file_tmp(const mn::Str& base, const mn::Str& ext, Allocator allocator = allocator_top());
+
+	inline static Str
+	file_tmp(const char* base, const mn::Str& ext, Allocator allocator = allocator_top())
+	{
+		return file_tmp(str_lit(base), ext, allocator);
+	}
+
+	inline static Str
+	file_tmp(const mn::Str& base, const char* ext, Allocator allocator = allocator_top())
+	{
+		return file_tmp(base, str_lit(ext), allocator);
+	}
+
+	inline static Str
+	file_tmp(const char* base, const char* ext, Allocator allocator = allocator_top())
+	{
+		return file_tmp(str_lit(base), str_lit(ext), allocator);
+	}
+
 	/**
 	 * @brief      Creates a new folder
 	 *
@@ -613,4 +666,7 @@ namespace mn
 	{
 		return folder_move(src.ptr, dst.ptr);
 	}
+
+	API_MN Str
+	folder_tmp(Allocator allocator = allocator_top());
 }

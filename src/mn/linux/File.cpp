@@ -1,4 +1,5 @@
 #include "mn/File.h"
+#include "mn/OS.h"
 
 #define _LARGEFILE64_SOURCE 1
 #include <sys/sysinfo.h>
@@ -10,9 +11,6 @@
 #include <errno.h>
 #include <dirent.h>
 #include <linux/limits.h>
-
-//to supress warnings in release mode
-#define UNUSED(x) ((void)(x))
 
 namespace mn
 {
@@ -183,13 +181,33 @@ namespace mn
 	}
 
 	Str
-	path_os_encoding(const char* path)
+	file_content_str(const char* filename, Allocator allocator)
 	{
-		return str_from_c(path, allocator_tmp());
+		Str str = str_with_allocator(allocator);
+		File f = file_open(filename, IO_MODE::READ, OPEN_MODE::OPEN_ONLY);
+		if(file_valid(f) == false)
+			panic("cannot read file \"{}\"", filename);
+
+		buf_resize(str, file_size(f) + 1);
+		--str.count;
+		str.ptr[str.count] = '\0';
+
+		size_t read_size = file_read(f, Block { str.ptr, str.count });
+		((void)(read_size));
+		assert(read_size == str.count);
+
+		file_close(f);
+		return str;
 	}
 
-	Str&
-	path_sanitize(Str& path)
+	Str
+	path_os_encoding(const char* path)
+	{
+		return str_from_c(path, libdps.use());
+	}
+
+	Str
+	path_sanitize(Str path)
 	{
 		char prev = '\0';
 		char *it_write = path.ptr;
@@ -232,8 +250,8 @@ namespace mn
 		return path;
 	}
 
-	Str&
-	path_normalize(Str& path)
+	Str
+	path_normalize(Str path)
 	{
 		for(char& c: path)
 		{
@@ -281,7 +299,6 @@ namespace mn
 	{
 		int result = ::chdir(path);
 		assert(result == 0 && "chdir failed");
-		UNUSED(result);
 	}
 
 	Str
@@ -295,6 +312,24 @@ namespace mn
 		Str cwd = path_current(allocator);
 		str_pushf(cwd, "/%s", path);
 		return cwd;
+	}
+
+	Str
+	file_directory(const char* path, Allocator allocator)
+	{
+		Str result = str_from_c(path, allocator);
+		path_sanitize(result);
+
+		size_t i = 0;
+		for(i = 1; i <= result.count; ++i)
+		{
+			char c = result[result.count - i];
+			if(c == '/')
+				break;
+		}
+		result.count -= i;
+		str_null_terminate(result);
+		return result;
 	}
 
 	Buf<Path_Entry>
@@ -390,8 +425,8 @@ namespace mn
 	bool
 	folder_remove(const char* path)
 	{
-		Buf<Path_Entry> files = path_entries(path, allocator_tmp());
-		Str tmp_path = str_with_allocator(allocator_tmp());
+		Buf<Path_Entry> files = path_entries(path, memory::tmp();
+		Str tmp_path = str_with_allocator(memory::tmp();
 		for(size_t i = 2; i < files.count; ++i)
 		{
 			str_clear(tmp_path);
@@ -420,7 +455,7 @@ namespace mn
 	bool
 	folder_copy(const char* src, const char* dst)
 	{
-		Buf<Path_Entry> files = path_entries(src, allocator_tmp());
+		Buf<Path_Entry> files = path_entries(src, memory::tmp());
 
 		//create the folder no matter what
 		if(folder_make(dst) == false)
@@ -431,8 +466,8 @@ namespace mn
 			return true;
 
 		size_t i = 0;
-		Str tmp_src = str_with_allocator(allocator_tmp());
-		Str tmp_dst = str_with_allocator(allocator_tmp());
+		Str tmp_src = str_with_allocator(memory::tmp());
+		Str tmp_dst = str_with_allocator(memory::tmp());
 		for(i = 0; i < files.count; ++i)
 		{
 			if(files[i].name != "." && files[i].name != "..")

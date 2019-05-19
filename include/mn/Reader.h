@@ -20,6 +20,9 @@ namespace mn
 	API_MN Reader
 	reader_stdin();
 
+	API_MN Reader
+	_reader_tmp();
+
 	/**
 	 * @brief      Returns a newly created reader on top of the given stream
 	 *
