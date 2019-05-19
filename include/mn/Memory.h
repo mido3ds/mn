@@ -8,6 +8,7 @@
 
 #include <stdint.h>
 #include <utility>
+#include <new>
 
 namespace mn
 {

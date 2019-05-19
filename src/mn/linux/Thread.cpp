@@ -13,7 +13,7 @@
 namespace mn
 {
 	pthread_mutex_t*
-	_allocators_mutex_new()
+	_leak_allocator_mutex_new()
 	{
 		static pthread_mutex_t mtx;
 		int result = pthread_mutex_init(&mtx, NULL);
@@ -24,9 +24,9 @@ namespace mn
 
 
 	Mutex
-	_allocators_mutex()
+	_leak_allocator_mutex()
 	{
-		static Mutex mtx = (Mutex)_allocators_mutex_new();
+		static Mutex mtx = (Mutex)_leak_allocator_mutex_new();
 		return mtx;
 	}
 

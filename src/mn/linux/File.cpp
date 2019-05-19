@@ -203,7 +203,7 @@ namespace mn
 	Str
 	path_os_encoding(const char* path)
 	{
-		return str_from_c(path, libdps.use());
+		return str_from_c(path, memory::tmp());
 	}
 
 	Str
@@ -425,8 +425,8 @@ namespace mn
 	bool
 	folder_remove(const char* path)
 	{
-		Buf<Path_Entry> files = path_entries(path, memory::tmp();
-		Str tmp_path = str_with_allocator(memory::tmp();
+		Buf<Path_Entry> files = path_entries(path, memory::tmp());
+		Str tmp_path = str_with_allocator(memory::tmp());
 		for(size_t i = 2; i < files.count; ++i)
 		{
 			str_clear(tmp_path);
