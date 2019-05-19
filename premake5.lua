@@ -4,6 +4,7 @@ workspace "mn"
 	platforms {"static", "shared"}
 	targetdir "bin/%{cfg.platform}/%{cfg.buildcfg}/"
 	location "build"
+	-- location ("projects/" .. _ACTION)
 	startproject "unittest"
 
 	--language configuration

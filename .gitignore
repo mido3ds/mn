@@ -17,6 +17,10 @@ dist-bin
 **/build/
 **/Makefile
 forge/generated/*
+!projects
+!projects/**/*.vcxproj
+!projects/**/*.vcxproj.filters
+!projects/**/Makefile
 
 # User-specific files
 *.suo

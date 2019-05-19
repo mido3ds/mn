@@ -1,0 +1,28 @@
+language: shell
+matrix:
+  include:
+    - name: "Windows VS2017"
+      os: windows
+      script:
+        - cmd.exe /C '"C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC\Auxiliary\Build\vcvarsall.bat" amd64 && msbuild.exe projects/vs2017/mn.sln /p:Configuration=debug;Platform=shared'
+        - cmd.exe /C '"C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC\Auxiliary\Build\vcvarsall.bat" amd64 && msbuild.exe projects/vs2017/mn.sln /p:Configuration=release;Platform=shared'
+        - cmd.exe /C '"C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC\Auxiliary\Build\vcvarsall.bat" amd64 && msbuild.exe projects/vs2017/mn.sln /p:Configuration=debug;Platform=static'
+        - cmd.exe /C '"C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC\Auxiliary\Build\vcvarsall.bat" amd64 && msbuild.exe projects/vs2017/mn.sln /p:Configuration=release;Platform=static'
+        - cmd.exe /C './bin/shared/debug/unittest.exe'
+        - cmd.exe /C './bin/shared/release/unittest.exe'
+        - cmd.exe /C './bin/static/debug/unittest.exe'
+        - cmd.exe /C './bin/static/release/unittest.exe'
+
+    - name: "Linux gcc"
+      os: linux
+      dist: trusty
+      sudo: false
+      script:
+        - make -f projects/gmake/Makefile -j 4 config=debug_shared
+        - make -f projects/gmake/Makefile -j 4 config=release_shared
+        - make -f projects/gmake/Makefile -j 4 config=debug_static
+        - make -f projects/gmake/Makefile -j 4 config=release_static
+        - ./bin/shared/debug/unittest
+        - ./bin/shared/release/unittest
+        - ./bin/static/debug/unittest
+        - ./bin/static/release/unittest
