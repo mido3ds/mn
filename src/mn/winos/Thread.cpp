@@ -35,36 +35,33 @@ namespace mn
 	_leak_allocator_mutex()
 	{
 		static Leak_Allocator_Mutex mtx;
-		return (Mutex)&mtx.self;
+		return &mtx.self;
 	}
 
 	Mutex
 	mutex_new(const char* name)
 	{
-		IMutex* self = alloc<IMutex>();
+		Mutex self = alloc<IMutex>();
 		self->name = name;
 		InitializeCriticalSectionAndSpinCount(&self->cs, 1<<14);
-		return (Mutex)self;
+		return self;
 	}
 
 	void
-	mutex_lock(Mutex mutex)
+	mutex_lock(Mutex self)
 	{
-		IMutex* self = (IMutex*)mutex;
 		EnterCriticalSection(&self->cs);
 	}
 
 	void
-	mutex_unlock(Mutex mutex)
+	mutex_unlock(Mutex self)
 	{
-		IMutex* self = (IMutex*)mutex;
 		LeaveCriticalSection(&self->cs);
 	}
 
 	void
-	mutex_free(Mutex mutex)
+	mutex_free(Mutex self)
 	{
-		IMutex* self = (IMutex*)mutex;
 		DeleteCriticalSection(&self->cs);
 		free(self);
 	}
@@ -80,44 +77,39 @@ namespace mn
 	Mutex_RW
 	mutex_rw_new(const char* name)
 	{
-		IMutex_RW* self = alloc<IMutex_RW>();
+		Mutex_RW self = alloc<IMutex_RW>();
 		self->lock = SRWLOCK_INIT;
 		self->name = name;
-		return (Mutex_RW)self;
+		return self;
 	}
 
 	void
-	mutex_rw_free(Mutex_RW mutex)
+	mutex_rw_free(Mutex_RW self)
 	{
-		IMutex_RW* self = (IMutex_RW*)mutex;
 		free(self);
 	}
 
 	void
-	mutex_read_lock(Mutex_RW mutex)
+	mutex_read_lock(Mutex_RW self)
 	{
-		IMutex_RW* self = (IMutex_RW*)mutex;
 		AcquireSRWLockShared(&self->lock);
 	}
 
 	void
-	mutex_read_unlock(Mutex_RW mutex)
+	mutex_read_unlock(Mutex_RW self)
 	{
-		IMutex_RW* self = (IMutex_RW*)mutex;
 		ReleaseSRWLockShared(&self->lock);
 	}
 
 	void
-	mutex_write_lock(Mutex_RW mutex)
+	mutex_write_lock(Mutex_RW self)
 	{
-		IMutex_RW* self = (IMutex_RW*)mutex;
 		AcquireSRWLockExclusive(&self->lock);
 	}
 
 	void
-	mutex_write_unlock(Mutex_RW mutex)
+	mutex_write_unlock(Mutex_RW self)
 	{
-		IMutex_RW* self = (IMutex_RW*)mutex;
 		ReleaseSRWLockExclusive(&self->lock);
 	}
 
@@ -135,7 +127,7 @@ namespace mn
 	DWORD WINAPI
 	_thread_start(LPVOID user_data)
 	{
-		IThread* self = (IThread*)user_data;
+		Thread self = (Thread)user_data;
 		if(self->func)
 			self->func(self->user_data);
 		return 0;
@@ -144,7 +136,7 @@ namespace mn
 	Thread
 	thread_new(Thread_Func func, void* arg, const char* name)
 	{
-		IThread* self = alloc<IThread>();
+		Thread self = alloc<IThread>();
 		self->func = func;
 		self->user_data = arg;
 		self->name = name;
@@ -155,13 +147,12 @@ namespace mn
 									self, //thread start function arg
 									0, //default creation flags
 									&self->id); //thread id
-		return (Thread)self;
+		return self;
 	}
 
 	void
-	thread_free(Thread thread)
+	thread_free(Thread self)
 	{
-		IThread* self = (IThread*)thread;
 		if(self->handle)
 		{
 			BOOL result = CloseHandle(self->handle);
@@ -171,9 +162,8 @@ namespace mn
 	}
 
 	void
-	thread_join(Thread thread)
+	thread_join(Thread self)
 	{
-		IThread* self = (IThread*)thread;
 		if(self->handle)
 		{
 			DWORD result = WaitForSingleObject(self->handle, INFINITE);
@@ -199,26 +189,23 @@ namespace mn
 	Limbo
 	limbo_new(const char* name)
 	{
-		ILimbo* self = alloc<ILimbo>();
+		Limbo self = alloc<ILimbo>();
 		InitializeCriticalSectionAndSpinCount(&self->cs, 4096);
 		self->cv = CONDITION_VARIABLE_INIT;
 		self->name = name;
-		return (Limbo)self;
+		return self;
 	}
 
 	void
-	limbo_free(Limbo limbo)
+	limbo_free(Limbo self)
 	{
-		ILimbo* self = (ILimbo*)limbo;
 		DeleteCriticalSection(&self->cs);
 		free(self);
 	}
 
 	void
-	limbo_lock(Limbo limbo, Limbo_Predicate* pred)
+	limbo_lock(Limbo self, Limbo_Predicate* pred)
 	{
-		ILimbo* self = (ILimbo*)limbo;
-
 		EnterCriticalSection(&self->cs);
 
 		while(pred->should_wake() == false)
@@ -226,19 +213,15 @@ namespace mn
 	}
 
 	void
-	limbo_unlock_one(Limbo limbo)
+	limbo_unlock_one(Limbo self)
 	{
-		ILimbo* self = (ILimbo*)limbo;
-
 		LeaveCriticalSection(&self->cs);
 		WakeConditionVariable(&self->cv);
 	}
 
 	void
-	limbo_unlock_all(Limbo limbo)
+	limbo_unlock_all(Limbo self)
 	{
-		ILimbo* self = (ILimbo*)limbo;
-
 		LeaveCriticalSection(&self->cs);
 		WakeAllConditionVariable(&self->cv);
 	}

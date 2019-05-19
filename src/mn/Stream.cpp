@@ -7,7 +7,7 @@
 
 namespace mn
 {
-	struct Internal_Stream
+	struct IStream
 	{
 		enum KIND
 		{
@@ -23,18 +23,18 @@ namespace mn
 			Memory_Stream memory;
 		};
 	};
-	TS_Typed_Pool<Internal_Stream>*
+	TS_Typed_Pool<IStream>*
 	_stream_pool()
 	{
-		static TS_Typed_Pool<Internal_Stream> _pool(1024, memory::clib());
+		static TS_Typed_Pool<IStream> _pool(1024, memory::clib());
 		return &_pool;
 	}
 
-	Internal_Stream
+	IStream
 	_stream_std(File file)
 	{
-		Internal_Stream self{};
-		self.kind = Internal_Stream::KIND_FILE;
+		IStream self{};
+		self.kind = IStream::KIND_FILE;
 		self.file = file;
 		return self;
 	}
@@ -42,32 +42,32 @@ namespace mn
 	Stream
 	stream_stdout()
 	{
-		static Internal_Stream _stdout = _stream_std(file_stdout());
-		return (Stream)&_stdout;
+		static IStream _stdout = _stream_std(file_stdout());
+		return &_stdout;
 	}
 
 	Stream
 	stream_stderr()
 	{
-		static Internal_Stream _stderr = _stream_std(file_stderr());
-		return (Stream)&_stderr;
+		static IStream _stderr = _stream_std(file_stderr());
+		return &_stderr;
 	}
 
 	Stream
 	stream_stdin()
 	{
-		static Internal_Stream _stdin = _stream_std(file_stdin());
-		return (Stream)&_stdin;
+		static IStream _stdin = _stream_std(file_stdin());
+		return &_stdin;
 	}
 
 	struct Stream_Tmp_Wrapper
 	{
-		Internal_Stream self;
+		IStream self;
 
 		Stream_Tmp_Wrapper()
 		{
-			self = Internal_Stream{};
-			self.kind = Internal_Stream::KIND_MEMORY;
+			self = IStream{};
+			self.kind = IStream::KIND_MEMORY;
 			self.memory = memory_stream_new(allocator_top());
 		}
 
@@ -81,7 +81,7 @@ namespace mn
 	stream_tmp()
 	{
 		thread_local Stream_Tmp_Wrapper _tmp;
-		return (Stream)&_tmp.self;
+		return &_tmp.self;
 	}
 
 	Stream
@@ -94,36 +94,35 @@ namespace mn
 			return nullptr;
 		}
 		
-		Internal_Stream* self = _stream_pool()->get();
-		self->kind = Internal_Stream::KIND_FILE;
+		Stream self = _stream_pool()->get();
+		self->kind = IStream::KIND_FILE;
 		self->file = file;
-		return (Stream)self;
+		return self;
 	}
 
 	Stream
 	stream_memory_new(Allocator allocator)
 	{
-		Internal_Stream* self = _stream_pool()->get();
-		self->kind = Internal_Stream::KIND_MEMORY;
+		Stream self = _stream_pool()->get();
+		self->kind = IStream::KIND_MEMORY;
 		self->memory = memory_stream_new(allocator);
-		return (Stream)self;
+		return self;
 	}
 
 	void
-	stream_free(Stream stream)
+	stream_free(Stream self)
 	{
-		Internal_Stream* self = (Internal_Stream*)stream;
 		switch (self->kind)
 		{
-			case Internal_Stream::KIND_FILE:
+			case IStream::KIND_FILE:
 				file_close(self->file);
 				break;
 
-			case Internal_Stream::KIND_MEMORY:
+			case IStream::KIND_MEMORY:
 				memory_stream_free(self->memory);
 				break;
 
-			case Internal_Stream::KIND_NONE:
+			case IStream::KIND_NONE:
 			default:
 				assert(false &&
 					   "Invalid stream type");
@@ -133,23 +132,22 @@ namespace mn
 	}
 
 	size_t
-	stream_write(Stream stream, Block data)
+	stream_write(Stream self, Block data)
 	{
-		Internal_Stream* self = (Internal_Stream*)stream;
 		size_t result = 0;
 
 		switch (self->kind)
 		{
-			case Internal_Stream::KIND_FILE:
+			case IStream::KIND_FILE:
 				assert(file_valid(self->file) && "Invalid file");
 				result = file_write(self->file, data);
 				break;
 
-			case Internal_Stream::KIND_MEMORY:
+			case IStream::KIND_MEMORY:
 				result = memory_stream_write(self->memory, data);
 				break;
 
-			case Internal_Stream::KIND_NONE:
+			case IStream::KIND_NONE:
 			default:
 				assert(false &&
 					   "Invalid stream type");
@@ -159,23 +157,22 @@ namespace mn
 	}
 
 	size_t
-	stream_read(Stream stream, Block data)
+	stream_read(Stream self, Block data)
 	{
-		Internal_Stream* self = (Internal_Stream*)stream;
 		size_t result = 0;
 
 		switch (self->kind)
 		{
-			case Internal_Stream::KIND_FILE:
+			case IStream::KIND_FILE:
 				assert(file_valid(self->file) && "Invalid file");
 				result = file_read(self->file, data);
 				break;
 
-			case Internal_Stream::KIND_MEMORY:
+			case IStream::KIND_MEMORY:
 				result = memory_stream_read(self->memory, data);
 				break;
 
-			case Internal_Stream::KIND_NONE:
+			case IStream::KIND_NONE:
 			default:
 				assert(false &&
 					   "Invalid stream type");
@@ -185,23 +182,22 @@ namespace mn
 	}
 
 	int64_t
-	stream_size(Stream stream)
+	stream_size(Stream self)
 	{
-		Internal_Stream* self = (Internal_Stream*)stream;
 		int64_t result = 0;
 
 		switch (self->kind)
 		{
-			case Internal_Stream::KIND_FILE:
+			case IStream::KIND_FILE:
 				assert(file_valid(self->file) && "Invalid file");
 				result = file_size(self->file);
 				break;
 
-			case Internal_Stream::KIND_MEMORY:
+			case IStream::KIND_MEMORY:
 				result = memory_stream_size(self->memory);
 				break;
 
-			case Internal_Stream::KIND_NONE:
+			case IStream::KIND_NONE:
 			default:
 				assert(false &&
 					   "Invalid stream type");
@@ -211,23 +207,22 @@ namespace mn
 	}
 
 	int64_t
-	stream_cursor_pos(Stream stream)
+	stream_cursor_pos(Stream self)
 	{
-		Internal_Stream* self = (Internal_Stream*)stream;
 		int64_t result = 0;
 
 		switch (self->kind)
 		{
-			case Internal_Stream::KIND_FILE:
+			case IStream::KIND_FILE:
 				assert(file_valid(self->file) && "Invalid file");
 				result = file_cursor_pos(self->file);
 				break;
 
-			case Internal_Stream::KIND_MEMORY:
+			case IStream::KIND_MEMORY:
 				result = memory_stream_cursor_pos(self->memory);
 				break;
 
-			case Internal_Stream::KIND_NONE:
+			case IStream::KIND_NONE:
 			default:
 				assert(false &&
 					   "Invalid stream type");
@@ -237,24 +232,23 @@ namespace mn
 	}
 
 	void
-	stream_cursor_move(Stream stream, int64_t offset)
+	stream_cursor_move(Stream self, int64_t offset)
 	{
-		Internal_Stream* self = (Internal_Stream*)stream;
 		bool res = false;
 		UNUSED(res);
 		switch (self->kind)
 		{
-			case Internal_Stream::KIND_FILE:
+			case IStream::KIND_FILE:
 				assert(file_valid(self->file) && "Invalid file");
 				res = file_cursor_move(self->file, offset);
 				assert(res == true && "File cursor move failed");
 				break;
 
-			case Internal_Stream::KIND_MEMORY:
+			case IStream::KIND_MEMORY:
 				memory_stream_cursor_move(self->memory, offset);
 				break;
 
-			case Internal_Stream::KIND_NONE:
+			case IStream::KIND_NONE:
 			default:
 				assert(false &&
 					   "Invalid stream type");
@@ -263,24 +257,23 @@ namespace mn
 	}
 
 	void
-	stream_cursor_move_to_start(Stream stream)
+	stream_cursor_move_to_start(Stream self)
 	{
-		Internal_Stream* self = (Internal_Stream*)stream;
 		bool res = false;
 		UNUSED(res);
 		switch (self->kind)
 		{
-			case Internal_Stream::KIND_FILE:
+			case IStream::KIND_FILE:
 				assert(file_valid(self->file) && "Invalid file");
 				res = file_cursor_move_to_start(self->file);
 				assert(res == true && "File cursor move failed");
 				break;
 
-			case Internal_Stream::KIND_MEMORY:
+			case IStream::KIND_MEMORY:
 				memory_stream_cursor_to_start(self->memory);
 				break;
 
-			case Internal_Stream::KIND_NONE:
+			case IStream::KIND_NONE:
 			default:
 				assert(false &&
 					   "Invalid stream type");
@@ -289,24 +282,23 @@ namespace mn
 	}
 
 	void
-	stream_cursor_move_to_end(Stream stream)
+	stream_cursor_move_to_end(Stream self)
 	{
-		Internal_Stream* self = (Internal_Stream*)stream;
 		bool res = false;
 		UNUSED(res);
 		switch (self->kind)
 		{
-			case Internal_Stream::KIND_FILE:
+			case IStream::KIND_FILE:
 				assert(file_valid(self->file) && "Invalid file");
 				res = file_cursor_move_to_end(self->file);
 				assert(res == true && "File cursor move failed");
 				break;
 
-			case Internal_Stream::KIND_MEMORY:
+			case IStream::KIND_MEMORY:
 				memory_stream_cursor_to_end(self->memory);
 				break;
 
-			case Internal_Stream::KIND_NONE:
+			case IStream::KIND_NONE:
 			default:
 				assert(false &&
 					   "Invalid stream type");
@@ -315,11 +307,9 @@ namespace mn
 	}
 
 	const char*
-	stream_str(Stream stream)
+	stream_str(Stream self)
 	{
-		Internal_Stream* self = (Internal_Stream*)stream;
-
-		assert(self->kind == Internal_Stream::KIND_MEMORY && "stream_str is only supported in memory streams");
+		assert(self->kind == IStream::KIND_MEMORY && "stream_str is only supported in memory streams");
 		//set the byte at the cursor
 		if(size_t(self->memory.cursor) == self->memory.str.count)
 			buf_push(self->memory.str, '\0');

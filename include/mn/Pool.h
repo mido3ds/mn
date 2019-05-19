@@ -10,7 +10,7 @@ namespace mn
 	/**
 	 * Pool handle
 	 */
-	MS_HANDLE(Pool);
+	typedef struct IPool* Pool;
 
 	/**
 	 * @brief      Creates a new memory pool

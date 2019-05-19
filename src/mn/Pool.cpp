@@ -3,7 +3,7 @@
 
 namespace mn
 {
-	struct Internal_Pool
+	struct IPool
 	{
 		Allocator meta_allocator;
 		Allocator arena;
@@ -14,7 +14,7 @@ namespace mn
 	Pool
 	pool_new(size_t element_size, size_t bucket_size, Allocator meta_allocator)
 	{
-		Internal_Pool* self = alloc_from<Internal_Pool>(meta_allocator);
+		Pool self = alloc_from<IPool>(meta_allocator);
 
 		if(element_size < sizeof(void*))
 			element_size = sizeof(void*);
@@ -23,23 +23,19 @@ namespace mn
 		self->arena = allocator_arena_new(element_size * bucket_size, meta_allocator);
 		self->head = nullptr;
 		self->element_size = element_size;
-		return (Pool)self;
+		return self;
 	}
 
 	void
-	pool_free(Pool pool)
+	pool_free(Pool self)
 	{
-		Internal_Pool* self = (Internal_Pool*)pool;
-
 		allocator_free(self->arena);
 		free_from(self->meta_allocator, self);
 	}
 
 	void*
-	pool_get(Pool pool)
+	pool_get(Pool self)
 	{
-		Internal_Pool* self = (Internal_Pool*)pool;
-
 		if(self->head != nullptr)
 		{
 			void* result = self->head;
@@ -51,10 +47,8 @@ namespace mn
 	}
 
 	void
-	pool_put(Pool pool, void* ptr)
+	pool_put(Pool self, void* ptr)
 	{
-		Internal_Pool* self = (Internal_Pool*)pool;
-
 		size_t* sptr = (size_t*)ptr;
 		*sptr = (size_t)self->head;
 		self->head = ptr;

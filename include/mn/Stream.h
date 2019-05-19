@@ -10,7 +10,7 @@ namespace mn
 	/**
 	 * Stream handle
 	 */
-	MS_HANDLE(Stream);
+	typedef struct IStream* Stream;
 
 	/**
 	 * @brief      Returns a stream of the standard output

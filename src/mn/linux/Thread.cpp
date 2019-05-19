@@ -40,36 +40,33 @@ namespace mn
 	Mutex
 	mutex_new(const char* name)
 	{
-		IMutex* self = alloc<IMutex>();
+		Mutex self = alloc<IMutex>();
 		self->name = name;
 		int result = pthread_mutex_init(&self->handle, NULL);
 		assert(result == 0);
 		UNUSED(result);
-		return (Mutex)self;
+		return self;
 	}
 
 	void
-	mutex_lock(Mutex mutex)
+	mutex_lock(Mutex self)
 	{
-		IMutex* self = (IMutex*)mutex;
 		int result = pthread_mutex_lock(&self->handle);
 		assert(result == 0);
 		UNUSED(result);
 	}
 
 	void
-	mutex_unlock(Mutex mutex)
+	mutex_unlock(Mutex self)
 	{
-		IMutex* self = (IMutex*)mutex;
 		int result = pthread_mutex_unlock(&self->handle);
 		assert(result == 0);
 		UNUSED(result);
 	}
 
 	void
-	mutex_free(Mutex mutex)
+	mutex_free(Mutex self)
 	{
-		IMutex* self = (IMutex*)mutex;
 		int result = pthread_mutex_destroy(&self->handle);
 		assert(result == 0);
 		UNUSED(result);
@@ -87,45 +84,40 @@ namespace mn
 	Mutex_RW
 	mutex_rw_new(const char* name)
 	{
-		IMutex_RW* self = alloc<IMutex_RW>();
+		Mutex_RW self = alloc<IMutex_RW>();
 		pthread_rwlock_init(&self->lock, NULL);
 		self->name = name;
-		return (Mutex_RW)self;
+		return self;
 	}
 
 	void
-	mutex_rw_free(Mutex_RW mutex)
+	mutex_rw_free(Mutex_RW self)
 	{
-		IMutex_RW* self = (IMutex_RW*)mutex;
 		pthread_rwlock_destroy(&self->lock);
 		free(self);
 	}
 
 	void
-	mutex_read_lock(Mutex_RW mutex)
+	mutex_read_lock(Mutex_RW self)
 	{
-		IMutex_RW* self = (IMutex_RW*)mutex;
 		pthread_rwlock_rdlock(&self->lock);
 	}
 
 	void
-	mutex_read_unlock(Mutex_RW mutex)
+	mutex_read_unlock(Mutex_RW self)
 	{
-		IMutex_RW* self = (IMutex_RW*)mutex;
 		pthread_rwlock_unlock(&self->lock);
 	}
 
 	void
-	mutex_write_lock(Mutex_RW mutex)
+	mutex_write_lock(Mutex_RW self)
 	{
-		IMutex_RW* self = (IMutex_RW*)mutex;
 		pthread_rwlock_wrlock(&self->lock);
 	}
 
 	void
-	mutex_write_unlock(Mutex_RW mutex)
+	mutex_write_unlock(Mutex_RW self)
 	{
-		IMutex_RW* self = (IMutex_RW*)mutex;
 		pthread_rwlock_unlock(&self->lock);
 	}
 
@@ -142,7 +134,7 @@ namespace mn
 	void*
 	_thread_start(void* user_data)
 	{
-		IThread* self = (IThread*)user_data;
+		Thread self = (Thread)user_data;
 		if(self->func)
 			self->func(self->user_data);
 		return 0;
@@ -151,27 +143,25 @@ namespace mn
 	Thread
 	thread_new(Thread_Func func, void* arg, const char* name)
 	{
-		IThread* self = alloc<IThread>();
+		Thread self = alloc<IThread>();
 		self->func = func;
 		self->user_data = arg;
 		self->name = name;
 		int result = pthread_create(&self->handle, NULL, _thread_start, self);
 		assert(result == 0 && "pthread_create failed");
 		UNUSED(result);
-		return (Thread)self;
+		return self;
 	}
 
 	void
-	thread_free(Thread thread)
+	thread_free(Thread self)
 	{
-		IThread* self = (IThread*)thread;
 		free(self);
 	}
 
 	void
-	thread_join(Thread thread)
+	thread_join(Thread self)
 	{
-		IThread* self = (IThread*)thread;
 		int result = pthread_join(self->handle, NULL);
 		assert(result == 0 && "pthread_join failed");
 		UNUSED(result);

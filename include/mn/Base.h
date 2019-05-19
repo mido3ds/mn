@@ -4,21 +4,6 @@
 
 #include <stddef.h>
 
-/**
- * @brief      Declares a handle which is a pointer to a generated empty structure
- * 			   `typedef struct NAME##__ { int unused; } *NAME;`
- *
- * @param      NAME  The Name of the handle
- */
-#define MS_HANDLE(NAME) typedef struct NAME##__ { int unused; } *NAME;
-
-/**
- * @brief      Forward declares a handle by name `typedef struct NAME##__ *NAME;`
- *
- * @param      NAME  The Name of the handle
- */
-#define MS_FWD_HANDLE(NAME) typedef struct NAME##__ *NAME;
-
 namespace mn
 {
 	/**

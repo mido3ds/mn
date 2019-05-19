@@ -10,7 +10,7 @@ namespace mn
 	/**
 	 * Mutex Handle
 	 */
-	MS_HANDLE(Mutex);
+	typedef struct IMutex* Mutex;
 
 	API_MN Mutex
 	_leak_allocator_mutex();
@@ -60,7 +60,7 @@ namespace mn
 
 
 	//Read preferring multi-reader single-writer mutex
-	MS_HANDLE(Mutex_RW);
+	typedef struct IMutex_RW* Mutex_RW;
 
 	/**
 	 * @brief      Creates a new multi-reader single-writer mutex
@@ -111,7 +111,7 @@ namespace mn
 
 
 	//Thread API
-	MS_HANDLE(Thread);
+	typedef struct IThread* Thread;
 
 	/**
 	 * Thread function
@@ -162,7 +162,7 @@ namespace mn
 		virtual bool should_wake() = 0;
 	};
 
-	MS_HANDLE(Limbo);
+	typedef struct ILimbo* Limbo;
 
 	API_MN Limbo
 	limbo_new(const char* name);

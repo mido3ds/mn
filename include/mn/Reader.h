@@ -11,8 +11,8 @@ namespace mn
 	 * A Reader is a form of buffered stream which is suitable for parsing
 	 * text/string input like the usage in function `reads`
 	 */
-	MS_HANDLE(Reader);
-	MS_FWD_HANDLE(Stream);
+	typedef struct IReader* Reader;
+	typedef struct IStream* Stream;
 
 	/**
 	 * @brief      Returns the reader of the standard input

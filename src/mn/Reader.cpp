@@ -5,23 +5,23 @@
 
 namespace mn
 {
-	struct Internal_Reader
+	struct IReader
 	{
 		Stream stream;
 		Memory_Stream buffer;
 	};
 	
-	TS_Typed_Pool<Internal_Reader>*
+	TS_Typed_Pool<IReader>*
 	_reader_pool()
 	{
-		static TS_Typed_Pool<Internal_Reader> _pool(1024, memory::clib());
+		static TS_Typed_Pool<IReader> _pool(1024, memory::clib());
 		return &_pool;
 	}
 
-	Internal_Reader
+	IReader
 	_reader_stdin()
 	{
-		Internal_Reader self{};
+		IReader self{};
 		self.stream = stream_stdin();
 		self.buffer = memory_stream_new();
 		return self;
@@ -30,13 +30,13 @@ namespace mn
 	Reader
 	reader_stdin()
 	{
-		static Internal_Reader _stdin = _reader_stdin();
-		return (Reader)&_stdin;
+		static IReader _stdin = _reader_stdin();
+		return &_stdin;
 	}
 
 	struct Reader_Tmp_Wrapper
 	{
-		Internal_Reader self;
+		IReader self;
 
 		Reader_Tmp_Wrapper()
 		{
@@ -54,48 +54,45 @@ namespace mn
 	_reader_tmp()
 	{
 		thread_local Reader_Tmp_Wrapper _reader;
-		return (Reader)&_reader.self;
+		return &_reader.self;
 	}
 
 	Reader
 	reader_new(Stream stream)
 	{
-		Internal_Reader* self = _reader_pool()->get();
+		Reader self = _reader_pool()->get();
 		self->stream = stream;
 		self->buffer = memory_stream_new();
-		return (Reader)self;
+		return self;
 	}
 
 	Reader
 	reader_str(const Str& str)
 	{
-		Internal_Reader* self = _reader_pool()->get();
+		Reader self = _reader_pool()->get();
 		self->stream = nullptr;
 		self->buffer = memory_stream_new();
 		memory_stream_write(self->buffer, Block{ str.ptr, str.count });
 		memory_stream_cursor_to_start(self->buffer);
-		return (Reader)self;
+		return self;
 	}
 
 	Reader
-	reader_wrap_str(Reader reader, const Str& str)
+	reader_wrap_str(Reader self, const Str& str)
 	{
-		if(reader == nullptr)
+		if(self == nullptr)
 			return reader_str(str);
 
-		Internal_Reader* self = (Internal_Reader*)reader;
 		assert(self->stream == nullptr);
 		memory_stream_clear(self->buffer);
 		memory_stream_write(self->buffer, Block { str.ptr, str.count });
 		memory_stream_cursor_to_start(self->buffer);
-		return reader;
+		return self;
 	}
 
 	void
-	reader_free(Reader reader)
+	reader_free(Reader self)
 	{
-		Internal_Reader* self = (Internal_Reader*)reader;
-
 		memory_stream_free(self->buffer);
 		if(self->stream)
 			stream_free(self->stream);
@@ -104,10 +101,8 @@ namespace mn
 	}
 
 	Block
-	reader_peek(Reader reader, size_t size)
+	reader_peek(Reader self, size_t size)
 	{
-		Internal_Reader* self = (Internal_Reader*)reader;
-
 		//get the available data in the buffer
 		size_t available_size = self->buffer.str.count - self->buffer.cursor;
 
@@ -129,10 +124,8 @@ namespace mn
 	}
 
 	size_t
-	reader_skip(Reader reader, size_t size)
+	reader_skip(Reader self, size_t size)
 	{
-		Internal_Reader* self = (Internal_Reader*)reader;
-
 		//get the available data in the buffer
 		size_t available_size = self->buffer.str.count - self->buffer.cursor;
 
@@ -144,10 +137,8 @@ namespace mn
 	}
 
 	size_t
-	reader_read(Reader reader, Block data)
+	reader_read(Reader self, Block data)
 	{
-		Internal_Reader* self = (Internal_Reader*)reader;
-
 		//empty request
 		if(data.size == 0)
 			return 0;
