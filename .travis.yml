@@ -26,10 +26,12 @@ matrix:
       script:
         - export CC=gcc-7
         - export CXX=g++-7
-        - cd projects/gmake && make -j 4 config=debug_shared
-        - cd projects/gmake && make -j 4 config=release_shared
-        - cd projects/gmake && make -j 4 config=debug_static
-        - cd projects/gmake && make -j 4 config=release_static
+        - cd projects/gmake
+        - make -j 4 config=debug_shared
+        - make -j 4 config=release_shared
+        - make -j 4 config=debug_static
+        - make -j 4 config=release_static
+        - cd ../../
         - ./bin/shared/debug/unittest
         - ./bin/shared/release/unittest
         - ./bin/static/debug/unittest
