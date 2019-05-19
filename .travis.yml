@@ -18,10 +18,10 @@ matrix:
       dist: trusty
       sudo: false
       script:
-        - make -f projects/gmake/Makefile -j 4 config=debug_shared
-        - make -f projects/gmake/Makefile -j 4 config=release_shared
-        - make -f projects/gmake/Makefile -j 4 config=debug_static
-        - make -f projects/gmake/Makefile -j 4 config=release_static
+        - cd projects/gmake && make -j 4 config=debug_shared
+        - cd projects/gmake && make -j 4 config=release_shared
+        - cd projects/gmake && make -j 4 config=debug_static
+        - cd projects/gmake && make -j 4 config=release_static
         - ./bin/shared/debug/unittest
         - ./bin/shared/release/unittest
         - ./bin/static/debug/unittest
