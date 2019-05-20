@@ -21,6 +21,7 @@ forge/generated/*
 !projects/**/*.vcxproj
 !projects/**/*.vcxproj.filters
 !projects/**/Makefile
+compile_commands.json
 
 # User-specific files
 *.suo
