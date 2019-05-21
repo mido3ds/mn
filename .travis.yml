@@ -4,35 +4,32 @@ matrix:
     - name: "Windows VS2017"
       os: windows
       script:
-        - cmd.exe /C '"C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC\Auxiliary\Build\vcvarsall.bat" amd64 && msbuild.exe projects/vs2017/mn.sln /p:Configuration=debug;Platform=shared'
-        - cmd.exe /C '"C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC\Auxiliary\Build\vcvarsall.bat" amd64 && msbuild.exe projects/vs2017/mn.sln /p:Configuration=release;Platform=shared'
-        - cmd.exe /C '"C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC\Auxiliary\Build\vcvarsall.bat" amd64 && msbuild.exe projects/vs2017/mn.sln /p:Configuration=debug;Platform=static'
-        - cmd.exe /C '"C:\Program Files (x86)\Microsoft Visual Studio\2017\BuildTools\VC\Auxiliary\Build\vcvarsall.bat" amd64 && msbuild.exe projects/vs2017/mn.sln /p:Configuration=release;Platform=static'
-        - cmd.exe /C './bin/shared/debug/unittest.exe'
-        - cmd.exe /C './bin/shared/release/unittest.exe'
-        - cmd.exe /C './bin/static/debug/unittest.exe'
-        - cmd.exe /C './bin/static/release/unittest.exe'
+        - cmd.exe /C 'cmake . -G "Visual Studio 15 Win64" -B build -DBUILD_SHARED_LIBS=ON'
+        - cmd.exe /C 'cmake --build . --config Debug'
+        - cmd.exe /C 'cmake --build . --config Release'
+        - ./build/bin/debug/unittest.exe
+        - ./build/bin/release/unittest.exe
 
-    - name: "Linux gcc"
-      os: linux
-      dist: trusty
-      sudo: false
-      addons:
-        apt:
-          sources:
-            - ubuntu-toolchain-r-test
-          packages:
-            - g++-7
-      script:
-        - export CC=gcc-7
-        - export CXX=g++-7
-        - cd projects/gmake
-        - make -j 4 config=debug_shared
-        - make -j 4 config=release_shared
-        - make -j 4 config=debug_static
-        - make -j 4 config=release_static
-        - cd ../../
-        - ./bin/shared/debug/unittest
-        - ./bin/shared/release/unittest
-        - ./bin/static/debug/unittest
-        - ./bin/static/release/unittest
+    # - name: "Linux gcc"
+    #   os: linux
+    #   dist: trusty
+    #   sudo: false
+    #   addons:
+    #     apt:
+    #       sources:
+    #         - ubuntu-toolchain-r-test
+    #       packages:
+    #         - g++-7
+    #   script:
+    #     - export CC=gcc-7
+    #     - export CXX=g++-7
+    #     - cd projects/gmake
+    #     - make -j 4 config=debug_shared
+    #     - make -j 4 config=release_shared
+    #     - make -j 4 config=debug_static
+    #     - make -j 4 config=release_static
+    #     - cd ../../
+    #     - ./bin/shared/debug/unittest
+    #     - ./bin/shared/release/unittest
+    #     - ./bin/static/debug/unittest
+    #     - ./bin/static/release/unittest
