@@ -17,10 +17,10 @@ namespace mn
 	/**
 	 * @brief      Returns the reader of the standard input
 	 */
-	API_MN Reader
+	MN_EXPORT Reader
 	reader_stdin();
 
-	API_MN Reader
+	MN_EXPORT Reader
 	_reader_tmp();
 
 	/**
@@ -28,7 +28,7 @@ namespace mn
 	 *
 	 * @param[in]  stream  The stream
 	 */
-	API_MN Reader
+	MN_EXPORT Reader
 	reader_new(Stream stream);
 
 	/**
@@ -36,7 +36,7 @@ namespace mn
 	 *
 	 * @param[in]  str   The string
 	 */
-	API_MN Reader
+	MN_EXPORT Reader
 	reader_str(const Str& str);
 
 	/**
@@ -45,13 +45,13 @@ namespace mn
 	 * @param[in]  reader  The reader to edit (this is the returned value after it was edited)
 	 * @param[in]  str     The string to wrap
 	 */
-	API_MN Reader
+	MN_EXPORT Reader
 	reader_wrap_str(Reader reader, const Str& str);
 
 	/**
 	 * @brief      Frees the given reader
 	 */
-	API_MN void
+	MN_EXPORT void
 	reader_free(Reader reader);
 
 	/**
@@ -71,7 +71,7 @@ namespace mn
 	 *
 	 * @return     Memory Block of the peeked content
 	 */
-	API_MN Block
+	MN_EXPORT Block
 	reader_peek(Reader reader, size_t size);
 
 	/**
@@ -82,7 +82,7 @@ namespace mn
 	 *
 	 * @return     The skipped size in bytes
 	 */
-	API_MN size_t
+	MN_EXPORT size_t
 	reader_skip(Reader reader, size_t size);
 
 	/**
@@ -93,6 +93,6 @@ namespace mn
 	 *
 	 * @return     The read size in bytes
 	 */
-	API_MN size_t
+	MN_EXPORT size_t
 	reader_read(Reader reader, Block data);
 }

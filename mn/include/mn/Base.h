@@ -31,7 +31,7 @@ namespace mn
 	 *
 	 * @param[in]  block  The block to set
 	 */
-	API_MN void
+	MN_EXPORT void
 	block_zero(Block block);
 
 	/**
@@ -41,7 +41,7 @@ namespace mn
 	 *
 	 * @return     A Block enclosing the string without the null termination
 	 */
-	API_MN Block
+	MN_EXPORT Block
 	block_lit(const char* str);
 
 	/**

@@ -11,13 +11,13 @@ namespace mn::memory
 {
 	struct CLib : Interface
 	{
-		API_MN Block
+		MN_EXPORT Block
 		alloc(size_t size, uint8_t alignment) override;
 
-		API_MN void
+		MN_EXPORT void
 		free(Block block) override;
 	};
 
-	API_MN CLib*
+	MN_EXPORT CLib*
 	clib();
 }

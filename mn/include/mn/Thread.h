@@ -12,7 +12,7 @@ namespace mn
 	 */
 	typedef struct IMutex* Mutex;
 
-	API_MN Mutex
+	MN_EXPORT Mutex
 	_leak_allocator_mutex();
 
 	/**
@@ -20,7 +20,7 @@ namespace mn
 	 *
 	 * @param[in]  name  The mutex name
 	 */
-	API_MN Mutex
+	MN_EXPORT Mutex
 	mutex_new(const char* name = "Mutex");
 
 	/**
@@ -28,7 +28,7 @@ namespace mn
 	 *
 	 * @param[in]  mutex  The mutex
 	 */
-	API_MN void
+	MN_EXPORT void
 	mutex_lock(Mutex mutex);
 
 	/**
@@ -36,7 +36,7 @@ namespace mn
 	 *
 	 * @param[in]  mutex  The mutex
 	 */
-	API_MN void
+	MN_EXPORT void
 	mutex_unlock(Mutex mutex);
 
 	/**
@@ -44,7 +44,7 @@ namespace mn
 	 *
 	 * @param[in]  mutex  The mutex
 	 */
-	API_MN void
+	MN_EXPORT void
 	mutex_free(Mutex mutex);
 
 	/**
@@ -67,13 +67,13 @@ namespace mn
 	 *
 	 * @param[in]  name  The mutex name
 	 */
-	API_MN Mutex_RW
+	MN_EXPORT Mutex_RW
 	mutex_rw_new(const char* name = "Mutex_RW");
 
 	/**
 	 * @brief      Frees the mutex
 	 */
-	API_MN void
+	MN_EXPORT void
 	mutex_rw_free(Mutex_RW mutex);
 
 	/**
@@ -88,25 +88,25 @@ namespace mn
 	/**
 	 * @brief      Locks the mutex for a read operation
 	 */
-	API_MN void
+	MN_EXPORT void
 	mutex_read_lock(Mutex_RW mutex);
 
 	/**
 	 * @brief      Unlocks the mutex from a read operation
 	 */
-	API_MN void
+	MN_EXPORT void
 	mutex_read_unlock(Mutex_RW mutex);
 
 	/**
 	 * @brief      Locks the mutex for a write operation
 	 */
-	API_MN void
+	MN_EXPORT void
 	mutex_write_lock(Mutex_RW mutex);
 
 	/**
 	 * @brief      Unlocks the mutex from a write operation
 	 */
-	API_MN void
+	MN_EXPORT void
 	mutex_write_unlock(Mutex_RW mutex);
 
 
@@ -125,13 +125,13 @@ namespace mn
 	 * @param      arg   The argument to pass to the function
 	 * @param[in]  name  The name of the thread
 	 */
-	API_MN Thread
+	MN_EXPORT Thread
 	thread_new(Thread_Func func, void* arg, const char* name = "Thread");
 
 	/**
 	 * @brief      Frees the thread
 	 */
-	API_MN void
+	MN_EXPORT void
 	thread_free(Thread thread);
 
 	/**
@@ -146,13 +146,13 @@ namespace mn
 	/**
 	 * @brief      joins the execution of the calling thread with the given thread
 	 */
-	API_MN void
+	MN_EXPORT void
 	thread_join(Thread thread);
 
 	/**
 	 * @brief      sleeps the calling thread by the given milliseconds
 	 */
-	API_MN void
+	MN_EXPORT void
 	thread_sleep(uint32_t milliseconds);
 
 
@@ -164,22 +164,22 @@ namespace mn
 
 	typedef struct ILimbo* Limbo;
 
-	API_MN Limbo
+	MN_EXPORT Limbo
 	limbo_new(const char* name);
 
-	API_MN void
+	MN_EXPORT void
 	limbo_free(Limbo limbo);
 
 	//wait for the predicate to be true
-	API_MN void
+	MN_EXPORT void
 	limbo_lock(Limbo limbo, Limbo_Predicate* pred);
 
 	//leaves the limbo + notify one combo
-	API_MN void
+	MN_EXPORT void
 	limbo_unlock_one(Limbo limbo);
 
 	//leaves the limbo + notify all combo
-	API_MN void
+	MN_EXPORT void
 	limbo_unlock_all(Limbo limbo);
 
 	template<typename T>

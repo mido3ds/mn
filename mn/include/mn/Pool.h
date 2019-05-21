@@ -21,7 +21,7 @@ namespace mn
 	 * @param[in]  bucket_size     The bucket size (in elements count)
 	 * @param[in]  meta_allocator  The meta allocator for the pool to allocator from
 	 */
-	API_MN Pool
+	MN_EXPORT Pool
 	pool_new(size_t element_size, size_t bucket_size, Allocator meta_allocator = allocator_top());
 
 	/**
@@ -29,7 +29,7 @@ namespace mn
 	 *
 	 * @param[in]  pool  The pool
 	 */
-	API_MN void
+	MN_EXPORT void
 	pool_free(Pool pool);
 
 	/**
@@ -48,7 +48,7 @@ namespace mn
 	 *
 	 * @param[in]  pool  The pool
 	 */
-	API_MN void*
+	MN_EXPORT void*
 	pool_get(Pool pool);
 
 	/**
@@ -57,7 +57,7 @@ namespace mn
 	 * @param[in]  pool  The pool
 	 * @param      ptr   The pointer to memory
 	 */
-	API_MN void
+	MN_EXPORT void
 	pool_put(Pool pool, void* ptr);
 
 

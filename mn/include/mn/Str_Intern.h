@@ -74,7 +74,7 @@ namespace mn
 	 * @param      self  The str_intern
 	 * @param[in]  str   The C string
 	 */
-	API_MN const char*
+	MN_EXPORT const char*
 	str_intern(Str_Intern& self, const char* str);
 
 	/**
@@ -83,7 +83,7 @@ namespace mn
 	 * @param      self  The str_intern
 	 * @param[in]  str   The string
 	 */
-	API_MN const char*
+	MN_EXPORT const char*
 	str_intern(Str_Intern& self, const Str& str);
 
 	/**
@@ -92,6 +92,6 @@ namespace mn
 	 * @param      self  The str_intern
 	 * @param[in]  str   The C sub-string
 	 */
-	API_MN const char*
+	MN_EXPORT const char*
 	str_intern(Str_Intern& self, const char* begin, const char* end);
 }
