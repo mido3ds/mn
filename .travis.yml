@@ -9,8 +9,8 @@ matrix:
         - cmake .. -G "Visual Studio 15 Win64" -DBUILD_SHARED_LIBS=ON
         - cmake --build . --config Debug
         - cmake --build . --config Release
-        - ./build/bin/debug/unittest.exe
-        - ./build/bin/release/unittest.exe
+        - ./bin/Debug/unittest.exe
+        - ./bin/Release/unittest.exe
 
     # - name: "Linux gcc"
     #   os: linux
