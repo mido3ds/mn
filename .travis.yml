@@ -4,9 +4,11 @@ matrix:
     - name: "Windows VS2017"
       os: windows
       script:
-        - cmd.exe /C 'cmake . -G "Visual Studio 15 Win64" -B build -DBUILD_SHARED_LIBS=ON'
-        - cmd.exe /C 'cmake --build . --config Debug'
-        - cmd.exe /C 'cmake --build . --config Release'
+        - mkdir build
+        - cd build
+        - cmake .. -G "Visual Studio 15 Win64" -DBUILD_SHARED_LIBS=ON
+        - cmake --build . --config Debug
+        - cmake --build . --config Release
         - ./build/bin/debug/unittest.exe
         - ./build/bin/release/unittest.exe
 
