@@ -12,26 +12,23 @@ matrix:
         - ./bin/Debug/unittest.exe
         - ./bin/Release/unittest.exe
 
-    # - name: "Linux gcc"
-    #   os: linux
-    #   dist: trusty
-    #   sudo: false
-    #   addons:
-    #     apt:
-    #       sources:
-    #         - ubuntu-toolchain-r-test
-    #       packages:
-    #         - g++-7
-    #   script:
-    #     - export CC=gcc-7
-    #     - export CXX=g++-7
-    #     - cd projects/gmake
-    #     - make -j 4 config=debug_shared
-    #     - make -j 4 config=release_shared
-    #     - make -j 4 config=debug_static
-    #     - make -j 4 config=release_static
-    #     - cd ../../
-    #     - ./bin/shared/debug/unittest
-    #     - ./bin/shared/release/unittest
-    #     - ./bin/static/debug/unittest
-    #     - ./bin/static/release/unittest
+    - name: "Linux gcc"
+      os: linux
+      dist: trusty
+      sudo: false
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-7
+      script:
+        - export CC=gcc-7
+        - export CXX=g++-7
+        - mkdir build
+        - cd build
+        - cmake .. -DBUILD_SHARED_LIBS=ON
+        - cmake --build . --config Debug
+        - cmake --build . --config Release
+        - ./bin/Debug/unittest.exe
+        - ./bin/Release/unittest.exe
