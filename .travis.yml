@@ -25,10 +25,12 @@ matrix:
       script:
         - export CC=gcc-7
         - export CXX=g++-7
-        - mkdir build
-        - cd build
-        - cmake .. -DBUILD_SHARED_LIBS=ON
-        - cmake --build . --config Debug
-        - cmake --build . --config Release
-        - ./bin/Debug/unittest.exe
-        - ./bin/Release/unittest.exe
+        - mkdir Debug
+        - cd Debug
+        - cmake .. -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=Debug
+        - ./bin/unittest.exe
+        - cd ..
+        - mkdir Release
+        - cd Release
+        - cmake .. -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=Release
+        - ./bin/unittest.exe

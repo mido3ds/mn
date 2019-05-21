@@ -55,7 +55,7 @@ if(WIN32)
 		src/mn/winos/Thread.cpp
 		src/mn/winos/Virtual_Memory.cpp
 	)
-elseif(LINUX)
+elseif(UNIX)
 	set(SOURCE_FILES ${SOURCE_FILES} 
 		src/mn/linux/Debug.cpp
 		src/mn/linux/File.cpp
@@ -89,8 +89,22 @@ if(WIN32)
 		PRIVATE
 			UNICODE=1
 			_UNICODE=1
+			OS_WINDOWS=1
 	)
-endif(WIN32)
+	target_link_libraries(mn
+		PRIVATE
+			dbghelp
+	)
+elseif(UNIX)
+	target_link_libraries(mn
+		PRIVATE
+			pthread
+	)
+	target_compile_definitions(mn
+		PRIVATE
+			OS_LINUX=1
+	)
+endif()
 
 
 # enable C++17
@@ -101,6 +115,9 @@ set_target_properties(mn PROPERTIES
 	CXX_EXTENSIONS OFF
 	DEBUG_POSTFIX d
 )
+
+# define debug macro
+target_compile_definitions(mn PRIVATE "$<$<CONFIG:DEBUG>:DEBUG>")
 
 # generate exports header file
 include(GenerateExportHeader)
