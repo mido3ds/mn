@@ -1,18 +1,18 @@
 
-#ifndef API_MN_H
-#define API_MN_H
+#ifndef MN_EXPORT_H
+#define MN_EXPORT_H
 
 #ifdef MN_STATIC_DEFINE
-#  define API_MN
+#  define MN_EXPORT
 #  define MN_NO_EXPORT
 #else
-#  ifndef API_MN
+#  ifndef MN_EXPORT
 #    ifdef mn_EXPORTS
         /* We are building this library */
-#      define API_MN __declspec(dllexport)
+#      define MN_EXPORT __declspec(dllexport)
 #    else
         /* We are using this library */
-#      define API_MN __declspec(dllimport)
+#      define MN_EXPORT __declspec(dllimport)
 #    endif
 #  endif
 
@@ -26,7 +26,7 @@
 #endif
 
 #ifndef MN_DEPRECATED_EXPORT
-#  define MN_DEPRECATED_EXPORT API_MN MN_DEPRECATED
+#  define MN_DEPRECATED_EXPORT MN_EXPORT MN_DEPRECATED
 #endif
 
 #ifndef MN_DEPRECATED_NO_EXPORT
@@ -39,4 +39,4 @@
 #  endif
 #endif
 
-#endif /* API_MN_H */
+#endif /* MN_EXPORT_H */

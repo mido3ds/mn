@@ -11,7 +11,7 @@ namespace mn
 	 * @param      address_hint  The address hint for the allocator to put the allocated memory at
 	 * @param[in]  size          The size(in bytes)
 	 */
-	API_MN Block
+	MN_EXPORT Block
 	virtual_alloc(void* address_hint, size_t size);
 
 	/**
@@ -19,6 +19,6 @@ namespace mn
 	 *
 	 * @param[in]  block  The block
 	 */
-	API_MN void
+	MN_EXPORT void
 	virtual_free(Block block);
 }

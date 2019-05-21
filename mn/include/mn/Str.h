@@ -19,7 +19,7 @@ namespace mn
 	/**
 	 * @brief      Returns a new string
 	 */
-	API_MN Str
+	MN_EXPORT Str
 	str_new();
 
 	/**
@@ -27,7 +27,7 @@ namespace mn
 	 *
 	 * @param[in]  allocator  The allocator to be used by the string
 	 */
-	API_MN Str
+	MN_EXPORT Str
 	str_with_allocator(Allocator allocator);
 
 	/**
@@ -37,7 +37,7 @@ namespace mn
 	 * @param[in]  str        The C string
 	 * @param[in]  allocator  The allocator
 	 */
-	API_MN Str
+	MN_EXPORT Str
 	str_from_c(const char* str, Allocator allocator = allocator_top());
 
 	/**
@@ -48,7 +48,7 @@ namespace mn
 	 * @param[in]  end        The end
 	 * @param[in]  allocator  The allocator
 	 */
-	API_MN Str
+	MN_EXPORT Str
 	str_from_substr(const char* begin, const char* end, Allocator allocator = allocator_top());
 
 	/**
@@ -56,13 +56,13 @@ namespace mn
 	 *
 	 * @param[in]  lit   The C string literal
 	 */
-	API_MN Str
+	MN_EXPORT Str
 	str_lit(const char* lit);
 
 	/**
 	 * @brief      Frees the string
 	 */
-	API_MN void
+	MN_EXPORT void
 	str_free(Str& self);
 
 	/**
@@ -81,7 +81,7 @@ namespace mn
 	 *
 	 * @param[in]  str   The string
 	 */
-	API_MN size_t
+	MN_EXPORT size_t
 	rune_count(const char* str);
 
 	/**
@@ -155,7 +155,7 @@ namespace mn
 	 * @param      self  The first string
 	 * @param[in]  str   The second string literal
 	 */
-	API_MN void
+	MN_EXPORT void
 	str_push(Str& self, const char* str);
 
 	/**
@@ -176,7 +176,7 @@ namespace mn
 	 * @param      self   The string
 	 * @param[in]  block  The block
 	 */
-	API_MN void
+	MN_EXPORT void
 	str_block_push(Str& self, Block block);
 
 	/**
@@ -207,7 +207,7 @@ namespace mn
 	 *
 	 * @param      self  The string
 	 */
-	API_MN void
+	MN_EXPORT void
 	str_null_terminate(Str& self);
 
 	/**
@@ -219,7 +219,7 @@ namespace mn
 	 *
 	 * @return     index of the found target or size_t(-1) instead
 	 */
-	API_MN size_t
+	MN_EXPORT size_t
 	str_find(const Str& self, const Str& target, size_t start);
 
 	/**
@@ -275,7 +275,7 @@ namespace mn
 	 * @param[in]  skip_empty  determines whether we shouldn't return empty strings or not
 	 * @param[in]  allocator   The allocator [optional] default is the tmp allocator
 	 */
-	API_MN Buf<Str>
+	MN_EXPORT Buf<Str>
 	str_split(const Str& self, const Str& delim, bool skip_empty, Allocator allocator = memory::tmp());
 
 	/**
@@ -326,7 +326,7 @@ namespace mn
 	 * @param[in]  self    The string
 	 * @param[in]  prefix  The prefix
 	 */
-	API_MN bool
+	MN_EXPORT bool
 	str_prefix(const Str& self, const Str& prefix);
 
 	/**
@@ -371,7 +371,7 @@ namespace mn
 	 * @param[in]  self    The string
 	 * @param[in]  suffix  The suffix
 	 */
-	API_MN bool
+	MN_EXPORT bool
 	str_suffix(const Str& self, const Str& suffix);
 
 	/**
@@ -416,7 +416,7 @@ namespace mn
 	 * @param      self  The string
 	 * @param[in]  size  The size
 	 */
-	API_MN void
+	MN_EXPORT void
 	str_resize(Str& self, size_t size);
 
 	/**
@@ -424,7 +424,7 @@ namespace mn
 	 *
 	 * @param      self  The string
 	 */
-	API_MN void
+	MN_EXPORT void
 	str_clear(Str& self);
 
 	/**
@@ -435,7 +435,7 @@ namespace mn
 	 *
 	 * @return     The newly cloned string
 	 */
-	API_MN Str
+	MN_EXPORT Str
 	str_clone(const Str& other, Allocator allocator = allocator_top());
 
 	/**

@@ -20,7 +20,7 @@ namespace mn
 	 * @param[in]  allocator  The allocator to be used (optional by default will take
 	 * whatever on top of the allocator stack)
 	 */
-	API_MN Memory_Stream
+	MN_EXPORT Memory_Stream
 	memory_stream_new(Allocator allocator = allocator_top());
 
 	/**
@@ -28,7 +28,7 @@ namespace mn
 	 *
 	 * @param      self  The memory stream
 	 */
-	API_MN void
+	MN_EXPORT void
 	memory_stream_free(Memory_Stream& self);
 
 	/**
@@ -50,7 +50,7 @@ namespace mn
 	 *
 	 * @return     The size of the written data in bytes
 	 */
-	API_MN size_t
+	MN_EXPORT size_t
 	memory_stream_write(Memory_Stream& self, Block data);
 
 	/**
@@ -61,7 +61,7 @@ namespace mn
 	 *
 	 * @return     The size of the read data in bytes
 	 */
-	API_MN size_t
+	MN_EXPORT size_t
 	memory_stream_read(Memory_Stream& self, Block data);
 
 	/**
@@ -69,7 +69,7 @@ namespace mn
 	 *
 	 * @param      self  The memory stream
 	 */
-	API_MN int64_t
+	MN_EXPORT int64_t
 	memory_stream_size(Memory_Stream& self);
 
 	/**
@@ -77,7 +77,7 @@ namespace mn
 	 *
 	 * @param      self  The memory stream
 	 */
-	API_MN int64_t
+	MN_EXPORT int64_t
 	memory_stream_cursor_pos(Memory_Stream& self);
 
 	/**
@@ -86,7 +86,7 @@ namespace mn
 	 * @param      self    The memory stream
 	 * @param[in]  offset  The offset
 	 */
-	API_MN void
+	MN_EXPORT void
 	memory_stream_cursor_move(Memory_Stream& self, int64_t offset);
 
 	/**
@@ -95,7 +95,7 @@ namespace mn
 	 * @param      self  The memory stream
 	 * @param[in]  abs   The absolute position
 	 */
-	API_MN void
+	MN_EXPORT void
 	memory_stream_cursor_set(Memory_Stream& self, int64_t abs);
 
 	/**
@@ -103,7 +103,7 @@ namespace mn
 	 *
 	 * @param      self  The memory stream
 	 */
-	API_MN void
+	MN_EXPORT void
 	memory_stream_cursor_to_start(Memory_Stream& self);
 
 	/**
@@ -111,7 +111,7 @@ namespace mn
 	 *
 	 * @param      self  The memory stream
 	 */
-	API_MN void
+	MN_EXPORT void
 	memory_stream_cursor_to_end(Memory_Stream& self);
 
 	/**
@@ -120,7 +120,7 @@ namespace mn
 	 * @param      self  The memory stream
 	 * @param[in]  size  The size (in bytes)
 	 */
-	API_MN void
+	MN_EXPORT void
 	memory_stream_reserve(Memory_Stream& self, size_t size);
 
 	/**
@@ -128,7 +128,7 @@ namespace mn
 	 *
 	 * @param      self  The memory stream
 	 */
-	API_MN size_t
+	MN_EXPORT size_t
 	memory_stream_capacity(Memory_Stream& self);
 
 	/**
@@ -136,7 +136,7 @@ namespace mn
 	 *
 	 * @param      self  The memory stream
 	 */
-	API_MN void
+	MN_EXPORT void
 	memory_stream_clear(Memory_Stream& self);
 
 	/**
@@ -147,7 +147,7 @@ namespace mn
 	 * @param      self  The memory stream
 	 * @param[in]  size  The size (in bytes)
 	 */
-	API_MN Block
+	MN_EXPORT Block
 	memory_stream_block_ahead(Memory_Stream& self, size_t size);
 
 	/**
@@ -158,6 +158,6 @@ namespace mn
 	 * @param      self  The memory stream
 	 * @param[in]  size  The size (in bytes)
 	 */
-	API_MN Block
+	MN_EXPORT Block
 	memory_stream_block_behind(Memory_Stream& self, size_t size);
 }

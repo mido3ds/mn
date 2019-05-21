@@ -24,19 +24,19 @@ namespace mn::memory
 		Node* head;
 		Mutex mtx;
 
-		API_MN
+		MN_EXPORT
 		Leak();
 
-		API_MN
+		MN_EXPORT
 		~Leak() override;
 
-		API_MN Block
+		MN_EXPORT Block
 		alloc(size_t size, uint8_t alignment) override;
 
-		API_MN void
+		MN_EXPORT void
 		free(Block block) override;
 	};
 
-	API_MN Leak*
+	MN_EXPORT Leak*
 	leak();
 }

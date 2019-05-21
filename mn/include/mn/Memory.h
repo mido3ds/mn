@@ -22,19 +22,19 @@ namespace mn
 	 *
 	 * @return     The current top of allocator stack of the calling thread
 	 */
-	API_MN Allocator
+	MN_EXPORT Allocator
 	allocator_top();
 
 	/**
 	 * @brief      Pushes the given allocator to the top of the calling thread allocator stack
 	 */
-	API_MN void
+	MN_EXPORT void
 	allocator_push(Allocator allocator);
 
 	/**
 	 * @brief      Pops an allocator off the calling thread allocator stack
 	 */
-	API_MN void
+	MN_EXPORT void
 	allocator_pop();
 
 

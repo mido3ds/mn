@@ -17,19 +17,19 @@ namespace mn::memory
 		uint8_t* alloc_head;
 		size_t allocations_count;
 
-		API_MN
+		MN_EXPORT
 		Stack(size_t stack_size, Interface* meta = clib());
 
-		API_MN
+		MN_EXPORT
 		~Stack() override;
 
-		API_MN Block
+		MN_EXPORT Block
 		alloc(size_t size, uint8_t alignment) override;
 
-		API_MN void
+		MN_EXPORT void
 		free(Block block) override;
 
-		API_MN void
+		MN_EXPORT void
 		free_all();
 	};
 }

@@ -13,13 +13,13 @@ namespace mn::memory
 	{
 		~Virtual() = default;
 
-		API_MN Block
+		MN_EXPORT Block
 		alloc(size_t size, uint8_t alignment) override;
 
-		API_MN void
+		MN_EXPORT void
 		free(Block block) override;
 	};
 
-	API_MN Virtual*
+	MN_EXPORT Virtual*
 	virtual_mem();
 }

@@ -87,16 +87,17 @@ add_library(MoustaphaSaad::mn ALIAS mn)
 if(WIN32)
 	target_compile_definitions(mn
 		PRIVATE
-		UNICODE=1
-		_UNICODE=1
+			UNICODE=1
+			_UNICODE=1
 	)
 endif(WIN32)
+
 
 # enable C++17
 # disable any compiler specifc extensions
 # add d suffix in debug mode
+target_compile_features(mn PUBLIC cxx_std_17)
 set_target_properties(mn PROPERTIES
-	CXX_STANDARD 17
 	CXX_EXTENSIONS OFF
 	DEBUG_POSTFIX d
 )
@@ -105,11 +106,19 @@ set_target_properties(mn PROPERTIES
 include(GenerateExportHeader)
 generate_export_header(mn
 	EXPORT_FILE_NAME ${CMAKE_CURRENT_SOURCE_DIR}/include/mn/Exports.h
-	EXPORT_MACRO_NAME API_MN
 )
 
 # list include directories
 target_include_directories(mn
 	PUBLIC
 	${CMAKE_CURRENT_SOURCE_DIR}/include
+)
+
+
+# output directory
+set_target_properties(mn
+	PROPERTIES
+	ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+	LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
+	RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
 )

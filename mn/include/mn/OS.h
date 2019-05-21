@@ -6,7 +6,7 @@
 
 namespace mn
 {
-	[[noreturn]] API_MN void
+	[[noreturn]] MN_EXPORT void
 	_panic(const char* cause);
 
 	/**

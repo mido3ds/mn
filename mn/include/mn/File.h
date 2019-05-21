@@ -13,7 +13,7 @@ namespace mn
 	 *
 	 * @return     A Block of memory containing the encoded string
 	 */
-	API_MN Block
+	MN_EXPORT Block
 	to_os_encoding(const Str& utf8);
 
 	/**
@@ -23,7 +23,7 @@ namespace mn
 	 *
 	 * @return     A Block of memory containing the encoded string
 	 */
-	API_MN Block
+	MN_EXPORT Block
 	to_os_encoding(const char* utf8);
 
 	/**
@@ -33,7 +33,7 @@ namespace mn
 	 *
 	 * @return     A String containing the encoded string
 	 */
-	API_MN Str
+	MN_EXPORT Str
 	from_os_encoding(Block os_str);
 
 
@@ -83,19 +83,19 @@ namespace mn
 	/**
 	 * @brief      Returns a file handle pointing to the standard output
 	 */
-	API_MN File
+	MN_EXPORT File
 	file_stdout();
 
 	/**
 	 * @brief      Returns a file handle pointing to the standard error
 	 */
-	API_MN File
+	MN_EXPORT File
 	file_stderr();
 
 	/**
 	 * @brief      Returns a file handle pointing to the standard input
 	 */
-	API_MN File
+	MN_EXPORT File
 	file_stdin();
 
 	/**
@@ -105,7 +105,7 @@ namespace mn
 	 * @param[in]  io_mode    The i/o mode
 	 * @param[in]  open_mode  The open mode
 	 */
-	API_MN File
+	MN_EXPORT File
 	file_open(const char* filename, IO_MODE io_mode, OPEN_MODE open_mode);
 
 	inline static File
@@ -117,13 +117,13 @@ namespace mn
 	/**
 	 * @brief      Closes a file
 	 */
-	API_MN bool
+	MN_EXPORT bool
 	file_close(File handle);
 
 	/**
 	 * @brief      Validates a file handle
 	 */
-	API_MN bool
+	MN_EXPORT bool
 	file_valid(File handle);
 
 	/**
@@ -134,7 +134,7 @@ namespace mn
 	 * 
 	 * @return     The written size in bytes
 	 */
-	API_MN size_t
+	MN_EXPORT size_t
 	file_write(File handle, Block data);
 
 	/**
@@ -145,19 +145,19 @@ namespace mn
 	 *
 	 * @return     The read size in bytes
 	 */
-	API_MN size_t
+	MN_EXPORT size_t
 	file_read(File handle, Block data);
 
 	/**
 	 * @brief      Returns the size in bytes of a given file
 	 */
-	API_MN int64_t
+	MN_EXPORT int64_t
 	file_size(File handle);
 
 	/**
 	 * @brief      Returns the cursor position of the given file
 	 */
-	API_MN int64_t
+	MN_EXPORT int64_t
 	file_cursor_pos(File handle);
 
 	/**
@@ -166,19 +166,19 @@ namespace mn
 	 * @param[in]  handle  The file handle
 	 * @param[in]  offset  The offset
 	 */
-	API_MN bool
+	MN_EXPORT bool
 	file_cursor_move(File handle, int64_t offset);
 
 	/**
 	 * @brief      Sets the file cursor to the start
 	 */
-	API_MN bool
+	MN_EXPORT bool
 	file_cursor_move_to_start(File handle);
 
 	/**
 	 * @brief      Sets the file cursor to the end
 	 */
-	API_MN bool
+	MN_EXPORT bool
 	file_cursor_move_to_end(File handle);
 
 	/**
@@ -190,7 +190,7 @@ namespace mn
 	*
 	* @return     A String containing the content of the file
 	*/
-	API_MN Str
+	MN_EXPORT Str
 	file_content_str(const char* filename, Allocator allocator = allocator_top());
 
 	inline static Str
@@ -208,7 +208,7 @@ namespace mn
 	 *
 	 * @return     A String containing the encoded path
 	 */
-	API_MN Str
+	MN_EXPORT Str
 	path_os_encoding(const char* path);
 
 	/**
@@ -227,13 +227,13 @@ namespace mn
 	/**
 	 * Removes duplicate / and other sanitization stuff
 	 */
-	API_MN Str
+	MN_EXPORT Str
 	path_sanitize(Str path);
 
 	/**
 	 * Converts from the os-specific encoding to standard encoding(linux-like)
 	 */
-	API_MN Str
+	MN_EXPORT Str
 	path_normalize(Str path);
 
 	inline static Str
@@ -260,7 +260,7 @@ namespace mn
 	/**
 	 * @brief      Returns whether the path exists or not
 	 */
-	API_MN bool
+	MN_EXPORT bool
 	path_exists(const char* path);
 
 	/**
@@ -275,7 +275,7 @@ namespace mn
 	/**
 	 * @brief      Returns whether the given path is a folder or not
 	 */
-	API_MN bool
+	MN_EXPORT bool
 	path_is_folder(const char* path);
 
 	/**
@@ -290,7 +290,7 @@ namespace mn
 	/**
 	 * @brief      Returns whether the given path is a file or not
 	 */
-	API_MN bool
+	MN_EXPORT bool
 	path_is_file(const char* path);
 
 	/**
@@ -307,7 +307,7 @@ namespace mn
 	 *
 	 * @param[in]  allocator  The allocator to be used in the returned string
 	 */
-	API_MN Str
+	MN_EXPORT Str
 	path_current(Allocator allocator = allocator_top());
 
 	/**
@@ -315,7 +315,7 @@ namespace mn
 	 *
 	 * @param[in]  path  The path
 	 */
-	API_MN void
+	MN_EXPORT void
 	path_current_change(const char* path);
 
 	/**
@@ -335,7 +335,7 @@ namespace mn
 	 * @param[in]  path       The relative path
 	 * @param[in]  allocator  The allocator to be used in the returns string
 	 */
-	API_MN Str
+	MN_EXPORT Str
 	path_absolute(const char* path, Allocator allocator = allocator_top());
 
 	/**
@@ -350,7 +350,7 @@ namespace mn
 		return path_absolute(path.ptr, allocator);
 	}
 
-	API_MN Str
+	MN_EXPORT Str
 	file_directory(const char* path, Allocator allocator = allocator_top());
 
 	inline static Str
@@ -389,7 +389,7 @@ namespace mn
 	 * @param[in]  path       The path
 	 * @param[in]  allocator  The allocator to be used in the returned buf
 	 */
-	API_MN Buf<Path_Entry>
+	MN_EXPORT Buf<Path_Entry>
 	path_entries(const char* path, Allocator allocator = allocator_top());
 
 	/**
@@ -410,7 +410,7 @@ namespace mn
 	 * @param[in]  src   The source
 	 * @param[in]  dst   The destination
 	 */
-	API_MN bool
+	MN_EXPORT bool
 	file_copy(const char* src, const char* dst);
 
 	/**
@@ -454,7 +454,7 @@ namespace mn
 	 *
 	 * @param[in]  path  The file path
 	 */
-	API_MN bool
+	MN_EXPORT bool
 	file_remove(const char* path);
 
 	/**
@@ -474,7 +474,7 @@ namespace mn
 	 * @param[in]  src   The source
 	 * @param[in]  dst   The destination
 	 */
-	API_MN bool
+	MN_EXPORT bool
 	file_move(const char* src, const char* dst);
 
 	/**
@@ -513,7 +513,7 @@ namespace mn
 		return file_move(src.ptr, dst.ptr);
 	}
 
-	API_MN Str
+	MN_EXPORT Str
 	file_tmp(const mn::Str& base, const mn::Str& ext, Allocator allocator = allocator_top());
 
 	inline static Str
@@ -539,7 +539,7 @@ namespace mn
 	 *
 	 * @param[in]  path  The folder path
 	 */
-	API_MN bool
+	MN_EXPORT bool
 	folder_make(const char* path);
 
 	/**
@@ -558,7 +558,7 @@ namespace mn
 	 *
 	 * @param[in]  path  The folder path
 	 */
-	API_MN bool
+	MN_EXPORT bool
 	folder_remove(const char* path);
 
 	/**
@@ -578,7 +578,7 @@ namespace mn
 	 * @param[in]  src   The source
 	 * @param[in]  dst   The destination
 	 */
-	API_MN bool
+	MN_EXPORT bool
 	folder_copy(const char* src, const char* dst);
 
 	/**
@@ -667,6 +667,6 @@ namespace mn
 		return folder_move(src.ptr, dst.ptr);
 	}
 
-	API_MN Str
+	MN_EXPORT Str
 	folder_tmp(Allocator allocator = allocator_top());
 }

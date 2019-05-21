@@ -15,22 +15,22 @@ namespace mn
 	/**
 	 * @brief      Returns a stream of the standard output
 	 */
-	API_MN Stream
+	MN_EXPORT Stream
 	stream_stdout();
 
 	/**
 	 * @brief      Returns a stream of the standard error
 	 */
-	API_MN Stream
+	MN_EXPORT Stream
 	stream_stderr();
 
 	/**
 	 * @brief      Returns a stream of the standard input
 	 */
-	API_MN Stream
+	MN_EXPORT Stream
 	stream_stdin();
 
-	API_MN Stream
+	MN_EXPORT Stream
 	stream_tmp();
 
 	/**
@@ -40,7 +40,7 @@ namespace mn
 	 * @param[in]  io_mode    The i/o mode
 	 * @param[in]  open_mode  The open mode
 	 */
-	API_MN Stream
+	MN_EXPORT Stream
 	stream_file_new(const char* filename, IO_MODE io_mode, OPEN_MODE open_mode);
 
 	/**
@@ -48,7 +48,7 @@ namespace mn
 	 *
 	 * @param[in]  allocator  The allocator to be used by the memory stream
 	 */
-	API_MN Stream
+	MN_EXPORT Stream
 	stream_memory_new(Allocator allocator = allocator_top());
 
 	/**
@@ -56,7 +56,7 @@ namespace mn
 	 *
 	 * @param[in]  stream  The stream
 	 */
-	API_MN void
+	MN_EXPORT void
 	stream_free(Stream stream);
 
 	/**
@@ -78,7 +78,7 @@ namespace mn
 	 *
 	 * @return     The Written size in bytes
 	 */
-	API_MN size_t
+	MN_EXPORT size_t
 	stream_write(Stream stream, Block data);
 
 	/**
@@ -89,7 +89,7 @@ namespace mn
 	 *
 	 * @return     The Read size in bytes
 	 */
-	API_MN size_t
+	MN_EXPORT size_t
 	stream_read(Stream stream, Block data);
 
 	/**
@@ -97,7 +97,7 @@ namespace mn
 	 *
 	 * @param[in]  stream  The stream
 	 */
-	API_MN int64_t
+	MN_EXPORT int64_t
 	stream_size(Stream stream);
 
 	/**
@@ -105,7 +105,7 @@ namespace mn
 	 *
 	 * @param[in]  stream  The stream
 	 */
-	API_MN int64_t
+	MN_EXPORT int64_t
 	stream_cursor_pos(Stream stream);
 
 	/**
@@ -114,7 +114,7 @@ namespace mn
 	 * @param[in]  stream  The stream
 	 * @param[in]  offset  The offset
 	 */
-	API_MN void
+	MN_EXPORT void
 	stream_cursor_move(Stream stream, int64_t offset);
 
 	/**
@@ -122,7 +122,7 @@ namespace mn
 	 *
 	 * @param[in]  stream  The stream
 	 */
-	API_MN void
+	MN_EXPORT void
 	stream_cursor_move_to_start(Stream stream);
 
 	/**
@@ -130,7 +130,7 @@ namespace mn
 	 *
 	 * @param[in]  stream  The stream
 	 */
-	API_MN void
+	MN_EXPORT void
 	stream_cursor_move_to_end(Stream stream);
 
 	/**
@@ -139,7 +139,7 @@ namespace mn
 	 * 
 	 * @param[in]  stream  The stream
 	 */
-	API_MN const char*
+	MN_EXPORT const char*
 	stream_str(Stream stream);
 
 	/**
@@ -151,7 +151,7 @@ namespace mn
 	 *
 	 * @return     The size of the piped data(in bytes)
 	 */
-	API_MN size_t
+	MN_EXPORT size_t
 	memory_stream_pipe(Memory_Stream& self, Stream stream, size_t size);
 
 	/**
@@ -163,6 +163,6 @@ namespace mn
 	 *
 	 * @return     The size of the piped data(in bytes)
 	 */
-	API_MN size_t
+	MN_EXPORT size_t
 	memory_stream_pipe(Memory_Stream& self, File file, size_t size);
 }
