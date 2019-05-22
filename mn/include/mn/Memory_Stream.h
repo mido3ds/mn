@@ -70,7 +70,10 @@ namespace mn
 	 * @param      self  The memory stream
 	 */
 	MN_EXPORT int64_t
-	memory_stream_size(Memory_Stream& self);
+	memory_stream_size(const Memory_Stream& self);
+
+	MN_EXPORT bool
+	memory_stream_eof(const Memory_Stream& self);
 
 	/**
 	 * @brief      Returns the position of the cursor in the memory stream

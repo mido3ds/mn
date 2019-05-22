@@ -30,6 +30,12 @@ namespace mn
 	MN_EXPORT Str
 	str_with_allocator(Allocator allocator);
 
+	inline static Str
+	str_tmp()
+	{
+		return str_with_allocator(memory::tmp());
+	}
+
 	/**
 	 * @brief      Returns a new string which has the same content as the given
 	 * C string (performs a copy)

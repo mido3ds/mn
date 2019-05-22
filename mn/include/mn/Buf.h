@@ -308,7 +308,7 @@ namespace mn
 		if(self.count == self.cap)
 			buf_reserve(self, self.cap ? self.cap * 2 : 8);
 
-		self.ptr[self.count] = value;
+		self.ptr[self.count] = T(value);
 		++self.count;
 		return self.ptr + self.count - 1;
 	}
@@ -329,6 +329,30 @@ namespace mn
 		for(; i < self.count; ++i)
 			self.ptr[i] = value;
 	}
+
+	template<typename T>
+	inline static void
+	buf_concat(Buf<T>& self, const T* begin, const T* end)
+	{
+		size_t added_count = end - begin;
+		size_t old_count = self.count;
+		buf_resize(self, old_count + added_count);
+		::memcpy(self.ptr + old_count, begin, added_count * sizeof(T));
+	}
+
+	/**
+	 * @brief  update self buffer after concatinating other.
+	 *
+	 * @param[in]  first buffer to concat.
+	 * @param[in]  second buffer to concat.
+	 */
+	template<typename T>
+	inline static void
+	buf_concat(Buf<T>& self, const Buf<T>& other)
+	{
+		buf_concat(self, other.ptr, other.ptr + other.count);
+	}
+
 
 	/**
 	 * @brief      Pops the last element of the buf

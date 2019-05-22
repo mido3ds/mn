@@ -43,9 +43,15 @@ namespace mn
 	}
 
 	int64_t
-	memory_stream_size(Memory_Stream& self)
+	memory_stream_size(const Memory_Stream& self)
 	{
 		return self.str.count;
+	}
+
+	bool
+	memory_stream_eof(const Memory_Stream& self)
+	{
+		return self.cursor >= int64_t(self.str.count);
 	}
 
 	int64_t
