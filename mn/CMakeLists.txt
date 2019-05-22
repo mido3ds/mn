@@ -83,6 +83,11 @@ add_library(mn
 
 add_library(MoustaphaSaad::mn ALIAS mn)
 
+# make it reflect the same structure as the one on disk
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${HEADER_FILES})
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SOURCE_FILES})
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${TOOL_FILES})
+
 
 # Windows specfic flags to enable W variations of winapi
 if(WIN32)
