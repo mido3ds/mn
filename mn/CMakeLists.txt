@@ -78,6 +78,7 @@ endif(MSVC)
 add_library(mn
 	${HEADER_FILES}
 	${SOURCE_FILES}
+	${TOOL_FILES}
 )
 
 add_library(MoustaphaSaad::mn ALIAS mn)
