@@ -30,12 +30,6 @@ namespace mn
 	MN_EXPORT Str
 	str_with_allocator(Allocator allocator);
 
-	inline static Str
-	str_tmp()
-	{
-		return str_with_allocator(memory::tmp());
-	}
-
 	/**
 	 * @brief      Returns a new string which has the same content as the given
 	 * C string (performs a copy)
@@ -64,6 +58,12 @@ namespace mn
 	 */
 	MN_EXPORT Str
 	str_lit(const char* lit);
+
+	inline static Str
+	str_tmp(const char* str = nullptr)
+	{
+		return str_from_c(str);
+	}
 
 	/**
 	 * @brief      Frees the string
@@ -443,6 +443,12 @@ namespace mn
 	 */
 	MN_EXPORT Str
 	str_clone(const Str& other, Allocator allocator = allocator_top());
+
+	inline static bool
+	str_empty(const Str& self)
+	{
+		return self.count == 0;
+	}
 
 	/**
 	 * @brief      Clone function overload for the string type
