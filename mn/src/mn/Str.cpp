@@ -120,6 +120,14 @@ namespace mn
 		return size_t(-1);
 	}
 
+	void
+	str_replace(Str& self, char to_remove, char to_add)
+	{
+		for(size_t i = 0; i < self.count; ++i)
+			if(self[i] == to_remove)
+				self[i] = to_add;
+	}
+
 	Buf<Str>
 	str_split(const Str& self, const Str& delim, bool skip_empty, Allocator allocator)
 	{

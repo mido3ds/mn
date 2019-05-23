@@ -273,6 +273,9 @@ namespace mn
 		return str_find(str_lit(self), str_lit(target), start);
 	}
 
+	MN_EXPORT void
+	str_replace(Str& self, char to_remove, char to_add);
+
 	/**
 	 * @brief      Splits the string with the given delimiter
 	 *
