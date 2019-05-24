@@ -102,6 +102,10 @@ if(WIN32)
 		PRIVATE
 			dbghelp
 	)
+	target_compile_options(mn
+		PRIVATE
+			/WX /W4
+	)
 elseif(UNIX)
 	target_link_libraries(mn
 		PRIVATE
@@ -110,6 +114,10 @@ elseif(UNIX)
 	target_compile_definitions(mn
 		PRIVATE
 			OS_LINUX=1
+	)
+	target_compile_options(mn
+		PRIVATE
+			-Wall -Werror
 	)
 endif()
 
