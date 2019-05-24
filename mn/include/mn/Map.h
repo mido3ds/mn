@@ -581,7 +581,7 @@ namespace mn
 	inline static bool
 	map_remove(Map<TKey, TValue, THash>& self, const Key_Value<const TKey, TValue>* it)
 	{
-		auto diff = it - self.values.ptr;
+		auto diff = it - (Key_Value<const TKey, TValue>*)self.values.ptr;
 		assert(diff >= 0);
 		size_t index = diff;
 		assert(index < self.flags.count);
