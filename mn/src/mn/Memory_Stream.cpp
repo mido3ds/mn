@@ -1,4 +1,5 @@
 #include "mn/Memory_Stream.h"
+#include <assert.h>
 
 namespace mn
 {

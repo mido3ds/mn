@@ -7,6 +7,7 @@
 #include <string.h>
 #include <errno.h>
 #include <limits>
+#include <assert.h>
 
 namespace mn
 {

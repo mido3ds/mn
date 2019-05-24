@@ -12,6 +12,8 @@
 #include <dirent.h>
 #include <linux/limits.h>
 
+#include <assert.h>
+
 namespace mn
 {
 	Block
@@ -192,8 +194,7 @@ namespace mn
 		--str.count;
 		str.ptr[str.count] = '\0';
 
-		size_t read_size = file_read(f, Block { str.ptr, str.count });
-		((void)(read_size));
+		[[maybe_unused]] size_t read_size = file_read(f, Block { str.ptr, str.count });
 		assert(read_size == str.count);
 
 		file_close(f);
@@ -297,7 +298,7 @@ namespace mn
 	void
 	path_current_change(const char* path)
 	{
-		int result = ::chdir(path);
+		[[maybe_unused]] int result = ::chdir(path);
 		assert(result == 0 && "chdir failed");
 	}
 

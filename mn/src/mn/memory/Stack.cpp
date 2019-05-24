@@ -1,5 +1,4 @@
 #include "mn/memory/Stack.h"
-
 #include <assert.h>
 
 namespace mn::memory
@@ -22,7 +21,7 @@ namespace mn::memory
 	Stack::alloc(size_t size, uint8_t)
 	{
 		ptrdiff_t used_memory = this->alloc_head - (uint8_t*)this->memory.ptr;
-		size_t free_memory = this->memory.size - used_memory;
+		[[maybe_unused]] size_t free_memory = this->memory.size - used_memory;
 		assert(free_memory >= size &&
 			"Stack allocator doesn't have enough memory");
 

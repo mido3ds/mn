@@ -2,8 +2,8 @@
 
 #include "mn/Memory.h"
 
-#include <assert.h>
 #include <string.h>
+#include <assert.h>
 
 namespace mn
 {

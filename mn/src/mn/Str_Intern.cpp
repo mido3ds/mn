@@ -1,5 +1,7 @@
 #include "mn/Str_Intern.h"
 
+#include <assert.h>
+
 namespace mn
 {
 	const char*

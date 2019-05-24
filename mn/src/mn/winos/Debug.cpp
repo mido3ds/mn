@@ -1,7 +1,6 @@
 #include "mn/Debug.h"
 #include "mn/Str.h"
 
-#include <assert.h>
 #include <string.h>
 
 #define NOMINMAX

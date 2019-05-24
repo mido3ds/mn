@@ -7,6 +7,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <utility>
+#include <assert.h>
 
 namespace mn
 {

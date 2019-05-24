@@ -7,18 +7,14 @@
 
 #include <assert.h>
 
-//to supress warnings in release mode
-#define UNUSED(x) ((void)(x))
-
 namespace mn
 {
 	pthread_mutex_t*
 	_leak_allocator_mutex_new()
 	{
 		static pthread_mutex_t mtx;
-		int result = pthread_mutex_init(&mtx, NULL);
+		[[maybe_unused]] int result = pthread_mutex_init(&mtx, NULL);
 		assert(result == 0);
-		UNUSED(result);
 		return &mtx;
 	}
 
@@ -42,34 +38,30 @@ namespace mn
 	{
 		Mutex self = alloc<IMutex>();
 		self->name = name;
-		int result = pthread_mutex_init(&self->handle, NULL);
+		[[maybe_unused]] int result = pthread_mutex_init(&self->handle, NULL);
 		assert(result == 0);
-		UNUSED(result);
 		return self;
 	}
 
 	void
 	mutex_lock(Mutex self)
 	{
-		int result = pthread_mutex_lock(&self->handle);
+		[[maybe_unused]] int result = pthread_mutex_lock(&self->handle);
 		assert(result == 0);
-		UNUSED(result);
 	}
 
 	void
 	mutex_unlock(Mutex self)
 	{
-		int result = pthread_mutex_unlock(&self->handle);
+		[[maybe_unused]] int result = pthread_mutex_unlock(&self->handle);
 		assert(result == 0);
-		UNUSED(result);
 	}
 
 	void
 	mutex_free(Mutex self)
 	{
-		int result = pthread_mutex_destroy(&self->handle);
+		[[maybe_unused]] int result = pthread_mutex_destroy(&self->handle);
 		assert(result == 0);
-		UNUSED(result);
 		free(self);
 	}
 
@@ -147,9 +139,8 @@ namespace mn
 		self->func = func;
 		self->user_data = arg;
 		self->name = name;
-		int result = pthread_create(&self->handle, NULL, _thread_start, self);
+		[[maybe_unused]] int result = pthread_create(&self->handle, NULL, _thread_start, self);
 		assert(result == 0 && "pthread_create failed");
-		UNUSED(result);
 		return self;
 	}
 
@@ -162,9 +153,8 @@ namespace mn
 	void
 	thread_join(Thread self)
 	{
-		int result = pthread_join(self->handle, NULL);
+		[[maybe_unused]] int result = pthread_join(self->handle, NULL);
 		assert(result == 0 && "pthread_join failed");
-		UNUSED(result);
 	}
 
 	void

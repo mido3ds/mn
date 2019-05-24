@@ -2,8 +2,7 @@
 #include "mn/Memory_Stream.h"
 #include "mn/Pool.h"
 
-//to supress warnings in release mode
-#define UNUSED(x) ((void)(x))
+#include <assert.h>
 
 namespace mn
 {
@@ -234,8 +233,7 @@ namespace mn
 	void
 	stream_cursor_move(Stream self, int64_t offset)
 	{
-		bool res = false;
-		UNUSED(res);
+		[[maybe_unused]] bool res = false;
 		switch (self->kind)
 		{
 			case IStream::KIND_FILE:
@@ -259,8 +257,7 @@ namespace mn
 	void
 	stream_cursor_move_to_start(Stream self)
 	{
-		bool res = false;
-		UNUSED(res);
+		[[maybe_unused]] bool res = false;
 		switch (self->kind)
 		{
 			case IStream::KIND_FILE:
@@ -284,8 +281,7 @@ namespace mn
 	void
 	stream_cursor_move_to_end(Stream self)
 	{
-		bool res = false;
-		UNUSED(res);
+		[[maybe_unused]] bool res = false;
 		switch (self->kind)
 		{
 			case IStream::KIND_FILE:

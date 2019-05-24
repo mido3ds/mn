@@ -4,6 +4,8 @@
 #include "mn/Memory.h"
 #include "mn/Buf.h"
 
+#include <assert.h>
+
 namespace mn
 {
 	//Key value section

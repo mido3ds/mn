@@ -12,6 +12,8 @@
 
 #include <chrono>
 
+#include <assert.h>
+
 namespace mn
 {
 	Block
@@ -359,8 +361,7 @@ namespace mn
 		--str.count;
 		str.ptr[str.count] = '\0';
 
-		size_t read_size = file_read(f, Block { str.ptr, str.count });
-		((void)(read_size));
+		[[maybe_unused]] size_t read_size = file_read(f, Block { str.ptr, str.count });
 		assert(read_size == str.count);
 
 		file_close(f);
@@ -477,7 +478,7 @@ namespace mn
 	{
 		DWORD required_size = GetCurrentDirectory(0, NULL);
 		Block os_str = alloc_from(memory::tmp(), required_size * sizeof(TCHAR), alignof(TCHAR));
-		DWORD written_size = GetCurrentDirectory((DWORD)(os_str.size/sizeof(TCHAR)), (LPWSTR)os_str.ptr);
+		[[maybe_unused]] DWORD written_size = GetCurrentDirectory((DWORD)(os_str.size/sizeof(TCHAR)), (LPWSTR)os_str.ptr);
 		assert((size_t)(written_size+1) == (os_str.size / sizeof(TCHAR)) && "GetCurrentDirectory Failed");
 		Str res = _from_os_encoding(os_str, allocator);
 		path_normalize(res);
@@ -488,7 +489,7 @@ namespace mn
 	path_current_change(const char* path)
 	{
 		Block os_path = to_os_encoding(path_os_encoding(path));
-		bool result = SetCurrentDirectory((LPCWSTR)os_path.ptr);
+		[[maybe_unused]] bool result = SetCurrentDirectory((LPCWSTR)os_path.ptr);
 		assert(result && "SetCurrentDirectory Failed");
 	}
 
@@ -498,7 +499,7 @@ namespace mn
 		Block os_path = to_os_encoding(path_os_encoding(path));
 		DWORD required_size = GetFullPathName((LPCWSTR)os_path.ptr, 0, NULL, NULL);
 		Block full_path = alloc_from(memory::tmp(), required_size * sizeof(TCHAR), alignof(TCHAR));
-		DWORD written_size = GetFullPathName((LPCWSTR)os_path.ptr, required_size, (LPWSTR)full_path.ptr, NULL);
+		[[maybe_unused]] DWORD written_size = GetFullPathName((LPCWSTR)os_path.ptr, required_size, (LPWSTR)full_path.ptr, NULL);
 		assert(written_size+1 == required_size && "GetFullPathName failed");
 		Str res = _from_os_encoding(full_path, allocator);
 		path_normalize(res);
@@ -561,7 +562,7 @@ namespace mn
 				if (FindNextFile(search_handle, &file_data) == false)
 					break;
 			}
-			bool result = FindClose(search_handle);
+			[[maybe_unused]] bool result = FindClose(search_handle);
 			assert(result && "FindClose failed");
 		}
 		return res;

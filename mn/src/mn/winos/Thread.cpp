@@ -1,11 +1,11 @@
 #include "mn/Thread.h"
 #include "mn/Memory.h"
 
-#include <assert.h>
-
 #define NOMINMAX
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
+
+#include <assert.h>
 
 namespace mn
 {
@@ -155,7 +155,7 @@ namespace mn
 	{
 		if(self->handle)
 		{
-			BOOL result = CloseHandle(self->handle);
+			[[maybe_unused]] BOOL result = CloseHandle(self->handle);
 			assert(result == TRUE);
 		}
 		free(self);
@@ -166,7 +166,7 @@ namespace mn
 	{
 		if(self->handle)
 		{
-			DWORD result = WaitForSingleObject(self->handle, INFINITE);
+			[[maybe_unused]] DWORD result = WaitForSingleObject(self->handle, INFINITE);
 			assert(result == WAIT_OBJECT_0);
 		}
 	}

@@ -1,7 +1,5 @@
 #include "mn/Str.h"
 
-#include <assert.h>
-
 namespace mn
 {
 	Str

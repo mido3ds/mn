@@ -1,6 +1,5 @@
 #include "mn/memory/Arena.h"
 #include "mn/IO.h"
-
 #include <assert.h>
 
 namespace mn::memory

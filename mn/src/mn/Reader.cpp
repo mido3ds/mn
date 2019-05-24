@@ -3,6 +3,8 @@
 #include "mn/Memory_Stream.h"
 #include "mn/Pool.h"
 
+#include <assert.h>
+
 namespace mn
 {
 	struct IReader

@@ -3,8 +3,8 @@
 #include "mn/Base.h"
 #include "mn/Memory.h"
 
-#include <assert.h>
 #include <string.h>
+#include <assert.h>
 
 #include <initializer_list>
 
@@ -401,7 +401,7 @@ namespace mn
 	inline static void
 	buf_remove(Buf<T>& self, size_t ix)
 	{
-		assert(ix < self.count);
+		mn_assert(ix < self.count);
 		if(ix + 1 != self.count)
 		{
 			T tmp = self.ptr[self.count - 1];

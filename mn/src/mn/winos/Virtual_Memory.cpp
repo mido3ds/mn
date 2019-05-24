@@ -1,11 +1,11 @@
 #include "mn/Virtual_Memory.h"
 #include "mn/Memory.h"
 
-#include <assert.h>
-
 #define NOMINMAX
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
+
+#include <assert.h>
 
 namespace mn
 {
@@ -22,7 +22,7 @@ namespace mn
 	void
 	virtual_free(Block block)
 	{
-		auto result = VirtualFree(block.ptr, 0, MEM_RELEASE);
+		[[maybe_unused]] auto result = VirtualFree(block.ptr, 0, MEM_RELEASE);
 		assert(result != NULL);
 	}
 }
