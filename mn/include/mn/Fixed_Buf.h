@@ -1,6 +1,6 @@
 #pragma once
 
-#include "mn/Assert.h"
+#include <assert.h>
 
 namespace mn
 {
@@ -19,14 +19,14 @@ namespace mn
 		T&
 		operator[](size_t ix)
 		{
-			mn_assert(ix < count);
+			assert(ix < count);
 			return elements[ix];
 		}
 
 		const T&
 		operator[](size_t ix) const
 		{
-			mn_assert(ix < count);
+			assert(ix < count);
 			return elements[ix];
 		}
 	};
@@ -54,7 +54,7 @@ namespace mn
 	inline static void
 	fixed_buf_push(Fixed_Buf<T, Capacity>& self, const T& value)
 	{
-		mn_assert(self.count < Capacity);
+		assert(self.count < Capacity);
 		self.elements[self.count] = value;
 		++self.count;
 	}

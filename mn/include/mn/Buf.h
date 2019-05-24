@@ -401,7 +401,7 @@ namespace mn
 	inline static void
 	buf_remove(Buf<T>& self, size_t ix)
 	{
-		mn_assert(ix < self.count);
+		assert(ix < self.count);
 		if(ix + 1 != self.count)
 		{
 			T tmp = self.ptr[self.count - 1];
