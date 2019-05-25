@@ -145,12 +145,3 @@ target_include_directories(mn
 	PUBLIC
 	${CMAKE_CURRENT_SOURCE_DIR}/include
 )
-
-
-# output directory
-set_target_properties(mn
-	PROPERTIES
-	ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
-	LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
-	RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin"
-)
