@@ -63,7 +63,7 @@ namespace mn
 	inline static Str
 	str_tmp(const char* str = nullptr)
 	{
-		return str_from_c(str);
+		return str_from_c(str, memory::tmp());
 	}
 
 	/**
