@@ -1,5 +1,7 @@
 # MN Tour
 
+[![Build Status](https://travis-ci.org/MoustaphaSaad/mn.svg?branch=master)](https://travis-ci.org/MoustaphaSaad/mn)
+
 01, Jan, 2019
 
 MN is a minimal support library that i use and helps me in my "Pure Coding" style.
