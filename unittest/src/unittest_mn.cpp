@@ -11,6 +11,7 @@
 #include <mn/Str_Intern.h>
 #include <mn/Ring.h>
 #include <mn/OS.h>
+#include <mn/Bytes.h>
 #include <mn/memory/Leak.h>
 
 using namespace mn;
@@ -418,4 +419,23 @@ TEST_CASE("complex data ring case")
 	destruct(r);
 
 	allocator_pop();
+}
+
+TEST_CASE("bytes")
+{
+	Bytes b = bytes_new();
+	bytes_push8(b, 100);
+	bytes_push16(b, 500);
+	bytes_push16(b, uint16_t(-500));
+	bytes_push32f(b, 3.14f);
+
+	bytes_rewind(b);
+
+	CHECK(bytes_pop8(b) == 100);
+	CHECK(bytes_pop16(b) == 500);
+	CHECK(int16_t(bytes_pop16(b)) == -500);
+	CHECK(bytes_pop32f(b) == 3.14f);
+	CHECK(bytes_eof(b) == true);
+
+	bytes_free(b);
 }

@@ -27,12 +27,6 @@ namespace mn
 		memory_stream_free(self);
 	}
 
-	inline static void
-	destruct(Bytes& self)
-	{
-		bytes_free(self);
-	}
-
 	inline static size_t
 	bytes_size(const Bytes& self)
 	{
