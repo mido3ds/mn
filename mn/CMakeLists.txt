@@ -28,6 +28,7 @@ set(HEADER_FILES
 	include/mn/Stream.h
 	include/mn/Thread.h
 	include/mn/Virtual_Memory.h
+	include/mn/Bytes.h
 )
 
 # list the source files
