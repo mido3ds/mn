@@ -81,7 +81,7 @@ namespace mn
 	 * @param      self  The memory stream
 	 */
 	MN_EXPORT int64_t
-	memory_stream_cursor_pos(Memory_Stream& self);
+	memory_stream_cursor_pos(const Memory_Stream& self);
 
 	/**
 	 * @brief      Moves the cursor by the given offset

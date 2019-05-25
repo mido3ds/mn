@@ -56,7 +56,7 @@ namespace mn
 	}
 
 	int64_t
-	memory_stream_cursor_pos(Memory_Stream& self)
+	memory_stream_cursor_pos(const Memory_Stream& self)
 	{
 		return self.cursor;
 	}

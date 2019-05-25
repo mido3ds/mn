@@ -1,30 +1,30 @@
 #pragma once
 
-#include <mn/Buf.h>
+#include <mn/Memory_Stream.h>
 
 #include <stdint.h>
 #include <assert.h>
 
 namespace mn
 {
-	using Bytes = Buf<uint8_t>;
+	using Bytes = Memory_Stream;
 
 	inline static Bytes
 	bytes_new()
 	{
-		return buf_new<uint8_t>();
+		return memory_stream_new();
 	}
 
 	inline static Bytes
 	bytes_with_allocator(Allocator allocator)
 	{
-		return buf_with_allocator<uint8_t>(allocator);
+		return memory_stream_new(allocator);
 	}
 
 	inline static void
 	bytes_free(Bytes& self)
 	{
-		buf_free(self);
+		memory_stream_free(self);
 	}
 
 	inline static void
@@ -33,100 +33,159 @@ namespace mn
 		bytes_free(self);
 	}
 
+	inline static size_t
+	bytes_size(const Bytes& self)
+	{
+		return memory_stream_size(self);
+	}
+
+	inline static bool
+	bytes_eof(const Bytes& self)
+	{
+		return memory_stream_eof(self);
+	}
+
+	inline static void
+	bytes_concat(Bytes& self, const Bytes& other)
+	{
+		memory_stream_write(self, block_from(other.str));
+	}
+
+	inline static void
+	bytes_rewind(Bytes& self)
+	{
+		memory_stream_cursor_to_start(self);
+	}
+
+	inline static int64_t
+	bytes_cursor_pos(const Bytes& self)
+	{
+		return memory_stream_cursor_pos(self);
+	}
+
+	inline static void
+	bytes_cursor_move(Bytes& self, int64_t offset)
+	{
+		memory_stream_cursor_move(self, offset);
+	}
+
+	inline static void
+	bytes_cursor_set(Bytes& self, int64_t absolute)
+	{
+		memory_stream_cursor_set(self, absolute);
+	}
+
 	inline static void
 	bytes_push8(Bytes& self, uint8_t v)
 	{
-		buf_push(self, v);
+		[[maybe_unused]] size_t written_size = memory_stream_write(self, block_from(v));
+		assert(written_size == sizeof(v));
 	}
 
 	inline static void
 	bytes_push16(Bytes& self, uint16_t v)
 	{
-		buf_push(self, uint8_t(v));
-		buf_push(self, uint8_t(v >> 8));
+		[[maybe_unused]] size_t written_size = memory_stream_write(self, block_from(v));
+		assert(written_size == sizeof(v));
 	}
 
 	inline static void
 	bytes_push32(Bytes& self, uint32_t v)
 	{
-		buf_push(self, uint8_t(v));
-		buf_push(self, uint8_t(v >> 8));
-		buf_push(self, uint8_t(v >> 16));
-		buf_push(self, uint8_t(v >> 24));
+		[[maybe_unused]] size_t written_size = memory_stream_write(self, block_from(v));
+		assert(written_size == sizeof(v));
 	}
 
 	inline static void
 	bytes_push64(Bytes& self, uint64_t v)
 	{
-		buf_push(self, uint8_t(v));
-		buf_push(self, uint8_t(v >> 8));
-		buf_push(self, uint8_t(v >> 16));
-		buf_push(self, uint8_t(v >> 24));
-		buf_push(self, uint8_t(v >> 32));
-		buf_push(self, uint8_t(v >> 40));
-		buf_push(self, uint8_t(v >> 48));
-		buf_push(self, uint8_t(v >> 56));
+		[[maybe_unused]] size_t written_size = memory_stream_write(self, block_from(v));
+		assert(written_size == sizeof(v));
 	}
 
 	inline static void
 	bytes_push32f(Bytes& self, float v)
 	{
-		bytes_push32(self, *(uint32_t*)&v);
+		[[maybe_unused]] size_t written_size = memory_stream_write(self, block_from(v));
+		assert(written_size == sizeof(v));
 	}
 
 	inline static void
 	bytes_push64f(Bytes& self, double v)
 	{
-		bytes_push64(self, *(uint64_t*)&v);
+		[[maybe_unused]] size_t written_size = memory_stream_write(self, block_from(v));
+		assert(written_size == sizeof(v));
 	}
 
-	inline static uint8_t
-	bytes_pop8(const Bytes& self, uint64_t& ix)
+	inline static void
+	bytes_push_ptr(Bytes& self, void* ptr)
 	{
-		assert(ix + sizeof(uint8_t) <= self.count);
-		uint8_t v = *(uint8_t*)(self.ptr + ix);
-		ix += sizeof(v);
-		return v;
+		uintptr_t v = (uintptr_t)ptr;
+		[[maybe_unused]] size_t written_size = memory_stream_write(self, block_from(v));
+		assert(written_size == sizeof(v));
+	}
+
+
+	inline static uint8_t
+	bytes_pop8(Bytes& self)
+	{
+		uint8_t res = 0;
+		[[maybe_unused]] size_t read_size = memory_stream_read(self, block_from(res));
+		assert(read_size == sizeof(res));
+		return res;
 	}
 
 	inline static uint16_t
-	bytes_pop16(const Bytes& self, uint64_t& ix)
+	bytes_pop16(Bytes& self)
 	{
-		assert(ix + sizeof(uint16_t) <= self.count);
-		uint16_t v = *(uint16_t*)(self.ptr + ix);
-		ix += sizeof(v);
-		return v;
+		uint16_t res = 0;
+		[[maybe_unused]] size_t read_size = memory_stream_read(self, block_from(res));
+		assert(read_size == sizeof(res));
+		return res;
 	}
 
 	inline static uint32_t
-	bytes_pop32(const Bytes& self, uint64_t& ix)
+	bytes_pop32(Bytes& self)
 	{
-		assert(ix + sizeof(uint32_t) <= self.count);
-		uint32_t v = *(uint32_t*)(self.ptr + ix);
-		ix += sizeof(v);
-		return v;
+		uint32_t res = 0;
+		[[maybe_unused]] size_t read_size = memory_stream_read(self, block_from(res));
+		assert(read_size == sizeof(res));
+		return res;
 	}
 
 	inline static uint64_t
-	bytes_pop64(const Bytes& self, uint64_t& ix)
+	bytes_pop64(Bytes& self)
 	{
-		assert(ix + sizeof(uint64_t) <= self.count);
-		uint64_t v = *(uint64_t*)(self.ptr + ix);
-		ix += sizeof(v);
-		return v;
+		uint64_t res = 0;
+		[[maybe_unused]] size_t read_size = memory_stream_read(self, block_from(res));
+		assert(read_size == sizeof(res));
+		return res;
 	}
 
 	inline static float
-	bytes_pop32f(const Bytes& self, uint64_t& ix)
+	bytes_pop32f(Bytes& self)
 	{
-		uint32_t v = bytes_pop32(self, ix);
-		return *(float*)&v;
+		float res = 0;
+		[[maybe_unused]] size_t read_size = memory_stream_read(self, block_from(res));
+		assert(read_size == sizeof(res));
+		return res;
 	}
 
 	inline static double
-	bytes_pop64f(const Bytes& self, uint64_t& ix)
+	bytes_pop64f(Bytes& self)
 	{
-		uint64_t v = bytes_pop64(self, ix);
-		return *(double*)&v;
+		double res = 0;
+		[[maybe_unused]] size_t read_size = memory_stream_read(self, block_from(res));
+		assert(read_size == sizeof(res));
+		return res;
+	}
+
+	inline static void*
+	bytes_pop_ptr(Bytes& self)
+	{
+		void* res = 0;
+		[[maybe_unused]] size_t read_size = memory_stream_read(self, block_from(res));
+		assert(read_size == sizeof(res));
+		return res;
 	}
 }
