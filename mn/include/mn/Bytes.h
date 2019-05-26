@@ -119,6 +119,13 @@ namespace mn
 		assert(written_size == sizeof(v));
 	}
 
+	inline static void
+	bytes_push_block(Bytes& self, const Block& data)
+	{
+		[[maybe_unused]] size_t written_size = memory_stream_write(self, data);
+		assert(data.size == written_size);
+	}
+
 
 	inline static uint8_t
 	bytes_pop8(Bytes& self)
@@ -181,5 +188,12 @@ namespace mn
 		[[maybe_unused]] size_t read_size = memory_stream_read(self, block_from(res));
 		assert(read_size == sizeof(res));
 		return res;
+	}
+	
+	inline static void
+	bytes_pop_block(Bytes& self, const Block& data)
+	{
+		[[maybe_unused]] size_t read_size = memory_stream_read(self, data);
+		assert(read_size == data.size);
 	}
 }
