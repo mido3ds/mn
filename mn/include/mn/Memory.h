@@ -246,4 +246,16 @@ namespace mn
 	{
 		allocator_free(self);
 	}
+
+
+	inline static Block
+	block_clone(const Block& other, Allocator allocator = allocator_top())
+	{
+		if (other == false)
+			return Block{};
+
+		Block self = alloc_from(allocator, other.size, alignof(int));
+		::memcpy(self.ptr, other.ptr, other.size);
+		return self;
+	}
 }
