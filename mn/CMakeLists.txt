@@ -29,6 +29,8 @@ set(HEADER_FILES
 	include/mn/Thread.h
 	include/mn/Virtual_Memory.h
 	include/mn/Bytes.h
+	include/mn/Rune.h
+	include/utf8proc/utf8proc.h
 )
 
 # list the source files
@@ -47,6 +49,8 @@ set(SOURCE_FILES
 	src/mn/Str.cpp
 	src/mn/Str_Intern.cpp
 	src/mn/Stream.cpp
+	src/mn/Rune.cpp
+	src/utf8proc/utf8proc.c
 )
 
 # list os specfic files
@@ -145,4 +149,6 @@ generate_export_header(mn
 target_include_directories(mn
 	PUBLIC
 	${CMAKE_CURRENT_SOURCE_DIR}/include
+	PRIVATE
+	${CMAKE_CURRENT_SOURCE_DIR}/src
 )

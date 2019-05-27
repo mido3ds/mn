@@ -1,6 +1,7 @@
 #pragma once
 
 #include "mn/Exports.h"
+#include "mn/Rune.h"
 #include "mn/Buf.h"
 #include "mn/Map.h"
 
@@ -81,66 +82,6 @@ namespace mn
 	destruct(Str& self)
 	{
 		str_free(self);
-	}
-
-	/**
-	 * @brief      Returns the rune(utf-8 chars) count in the given string
-	 *
-	 * @param[in]  str   The string
-	 */
-	MN_EXPORT size_t
-	rune_count(const char* str);
-
-	/**
-	 * @brief      Returns the size(in bytes) of the given runes
-	 *
-	 * @param[in]  r     The rune
-	 */
-	inline static size_t
-	rune_size(int32_t r)
-	{
-		char* b = (char*)&r;
-		return ((b[0] != 0) +
-				(b[1] != 0) +
-				(b[2] != 0) +
-				(b[3] != 0));
-	}
-
-	/**
-	 * @brief      Given a string iterator/pointer it will move it to point to the next rune
-	 *
-	 * @param[in]  str   The string
-	 */
-	inline static const char*
-	rune_next(const char* str)
-	{
-		++str;
-		while(*str && ((*str & 0xC0) == 0x80))
-			++str;
-		return str;
-	}
-
-	/**
-	 * @brief      Extract a rune from the given string
-	 *
-	 * @param[in]  c     The string
-	 */
-	inline static int32_t
-	rune_read(const char* c)
-	{
-		if(c == nullptr)
-			return 0;
-
-		if(*c == 0)
-			return 0;
-
-		int32_t rune = 0;
-		uint8_t* result = (uint8_t*)&rune;
-		const uint8_t* it = (const uint8_t*)c;
-		*result++ = *it++;
-		while (*it && ((*it & 0xC0) == 0x80))
-			*result++ = *it++;
-		return rune;
 	}
 
 	/**

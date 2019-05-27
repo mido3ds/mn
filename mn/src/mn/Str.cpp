@@ -64,18 +64,6 @@ namespace mn
 		buf_free(self);
 	}
 
-	size_t
-	rune_count(const char* str)
-	{
-		size_t result = 0;
-		while(str != nullptr && *str != '\0')
-		{
-			result += ((*str & 0xC0) != 0x80);
-			++str;
-		}
-		return result;
-	}
-
 	void
 	str_push(Str& self, const char* str)
 	{
