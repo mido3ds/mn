@@ -9,7 +9,7 @@
 #include <stdint.h>
 #include <utility>
 #include <new>
-#include <stdlib.h>
+#include <string.h>
 
 namespace mn
 {
