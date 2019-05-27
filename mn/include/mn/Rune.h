@@ -3,6 +3,7 @@
 #include "mn/Exports.h"
 
 #include <stdint.h>
+#include <stddef.h>
 
 namespace mn
 {
