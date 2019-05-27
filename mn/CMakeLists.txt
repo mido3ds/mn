@@ -50,7 +50,7 @@ set(SOURCE_FILES
 	src/mn/Str_Intern.cpp
 	src/mn/Stream.cpp
 	src/mn/Rune.cpp
-	src/utf8proc/utf8proc.c
+	src/utf8proc/utf8proc.cpp
 )
 
 # list os specfic files
