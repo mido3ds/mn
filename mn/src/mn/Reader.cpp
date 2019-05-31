@@ -20,20 +20,27 @@ namespace mn
 		return &_pool;
 	}
 
-	IReader
-	_reader_stdin()
+	struct Stdin_Reader_Wrapper
 	{
-		IReader self{};
-		self.stream = stream_stdin();
-		self.buffer = memory_stream_new();
-		return self;
-	}
+		IReader self;
+
+		Stdin_Reader_Wrapper()
+		{
+			self.stream = stream_stdin();
+			self.buffer = memory_stream_new();
+		}
+
+		~Stdin_Reader_Wrapper()
+		{
+			memory_stream_free(self.buffer);
+		}
+	};
 
 	Reader
 	reader_stdin()
 	{
-		static IReader _stdin = _reader_stdin();
-		return &_stdin;
+		static Stdin_Reader_Wrapper _stdin;
+		return &_stdin.self;
 	}
 
 	struct Reader_Tmp_Wrapper

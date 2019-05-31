@@ -101,6 +101,7 @@ if(WIN32)
 		PRIVATE
 			UNICODE=1
 			_UNICODE=1
+		PUBLIC
 			OS_WINDOWS=1
 	)
 	target_link_libraries(mn
@@ -117,7 +118,7 @@ elseif(UNIX)
 			pthread
 	)
 	target_compile_definitions(mn
-		PRIVATE
+		PUBLIC
 			OS_LINUX=1
 	)
 	target_compile_options(mn
