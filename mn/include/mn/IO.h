@@ -1428,13 +1428,8 @@ namespace mn
 	str_tmpf(const char* format, TArgs&& ... args)
 	{
 		Stream stream = stream_tmp();
-		stream_cursor_move_to_start(stream);
-		size_t size = vprintf(stream, format, std::forward<TArgs>(args)...);
-		stream_cursor_move_to_start(stream);
-		Str result = str_with_allocator(memory::tmp());
-		str_resize(result, size);
-		stream_read(stream, block_from(result));
-		return result;
+		vprintf(stream, format, std::forward<TArgs>(args)...);
+		return str_from_c(stream_str(stream), memory::tmp());
 	}
 
 	/**
@@ -1451,12 +1446,8 @@ namespace mn
 	strf(Str str, const char* format, TArgs&& ... args)
 	{
 		Stream stream = stream_tmp();
-		stream_cursor_move_to_start(stream);
-		size_t size = vprintf(stream, format, std::forward<TArgs>(args)...);
-		stream_cursor_move_to_start(stream);
-		size_t count = str.count;
-		str_resize(str, count + size);
-		stream_read(stream, Block{str.ptr + count, size});
+		vprintf(stream, format, std::forward<TArgs>(args)...);
+		str_push(str, stream_str(stream));
 		return str;
 	}
 

@@ -80,6 +80,7 @@ namespace mn
 	stream_tmp()
 	{
 		thread_local Stream_Tmp_Wrapper _tmp;
+		stream_cursor_move_to_start(&_tmp.self);
 		return &_tmp.self;
 	}
 
