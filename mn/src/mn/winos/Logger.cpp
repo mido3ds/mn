@@ -3,13 +3,8 @@
 
 namespace mn
 {
-	struct Logger
-	{
-		Stream current_stream;
-		Mutex mtx;
-	};
 
-	Logger* get_logger_instance()
+	Logger* logger_get_instance()
 	{
 		static Logger _log = Logger{ stream_stderr(), mutex_new("log mutex") };
 		return &_log;
@@ -17,21 +12,21 @@ namespace mn
 
 	void logger_free()
 	{
-		stream_free(get_logger_instance()->current_stream);
-		mutex_free(get_logger_instance()->mtx);
+		stream_free(logger_get_instance()->current_stream);
+		mutex_free(logger_get_instance()->mtx);
 	}
 
-	void log_stream_change(Stream& stream)
+	void logger_stream_change(Stream& stream)
 	{
-		mutex_lock(get_logger_instance()->mtx);
+		mutex_lock(logger_get_instance()->mtx);
 
-		get_logger_instance()->current_stream = stream;
+		logger_get_instance()->current_stream = stream;
 
-		mutex_unlock(get_logger_instance()->mtx);
+		mutex_unlock(logger_get_instance()->mtx);
 	}
 
-	Stream log_stream_get()
+	Stream logger_stream_get()
 	{
-		return get_logger_instance()->current_stream;
+		return logger_get_instance()->current_stream;
 	}
 }

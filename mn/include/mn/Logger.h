@@ -6,28 +6,32 @@
 
 namespace mn
 {
-	struct Logger;
+	struct Logger
+	{
+		Stream current_stream;
+		Mutex mtx;
+	};
 
 	template<typename ... TArgs>
-	inline static size_t
+	inline static void
 	log(const char* message, TArgs&& ... args)
 	{
-		mutex_lock(get_logger_instance()->mtx);
+		mutex_lock(logger_get_instance()->mtx);
 
-		vprintf(log_stream_get(), message, std::forward<TArgs>(args)...);
+		vprintf(logger_stream_get(), message, std::forward<TArgs>(args)...);
 
-		mutex_unlock(get_logger_instance()->mtx);
+		mutex_unlock(logger_get_instance()->mtx);
 	}
 
 	MN_EXPORT Logger*
-	get_logger_instance();
+	logger_get_instance();
 
 	MN_EXPORT void
 	logger_free();
 
 	MN_EXPORT void
-	log_stream_change(Stream& stream);
+	logger_stream_change(Stream& stream);
 
 	MN_EXPORT Stream
-	log_stream_get();
+	logger_stream_get();
 }
