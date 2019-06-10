@@ -12,9 +12,17 @@ namespace mn
 		Mutex mtx;
 	};
 
-	MN_EXPORT 
-	template<typename ... TArgs> void
-	log(const char* message, TArgs&& ... args);
+	 
+	template<typename ... TArgs>
+	inline static size_t
+	log(const char* message, TArgs&& ... args)
+	{
+		mutex_lock(logger.mtx);
+
+		vprintf(logger.current_stream, message, std::forward<TArgs>(args)...);
+
+		mutex_unlock(logger.mtx);
+	}
 
 	MN_EXPORT void
 	log_stream_change(const Stream& stream);
