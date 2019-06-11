@@ -6,25 +6,8 @@
 
 namespace mn
 {
-	struct Logger
-	{
-		Stream current_stream;
-		Mutex mtx;
-	};
-
-	template<typename ... TArgs>
-	inline static void
-	log(const char* message, TArgs&& ... args)
-	{
-		mutex_lock(logger_get_instance()->mtx);
-
-		vprintf(logger_stream_get(), message, std::forward<TArgs>(args)...);
-
-		mutex_unlock(logger_get_instance()->mtx);
-	}
-
-	MN_EXPORT Logger*
-	logger_get_instance();
+	MN_EXPORT void
+	log(Str str);
 
 	MN_EXPORT void
 	logger_free();
@@ -34,4 +17,18 @@ namespace mn
 
 	MN_EXPORT Stream
 	logger_stream_get();
+
+	template<typename ... TArgs>
+	inline static void
+	logf(const char* message, TArgs&& ... args)
+	{
+		Str log_message = strf(message, std::forward<TArgs>(args)...);
+		log(log_message);
+	}
+
+	inline static void 
+	log(const char* message)
+	{
+		log(str_lit(message));
+	}
 }

@@ -3,30 +3,38 @@
 
 namespace mn
 {
-
-	Logger* logger_get_instance()
+	struct Logger
 	{
-		static Logger _log = Logger{ stream_stderr(), mutex_new("log mutex") };
-		return &_log;
-	}
+		Stream current_stream;
+		Mutex mtx;
+	};
+
+	static Logger _log = Logger{ stream_stderr(), mutex_new("log mutex") };
 
 	void logger_free()
 	{
-		stream_free(logger_get_instance()->current_stream);
-		mutex_free(logger_get_instance()->mtx);
+		stream_free(_log.current_stream);
+		mutex_free(_log.mtx);
 	}
 
 	void logger_stream_change(Stream& stream)
 	{
-		mutex_lock(logger_get_instance()->mtx);
+		mutex_lock(_log.mtx);
 
-		logger_get_instance()->current_stream = stream;
+		_log.current_stream = stream;
 
-		mutex_unlock(logger_get_instance()->mtx);
+		mutex_unlock(_log.mtx);
 	}
 
 	Stream logger_stream_get()
 	{
-		return logger_get_instance()->current_stream;
+		return _log.current_stream;
+	}
+
+	void log(Str str)
+	{
+		mutex_lock(_log.mtx);
+		vprintf(logger_stream_get(), str.ptr);
+		mutex_unlock(_log.mtx);
 	}
 }
