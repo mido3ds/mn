@@ -10,9 +10,6 @@ namespace mn
 	log(Str str);
 
 	MN_EXPORT void
-	logger_free();
-
-	MN_EXPORT void
 	logger_stream_change(Stream& stream);
 
 	MN_EXPORT Stream
