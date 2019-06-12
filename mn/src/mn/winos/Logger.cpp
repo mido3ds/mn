@@ -1,5 +1,5 @@
 #include "mn/Logger.h"
-#include "mn/IO.h"
+#include "mn/Thread.h"
 
 namespace mn
 {
@@ -7,44 +7,58 @@ namespace mn
 	{
 		Logger()
 		{
-			stream_stderr();
-			mutex_new("log mutex");
+			current_stream = stream_stderr();
+			mtx = mutex_new("log mutex");
 		}
-
-		~Logger()
-		{
-			stream_free(current_stream);
-			mutex_free(mtx);
-		}
-
 
 		Stream current_stream;
 		Mutex mtx;
 	};
 
-	static Logger _log;
+	Logger
+	logger_instance()
+	{
+		static Logger _log;
+		return _log;
+	}
 
 	void
-	logger_stream_change(Stream& stream)
+	logger_free()
 	{
+		mutex_free(logger_instance().mtx);
+	}
+	
+	Stream
+	log_stream_set(Stream stream)
+	{
+		Logger _log = logger_instance();
+
 		mutex_lock(_log.mtx);
+
+		Stream old_stream = _log.current_stream;
 
 		_log.current_stream = stream;
 
 		mutex_unlock(_log.mtx);
+
+		return old_stream;
 	}
 
 	Stream
-	logger_stream_get()
+	log_stream()
 	{
-		return _log.current_stream;
+		return logger_instance().current_stream;
 	}
 
 	void
 	log(Str str)
 	{
+		Logger _log = logger_instance();
+
 		mutex_lock(_log.mtx);
-		vprintf(logger_stream_get(), str.ptr);
+
+		vprintf(_log.current_stream, str.ptr);
+
 		mutex_unlock(_log.mtx);
 	}
 }
