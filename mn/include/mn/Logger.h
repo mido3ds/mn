@@ -9,20 +9,17 @@ namespace mn
 	MN_EXPORT void
 	log(Str str);
 
+	inline static void
+	log(const char* message)
+	{
+		log(str_lit(message));
+	}
+
 	MN_EXPORT Stream
 	log_stream_set(Stream stream);
 
 	MN_EXPORT Stream
 	log_stream();
-
-	MN_EXPORT void
-	logger_free();
-
-	inline static void
-	logf(const char* message)
-	{
-		log(str_lit(message));
-	}
 
 	template<typename ... TArgs>
 	inline static void

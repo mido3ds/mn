@@ -11,35 +11,34 @@ namespace mn
 			mtx = mutex_new("log mutex");
 		}
 
+		~Logger()
+		{
+			mutex_free(mtx);
+		}
+
 		Stream current_stream;
 		Mutex mtx;
 	};
 
-	Logger
+	inline static Logger*
 	logger_instance()
 	{
 		static Logger _log;
-		return _log;
-	}
-
-	void
-	logger_free()
-	{
-		mutex_free(logger_instance().mtx);
+		return &_log;
 	}
 	
 	Stream
 	log_stream_set(Stream stream)
 	{
-		Logger _log = logger_instance();
+		Logger* _log = logger_instance();
 
-		mutex_lock(_log.mtx);
+		mutex_lock(_log->mtx);
 
-		Stream old_stream = _log.current_stream;
+		Stream old_stream = _log->current_stream;
 
-		_log.current_stream = stream;
+		_log->current_stream = stream;
 
-		mutex_unlock(_log.mtx);
+		mutex_unlock(_log->mtx);
 
 		return old_stream;
 	}
@@ -47,18 +46,18 @@ namespace mn
 	Stream
 	log_stream()
 	{
-		return logger_instance().current_stream;
+		return logger_instance()->current_stream;
 	}
 
 	void
 	log(Str str)
 	{
-		Logger _log = logger_instance();
+		Logger* _log = logger_instance();
 
-		mutex_lock(_log.mtx);
+		mutex_lock(_log->mtx);
 
-		vprintf(_log.current_stream, str.ptr);
+		vprintf(_log->current_stream, str.ptr);
 
-		mutex_unlock(_log.mtx);
+		mutex_unlock(_log->mtx);
 	}
 }
