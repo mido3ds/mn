@@ -5,6 +5,12 @@ namespace mn
 {
 	struct Logger
 	{
+		Logger()
+		{
+			stream_stderr();
+			mutex_new("log mutex");
+		}
+
 		~Logger()
 		{
 			stream_free(current_stream);
@@ -15,7 +21,7 @@ namespace mn
 		Mutex mtx;
 	};
 
-	static Logger _log = Logger{ stream_stderr(), mutex_new("log mutex") };
+	static Logger _log;
 
 	void
 	logger_stream_change(Stream& stream)
