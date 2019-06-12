@@ -17,6 +17,7 @@ namespace mn
 			mutex_free(mtx);
 		}
 
+
 		Stream current_stream;
 		Mutex mtx;
 	};
