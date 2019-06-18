@@ -2,6 +2,12 @@
 #include "mn/Buf.h"
 #include "mn/memory/Leak.h"
 
+#if DEBUG
+	#define ENABLE_LEAK_DETECTOR 1
+#else
+	#define ENABLE_LEAK_DETECTOR 0
+#endif
+
 namespace mn
 {
 	//allocator stack interface
@@ -37,7 +43,11 @@ namespace mn
 		int index = _allocator_index();
 		if (index < 0)
 		{
-			return memory::clib();
+			#if ENABLE_LEAK_DETECTOR
+				return memory::leak();
+			#else
+				return memory::clib();
+			#endif
 		}
 
 		return _allocator_stack()[index];
@@ -48,14 +58,13 @@ namespace mn
 	{
 		Allocator* stack = _allocator_stack();
 		int& allocator_index = _allocator_index();
-		allocator_index++;
-		stack[allocator_index] = allocator;
+		stack[++allocator_index] = allocator;
 	}
 
 	void
 	allocator_pop()
 	{
 		int& allocator_index = _allocator_index();
-		allocator_index--;
+		--allocator_index;
 	}
 }
