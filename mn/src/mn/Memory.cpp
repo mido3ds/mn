@@ -15,7 +15,7 @@ namespace mn
 	//allocator stack interface
 	struct Allocator_Stack
 	{
-		inline static constexpr size_t CAPACITY = 1024;
+		inline static constexpr int CAPACITY = 1024;
 		Allocator _stack[CAPACITY];
 		int _index = -1;
 	};
