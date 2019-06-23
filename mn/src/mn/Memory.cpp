@@ -17,7 +17,7 @@ namespace mn
 	{
 		inline static constexpr int CAPACITY = 1024;
 		Allocator _stack[CAPACITY];
-		int _index = -1;
+		int _count = 0;
 	};
 
 	inline static Allocator_Stack&
@@ -30,8 +30,8 @@ namespace mn
 	Allocator
 	allocator_top()
 	{
-		int index = _allocator_stack()._index;
-		if (index < 0)
+		Allocator_Stack& self = _allocator_stack();
+		if (self._count == 0)
 		{
 			#if ENABLE_LEAK_DETECTOR
 				return memory::leak();
@@ -40,23 +40,22 @@ namespace mn
 			#endif
 		}
 
-		return _allocator_stack()._stack[index];
+		return self._stack[self._count - 1];
 	}
 
 	void
 	allocator_push(Allocator allocator)
 	{
-		Allocator* stack = _allocator_stack()._stack;
-		int& index = _allocator_stack()._index;
-		assert(index < (Allocator_Stack::CAPACITY - 1));
-		stack[++index] = allocator;
+		Allocator_Stack& self = _allocator_stack();
+		assert(self._count < Allocator_Stack::CAPACITY);
+		self._stack[self._count++] = allocator;
 	}
 
 	void
 	allocator_pop()
 	{
-		int& index = _allocator_stack()._index;
-		assert(index >= 0);
-		--index;
+		Allocator_Stack& self = _allocator_stack();
+		assert(self._count > 0);
+		--self._count;
 	}
 }
