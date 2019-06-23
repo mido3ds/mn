@@ -48,7 +48,7 @@ namespace mn
 	{
 		Allocator* stack = _allocator_stack()._stack;
 		int& index = _allocator_stack()._index;
-		assert(index < Allocator_Stack::CAPACITY);
+		assert(index < (Allocator_Stack::CAPACITY - 1));
 		stack[++index] = allocator;
 	}
 
