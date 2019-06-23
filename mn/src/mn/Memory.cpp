@@ -2,6 +2,8 @@
 #include "mn/Buf.h"
 #include "mn/memory/Leak.h"
 
+#include <assert.h>
+
 #if DEBUG
 	#define ENABLE_LEAK_DETECTOR 1
 #else
@@ -11,33 +13,25 @@
 namespace mn
 {
 	//allocator stack interface
-	struct Allocator_Stack_Wrapper
+	struct Allocator_Stack
 	{
-		Buf<Allocator> stack;
-
-		Allocator_Stack_Wrapper()
-		{
-			stack = buf_with_allocator<Allocator>(memory::clib());
-		}
-
-		~Allocator_Stack_Wrapper()
-		{
-			buf_free(stack);
-		}
+		inline static constexpr int CAPACITY = 1024;
+		Allocator _stack[CAPACITY];
+		int _count = 0;
 	};
 
-	inline static Buf<Allocator>&
+	inline static Allocator_Stack&
 	_allocator_stack()
 	{
-		thread_local Allocator_Stack_Wrapper _wrapper;
-		return _wrapper.stack;
+		thread_local Allocator_Stack stack;
+		return stack;
 	}
 
 	Allocator
 	allocator_top()
 	{
-		Buf<Allocator>& stack = _allocator_stack();
-		if (stack.count == 0)
+		Allocator_Stack& self = _allocator_stack();
+		if (self._count == 0)
 		{
 			#if ENABLE_LEAK_DETECTOR
 				return memory::leak();
@@ -45,20 +39,23 @@ namespace mn
 				return memory::clib();
 			#endif
 		}
-		return buf_top(stack);
+
+		return self._stack[self._count - 1];
 	}
 
 	void
 	allocator_push(Allocator allocator)
 	{
-		Buf<Allocator>& stack = _allocator_stack();
-		buf_push(stack, allocator);
+		Allocator_Stack& self = _allocator_stack();
+		assert(self._count < Allocator_Stack::CAPACITY);
+		self._stack[self._count++] = allocator;
 	}
 
 	void
 	allocator_pop()
 	{
-		Buf<Allocator>& stack = _allocator_stack();
-		buf_pop(stack);
+		Allocator_Stack& self = _allocator_stack();
+		assert(self._count > 0);
+		--self._count;
 	}
 }
