@@ -170,6 +170,15 @@ namespace mn
 	file_cursor_move(File handle, int64_t offset);
 
 	/**
+	 * @brief      Set the file cursor by the given offset
+	 *
+	 * @param[in]  handle  The file handle
+	 * @param[in]  absolute The offset
+	 */
+	MN_EXPORT bool
+	file_cursor_set(File handle, int64_t absolute);
+
+	/**
 	 * @brief      Sets the file cursor to the start
 	 */
 	MN_EXPORT bool

@@ -169,6 +169,13 @@ namespace mn
 	}
 
 	bool
+	file_cursor_set(File handle, int64_t absolute)
+	{
+		off64_t offset = absolute;
+		return ::lseek64(handle.linux_handle, offset, SEEK_SET) != -1;
+	}
+
+	bool
 	file_cursor_move_to_start(File handle)
 	{
 		off64_t offset = 0;
