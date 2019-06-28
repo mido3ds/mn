@@ -31,6 +31,7 @@ set(HEADER_FILES
 	include/mn/Virtual_Memory.h
 	include/mn/Bytes.h
 	include/mn/Rune.h
+	include/mn/Context.h
 	include/utf8proc/utf8proc.h
 )
 
@@ -42,7 +43,6 @@ set(SOURCE_FILES
 	src/mn/memory/Stack.cpp
 	src/mn/memory/Virtual.cpp
 	src/mn/Base.cpp
-	src/mn/Memory.cpp
 	src/mn/Memory_Stream.cpp
 	src/mn/OS.cpp
 	src/mn/Pool.cpp
@@ -51,6 +51,7 @@ set(SOURCE_FILES
 	src/mn/Str_Intern.cpp
 	src/mn/Stream.cpp
 	src/mn/Rune.cpp
+	src/mn/Context.cpp
 	src/utf8proc/utf8proc.cpp
 )
 
