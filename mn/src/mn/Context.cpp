@@ -50,13 +50,13 @@ namespace mn
 			#endif
 		self->_allocator_stack_count = 1;
 
-		self->_allocator_tmp = allocator_arena_new(4ULL * 1024ULL * 1024ULL, memory::clib());
+		self->_allocator_tmp = alloc_construct_from<memory::Arena>(memory::clib(), 4ULL * 1024ULL * 1024ULL, memory::clib());
 	}
 
 	void
 	context_free(Context* self)
 	{
-		allocator_free(self->_allocator_tmp);
+		free_destruct_from(memory::clib(), self->_allocator_tmp);
 	}
 
 	Context*

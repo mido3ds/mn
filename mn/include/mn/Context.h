@@ -1,13 +1,17 @@
 #pragma once
 
 #include "mn/Exports.h"
-#include "mn/memory/Interface.h"
-#include "mn/memory/Arena.h"
 
 #include <stddef.h>
 
 namespace mn
 {
+	namespace memory
+	{
+		struct Interface;
+		struct Arena;
+	}
+
 	using Allocator = memory::Interface*;
 
 	typedef struct IStream* Stream;
