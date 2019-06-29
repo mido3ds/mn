@@ -32,6 +32,7 @@ set(HEADER_FILES
 	include/mn/Bytes.h
 	include/mn/Rune.h
 	include/mn/Context.h
+	include/mn/Task.h
 	include/utf8proc/utf8proc.h
 )
 
