@@ -13,6 +13,7 @@
 #include <mn/OS.h>
 #include <mn/Bytes.h>
 #include <mn/memory/Leak.h>
+#include <mn/Task.h>
 
 using namespace mn;
 
@@ -447,4 +448,21 @@ TEST_CASE("Rune")
 	CHECK(rune_lower('A') == 'a');
 	CHECK(rune_lower('a') == 'a');
 	CHECK(rune_lower('م') == 'م');
+}
+
+TEST_CASE("Task")
+{
+	CHECK(std::is_pod_v<Task<void()>> == true);
+
+	auto add = Task<int(int, int)>::make([](int a, int b) { return a + b; });
+	CHECK(std::is_pod_v<decltype(add)> == true);
+
+	auto inc = Task<int(int)>::make([=](int a) mutable { return add(a, 1); });
+	CHECK(std::is_pod_v<decltype(inc)> == true);
+
+	CHECK(add(1, 2) == 3);
+	CHECK(inc(5) == 6);
+
+	task_free(add);
+	task_free(inc);
 }
