@@ -50,7 +50,7 @@ namespace mn
 			Model(G&& f)
 			{
 				allocator = allocator_top();
-				fn = alloc_construct_from<F>(allocator, std::forward<F>(f));
+				fn = alloc_construct_from<F>(allocator, std::forward<G>(f));
 			}
 
 			template<typename G>
@@ -71,7 +71,7 @@ namespace mn
 			}
 		};
 
-		static constexpr size_t SMALL_SIZE = sizeof(void*) * 7;
+		static constexpr size_t SMALL_SIZE = sizeof(void*) * 8;
 		std::aligned_storage_t<SMALL_SIZE> concept;
 
 		Concept& _self()
