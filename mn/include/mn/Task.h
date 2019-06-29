@@ -53,6 +53,13 @@ namespace mn
 				fn = alloc_construct_from<F>(allocator, std::forward<F>(f));
 			}
 
+			template<typename G>
+			Model(Allocator a, G&& f)
+			{
+				allocator = a;
+				fn = alloc_construct_from<F>(allocator, std::forward<F>(f));
+			}
+
 			~Model() override
 			{
 				free_destruct_from(allocator, fn);
@@ -65,7 +72,6 @@ namespace mn
 		};
 
 		static constexpr size_t SMALL_SIZE = sizeof(void*) * 7;
-		Allocator allocator;
 		std::aligned_storage_t<SMALL_SIZE> concept;
 
 		Concept& _self()
@@ -84,8 +90,17 @@ namespace mn
 		{
 			constexpr bool is_small = sizeof(Model<std::decay_t<F>, true>) <= SMALL_SIZE;
 			Task<R(Args...)> self{};
-			self.allocator = allocator_top();
 			::new (&self.concept) Model<std::decay_t<F>, is_small>(std::forward<F>(f));
+			return self;
+		}
+
+		template<typename F>
+		inline static Task<R(Args...)>
+		make_with_allocator(Allocator allocator, F&& f)
+		{
+			constexpr bool is_small = sizeof(Model<std::decay_t<F>, true>) <= SMALL_SIZE;
+			Task<R(Args...)> self{};
+			::new (&self.concept) Model<std::decay_t<F>, is_small>(allocator, std::forward<F>(f));
 			return self;
 		}
 	};
