@@ -32,6 +32,11 @@ namespace mn
 				:fn(std::forward<G>(f))
 			{}
 
+			template<typename G>
+			Model(Allocator allocator, G&& f)
+				:fn(std::forward<G>(f))
+			{}
+
 			R invoke(Args&&... args) override
 			{
 				return std::invoke(fn, std::forward<Args>(args)...);
