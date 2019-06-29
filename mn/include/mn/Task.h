@@ -15,7 +15,6 @@ namespace mn
 	{
 		struct Concept
 		{
-			Allocator allocator;
 			virtual ~Concept() = default;
 			virtual R invoke(Args&&... args) = 0;
 		};
@@ -31,9 +30,7 @@ namespace mn
 			template<typename G>
 			Model(G&& f)
 				:fn(std::forward<G>(f))
-			{
-				allocator = nullptr;
-			}
+			{}
 
 			R invoke(Args&&... args) override
 			{
@@ -44,6 +41,7 @@ namespace mn
 		template<typename F>
 		struct Model<F, false> final : Concept
 		{
+			Allocator allocator;
 			F* fn;
 
 			template<typename G>

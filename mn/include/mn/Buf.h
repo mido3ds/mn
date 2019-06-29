@@ -134,6 +134,19 @@ namespace mn
 		value.~T();
 	}
 
+	inline static void destruct(char&) {}
+	inline static void destruct(uint8_t&) {}
+	inline static void destruct(uint16_t&) {}
+	inline static void destruct(uint32_t&) {}
+	inline static void destruct(uint64_t&) {}
+	inline static void destruct(int8_t&) {}
+	inline static void destruct(int16_t&) {}
+	inline static void destruct(int32_t&) {}
+	inline static void destruct(int64_t&) {}
+	inline static void destruct(float&) {}
+	inline static void destruct(double&) {}
+	inline static void destruct(long double&) {}
+
 	/**
 	 * @brief      A Custom destruct function for the buf which iterates over all the elements
 	 * and calls destruct on each element thus useful for destructing a big hierarchy 

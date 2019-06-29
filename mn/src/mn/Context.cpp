@@ -1,9 +1,9 @@
 #include "mn/Context.h"
 #include "mn/Memory.h"
-#include "mn/IO.h"
 #include "mn/memory/Leak.h"
 
 #include <assert.h>
+#include <stdio.h>
 
 namespace mn
 {
@@ -19,7 +19,7 @@ namespace mn
 		~Context_Wrapper()
 		{
 			#if DEBUG
-				printfmt_err("Temp Allocator 0x{:X}: {} bytes used at exit, {} bytes highwater mark\n",
+				fprintf(stderr, "Temp Allocator %p: %zu bytes used at exit, %zu bytes highwater mark\n",
 					self._allocator_tmp, self._allocator_tmp->used_mem, self._allocator_tmp->highwater_mem);
 			#endif
 
