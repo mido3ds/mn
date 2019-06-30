@@ -5,6 +5,7 @@
 #include "mn/memory/Interface.h"
 #include "mn/memory/Stack.h"
 #include "mn/memory/Arena.h"
+#include "mn/Context.h"
 
 #include <stdint.h>
 #include <utility>
@@ -14,29 +15,6 @@
 namespace mn
 {
 	using Allocator = memory::Interface*;
-
-	/**
-	 * Allocators are organized in a per thread stack so that you can change the allocator of any
-	 * part of the code even if it doesn't support custom allocator by using
-	 * allocator_push() and allocator_pop()
-	 * At the base of the stack is the clib_allocator and it can't be popped
-	 *
-	 * @return     The current top of allocator stack of the calling thread
-	 */
-	MN_EXPORT Allocator
-	allocator_top();
-
-	/**
-	 * @brief      Pushes the given allocator to the top of the calling thread allocator stack
-	 */
-	MN_EXPORT void
-	allocator_push(Allocator allocator);
-
-	/**
-	 * @brief      Pops an allocator off the calling thread allocator stack
-	 */
-	MN_EXPORT void
-	allocator_pop();
 
 
 	//alloc from interface

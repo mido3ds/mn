@@ -76,30 +76,4 @@ namespace mn::memory
 		this->total_mem = 0;
 		this->used_mem = 0;
 	}
-
-
-	//tmp allocator
-	struct Tmp_Allocator_Wrapper
-	{
-		Arena arena;
-
-		Tmp_Allocator_Wrapper()
-			:arena(4ULL*1024ULL, clib())
-		{}
-
-		~Tmp_Allocator_Wrapper()
-		{
-			#if DEBUG
-				printfmt_err("Temp Allocator 0x{:X}: {} bytes used at exit, {} bytes highwater mark\n",
-					&arena, arena.used_mem, arena.highwater_mem);
-			#endif
-		}
-	};
-
-	Arena*
-	tmp()
-	{
-		thread_local Tmp_Allocator_Wrapper _tmp_allocator;
-		return &_tmp_allocator.arena;
-	}
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "mn/Memory.h"
+#include "mn/Buf.h"
 
 #include <string.h>
 #include <assert.h>
