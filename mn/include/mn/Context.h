@@ -29,7 +29,7 @@ namespace mn
 
 		//Local tmp stream
 		Stream _stream_tmp;
-		Reader _reader_tmp;
+		Reader reader_tmp;
 	};
 
 	MN_EXPORT void
@@ -80,5 +80,5 @@ namespace mn
 	stream_tmp();
 
 	MN_EXPORT Reader
-	_reader_tmp();
+	reader_tmp();
 }

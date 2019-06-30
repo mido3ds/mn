@@ -56,7 +56,7 @@ namespace mn
 
 
 		self->_stream_tmp = stream_memory_new(memory::clib());
-		self->_reader_tmp = reader_with_allocator(nullptr, memory::clib());
+		self->reader_tmp = reader_with_allocator(nullptr, memory::clib());
 	}
 
 	void
@@ -64,7 +64,7 @@ namespace mn
 	{
 		free_destruct_from(memory::clib(), self->_allocator_tmp);
 		stream_free(self->_stream_tmp);
-		reader_free(self->_reader_tmp);
+		reader_free(self->reader_tmp);
 	}
 
 	Context*
@@ -122,8 +122,8 @@ namespace mn
 	}
 
 	Reader
-	_reader_tmp()
+	reader_tmp()
 	{
-		return context_local()->_reader_tmp;
+		return context_local()->reader_tmp;
 	}
 }
