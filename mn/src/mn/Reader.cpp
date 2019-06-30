@@ -9,16 +9,10 @@ namespace mn
 {
 	struct IReader
 	{
+		Allocator allocator;
 		Stream stream;
 		Memory_Stream buffer;
 	};
-	
-	TS_Typed_Pool<IReader>*
-	_reader_pool()
-	{
-		static TS_Typed_Pool<IReader> _pool(1024, memory::clib());
-		return &_pool;
-	}
 
 	struct Stdin_Reader_Wrapper
 	{
@@ -46,7 +40,9 @@ namespace mn
 	Reader
 	reader_new(Stream stream)
 	{
-		Reader self = _reader_pool()->get();
+		Allocator allocator = allocator_top();
+		Reader self = alloc_from<IReader>(allocator);
+		self->allocator = allocator;
 		self->stream = stream;
 		self->buffer = memory_stream_new();
 		return self;
@@ -55,7 +51,8 @@ namespace mn
 	Reader
 	reader_with_allocator(Stream stream, Allocator allocator)
 	{
-		Reader self = _reader_pool()->get();
+		Reader self = alloc_from<IReader>(allocator);
+		self->allocator = allocator;
 		self->stream = stream;
 		self->buffer = memory_stream_new(allocator);
 		return self;
@@ -64,7 +61,9 @@ namespace mn
 	Reader
 	reader_str(const Str& str)
 	{
-		Reader self = _reader_pool()->get();
+		Allocator allocator = allocator_top();
+		Reader self = alloc_from<IReader>(allocator);
+		self->allocator = allocator;
 		self->stream = nullptr;
 		self->buffer = memory_stream_new();
 		memory_stream_write(self->buffer, Block{ str.ptr, str.count });
@@ -92,7 +91,7 @@ namespace mn
 		if(self->stream)
 			stream_free(self->stream);
 
-		_reader_pool()->put(self);
+		free_from(self->allocator, self);
 	}
 
 	Block
