@@ -26,6 +26,10 @@ namespace mn
 
 		//tmp allocator
 		memory::Arena* _allocator_tmp;
+
+		//Local tmp stream
+		Stream _stream_tmp;
+		Reader _reader_tmp;
 	};
 
 	MN_EXPORT void
@@ -71,4 +75,10 @@ namespace mn
 		MN_EXPORT Arena*
 		tmp();
 	}
+
+	MN_EXPORT Stream
+	stream_tmp();
+
+	MN_EXPORT Reader
+	_reader_tmp();
 }

@@ -43,35 +43,21 @@ namespace mn
 		return &_stdin.self;
 	}
 
-	struct Reader_Tmp_Wrapper
-	{
-		IReader self;
-
-		Reader_Tmp_Wrapper()
-		{
-			self.stream = nullptr;
-			self.buffer = memory_stream_new(memory::clib());
-		}
-
-		~Reader_Tmp_Wrapper()
-		{
-			memory_stream_free(self.buffer);
-		}
-	};
-
-	Reader
-	_reader_tmp()
-	{
-		thread_local Reader_Tmp_Wrapper _reader;
-		return &_reader.self;
-	}
-
 	Reader
 	reader_new(Stream stream)
 	{
 		Reader self = _reader_pool()->get();
 		self->stream = stream;
 		self->buffer = memory_stream_new();
+		return self;
+	}
+
+	Reader
+	reader_with_allocator(Stream stream, Allocator allocator)
+	{
+		Reader self = _reader_pool()->get();
+		self->stream = stream;
+		self->buffer = memory_stream_new(allocator);
 		return self;
 	}
 

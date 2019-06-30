@@ -30,9 +30,6 @@ namespace mn
 	MN_EXPORT Stream
 	stream_stdin();
 
-	MN_EXPORT Stream
-	stream_tmp();
-
 	/**
 	 * @brief      Returns a stream of the given file
 	 *

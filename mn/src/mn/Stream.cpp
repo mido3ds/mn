@@ -59,31 +59,6 @@ namespace mn
 		return &_stdin;
 	}
 
-	struct Stream_Tmp_Wrapper
-	{
-		IStream self;
-
-		Stream_Tmp_Wrapper()
-		{
-			self = IStream{};
-			self.kind = IStream::KIND_MEMORY;
-			self.memory = memory_stream_new(allocator_top());
-		}
-
-		~Stream_Tmp_Wrapper()
-		{
-			memory_stream_free(self.memory);
-		}
-	};
-
-	Stream
-	stream_tmp()
-	{
-		thread_local Stream_Tmp_Wrapper _tmp;
-		stream_cursor_move_to_start(&_tmp.self);
-		return &_tmp.self;
-	}
-
 	Stream
 	stream_file_new(const char* filename, IO_MODE io_mode, OPEN_MODE open_mode)
 	{

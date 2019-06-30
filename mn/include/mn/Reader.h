@@ -20,9 +20,6 @@ namespace mn
 	MN_EXPORT Reader
 	reader_stdin();
 
-	MN_EXPORT Reader
-	_reader_tmp();
-
 	/**
 	 * @brief      Returns a newly created reader on top of the given stream
 	 *
@@ -30,6 +27,9 @@ namespace mn
 	 */
 	MN_EXPORT Reader
 	reader_new(Stream stream);
+
+	MN_EXPORT Reader
+	reader_with_allocator(Stream stream, Allocator allocator);
 
 	/**
 	 * @brief      Returns a newly created reader on top of the given string (copies the string)
