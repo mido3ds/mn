@@ -1865,7 +1865,7 @@ namespace mn
 	inline static size_t
 	reads(const Str& str, TArgs&& ... args)
 	{
-		Reader reader = _reader_tmp();
+		Reader reader = reader_tmp();
 		reader = reader_wrap_str(reader, str);
 		size_t result = 0;
 		_variadic_read_string_helper(reader, result, std::forward<TArgs>(args)...);

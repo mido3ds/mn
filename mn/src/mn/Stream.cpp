@@ -15,6 +15,7 @@ namespace mn
 			KIND_MEMORY
 		};
 
+		Allocator allocator;
 		KIND kind;
 		union
 		{
@@ -22,12 +23,6 @@ namespace mn
 			Memory_Stream memory;
 		};
 	};
-	TS_Typed_Pool<IStream>*
-	_stream_pool()
-	{
-		static TS_Typed_Pool<IStream> _pool(1024, memory::clib());
-		return &_pool;
-	}
 
 	IStream
 	_stream_std(File file)
@@ -59,31 +54,6 @@ namespace mn
 		return &_stdin;
 	}
 
-	struct Stream_Tmp_Wrapper
-	{
-		IStream self;
-
-		Stream_Tmp_Wrapper()
-		{
-			self = IStream{};
-			self.kind = IStream::KIND_MEMORY;
-			self.memory = memory_stream_new(allocator_top());
-		}
-
-		~Stream_Tmp_Wrapper()
-		{
-			memory_stream_free(self.memory);
-		}
-	};
-
-	Stream
-	stream_tmp()
-	{
-		thread_local Stream_Tmp_Wrapper _tmp;
-		stream_cursor_move_to_start(&_tmp.self);
-		return &_tmp.self;
-	}
-
 	Stream
 	stream_file_new(const char* filename, IO_MODE io_mode, OPEN_MODE open_mode)
 	{
@@ -93,8 +63,10 @@ namespace mn
 			assert(false && "Cannot open file");
 			return nullptr;
 		}
-		
-		Stream self = _stream_pool()->get();
+
+		Allocator allocator = allocator_top();
+		Stream self = alloc_from<IStream>(allocator);
+		self->allocator = allocator;
 		self->kind = IStream::KIND_FILE;
 		self->file = file;
 		return self;
@@ -103,7 +75,8 @@ namespace mn
 	Stream
 	stream_memory_new(Allocator allocator)
 	{
-		Stream self = _stream_pool()->get();
+		Stream self = alloc_from<IStream>(allocator);
+		self->allocator = allocator;
 		self->kind = IStream::KIND_MEMORY;
 		self->memory = memory_stream_new(allocator);
 		return self;
@@ -128,7 +101,7 @@ namespace mn
 					   "Invalid stream type");
 				break;
 		}
-		_stream_pool()->put(self);
+		free_from(self->allocator, self);
 	}
 
 	size_t
