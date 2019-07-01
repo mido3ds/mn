@@ -334,6 +334,14 @@ namespace mn
 	}
 
 	bool
+	file_cursor_set(File handle, int64_t absolute)
+	{
+		LARGE_INTEGER position, win_offset;
+		win_offset.QuadPart = absolute;
+		return SetFilePointerEx(handle.windows_handle, win_offset, &position, FILE_BEGIN);
+	}
+
+	bool
 	file_cursor_move_to_start(File handle)
 	{
 		LARGE_INTEGER position, offset;
