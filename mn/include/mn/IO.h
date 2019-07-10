@@ -8,7 +8,6 @@
 #include <errno.h>
 #include <limits>
 #include <assert.h>
-#include <charconv>
 
 namespace mn
 {
@@ -1588,6 +1587,7 @@ namespace mn
 		//we cannot parse negative numbers
 		if(*begin == '-')
 			return 0;
+
 		uint64_t tmp_value = ::strtoull(begin, &end, base);
 
 		if(errno == ERANGE)
