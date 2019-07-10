@@ -8,6 +8,7 @@
 #include <errno.h>
 #include <limits>
 #include <assert.h>
+#include <charconv>
 
 namespace mn
 {
@@ -1574,7 +1575,7 @@ namespace mn
 	}
 
 	inline static size_t
-	_read_uint64(Reader reader, uint64_t& value, int base)
+	_read_uint64(Reader reader, uint64_t& value,int base)
 	{
 		_guarantee_text_chunk(reader, 40);
 		Block peeked_content = reader_peek(reader, 0);
@@ -1588,9 +1589,11 @@ namespace mn
 		if(*begin == '-')
 			return 0;
 
-		uint64_t tmp_value = ::strtoull(begin, &end, base);
+		uint64_t tmp_value = 0;
+		std::from_chars_result res = std::from_chars(begin, end, tmp_value, base);
+		end = (char *)res.ptr;
 
-		if(errno == ERANGE)
+		if(res.ec != std::errc())
 			return 0;
 
 		value = tmp_value;
@@ -1606,9 +1609,11 @@ namespace mn
 
 		char* begin = (char*)peeked_content.ptr;
 		char* end = (char*)peeked_content.ptr + peeked_content.size;
-		int64_t tmp_value = ::strtoll(begin, &end, base);
+		int64_t tmp_value = 0;
+		std::from_chars_result res = std::from_chars(begin, end, tmp_value, base);
+		end = (char*)res.ptr;
 
-		if(errno == ERANGE)
+		if(res.ec != std::errc())
 			return 0;
 
 		value = tmp_value;
@@ -1624,9 +1629,11 @@ namespace mn
 
 		char* begin = (char*)peeked_content.ptr;
 		char* end = (char*)peeked_content.ptr + peeked_content.size;
-		float tmp_value = ::strtof(begin, &end);
+		float tmp_value = 0;
+		std::from_chars_result res = std::from_chars(begin, end, tmp_value);
+		end = (char*)res.ptr;
 
-		if(errno == ERANGE)
+		if(res.ec != std::errc())
 			return 0;
 
 		value = tmp_value;
@@ -1642,9 +1649,11 @@ namespace mn
 
 		char* begin = (char*)peeked_content.ptr;
 		char* end = (char*)peeked_content.ptr + peeked_content.size;
-		double tmp_value = ::strtod(begin, &end);
+		double tmp_value = 0;
+		std::from_chars_result res = std::from_chars(begin, end, tmp_value);
+		end = (char*)res.ptr;
 
-		if(errno == ERANGE)
+		if(res.ec != std::errc())
 			return 0;
 
 		value = tmp_value;

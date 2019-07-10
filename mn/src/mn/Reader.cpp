@@ -79,7 +79,7 @@ namespace mn
 
 		assert(self->stream == nullptr);
 		memory_stream_clear(self->buffer);
-		memory_stream_write(self->buffer, Block { str.ptr, str.count });
+		memory_stream_write(self->buffer, Block { str.ptr, str.count + 1 });
 		memory_stream_cursor_to_start(self->buffer);
 		return self;
 	}
