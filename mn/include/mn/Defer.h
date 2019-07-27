@@ -19,5 +19,5 @@ namespace mn
 	#define mn_DEFER_1(x, y) x##y
 	#define mn_DEFER_2(x, y) mn_DEFER_1(x, y)
 	#define mn_DEFER_3(x)    mn_DEFER_2(x, __COUNTER__)
-	#define mn_defer(code)   auto mn_DEFER_3(_defer_) = make_defer([&](){code;})
+	#define mn_defer(code)   auto mn_DEFER_3(_defer_) = mn::make_defer([&](){code;})
 }
