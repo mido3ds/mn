@@ -67,6 +67,8 @@ namespace mn
 	void
 	str_push(Str& self, const char* str)
 	{
+		if (str == nullptr)
+			return;
 		size_t str_len = ::strlen(str);
 		size_t self_len = self.count;
 		buf_resize(self, self.count + str_len + 1);
