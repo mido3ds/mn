@@ -71,6 +71,7 @@ if(WIN32)
 elseif(UNIX)
 	set(SOURCE_FILES ${SOURCE_FILES} 
 		src/mn/linux/Debug.cpp
+		src/mn/linux/Path.cpp
 		src/mn/linux/File.cpp
 		src/mn/linux/Thread.cpp
 		src/mn/linux/Virtual_Memory.cpp

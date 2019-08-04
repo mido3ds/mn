@@ -52,7 +52,7 @@ namespace mn
 	void
 	memory_stream_free(Memory_Stream self)
 	{
-		free_destruct(self);
+		free_destruct_from(self->str.allocator, self);
 	}
 
 	size_t

@@ -1,5 +1,6 @@
 #pragma once
-#include "mn/Stream.h"
+#include "mn/File.h"
+#include "mn/Memory_Stream.h"
 #include "mn/Reader.h"
 
 #include <stdio.h>
@@ -1429,7 +1430,7 @@ namespace mn
 	{
 		Memory_Stream stream = stream_tmp();
 		vprintf(stream, format, std::forward<TArgs>(args)...);
-		return str_from_c(stream->str.ptr, memory::tmp());
+		return str_clone(stream->str, memory::tmp());
 	}
 
 	/**
@@ -1445,9 +1446,9 @@ namespace mn
 	inline static Str
 	strf(Str str, const char* format, TArgs&& ... args)
 	{
-		Stream stream = stream_tmp();
+		Memory_Stream stream = stream_tmp();
 		vprintf(stream, format, std::forward<TArgs>(args)...);
-		str_push(str, stream_str(stream));
+		str_push(str, stream->str);
 		return str;
 	}
 
@@ -1486,14 +1487,14 @@ namespace mn
 	inline static size_t
 	printfmt(const char* format, TArgs&& ... args)
 	{
-		return vprintf(stream_stdout(), format, std::forward<TArgs>(args)...);
+		return vprintf(file_stdout(), format, std::forward<TArgs>(args)...);
 	}
 
 	template<typename ... TArgs>
 	inline static size_t
 	printfmt_err(const char* format, TArgs&& ... args)
 	{
-		return vprintf(stream_stderr(), format, std::forward<TArgs>(args)...);
+		return vprintf(file_stderr(), format, std::forward<TArgs>(args)...);
 	}
 
 
