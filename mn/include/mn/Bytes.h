@@ -196,4 +196,10 @@ namespace mn
 		[[maybe_unused]] size_t read_size = memory_stream_read(self, data);
 		assert(read_size == data.size);
 	}
+
+	inline static Block
+	block_from(const Bytes& self)
+	{
+		return block_from(self.str);
+	}
 }
