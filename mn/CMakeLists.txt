@@ -8,8 +8,6 @@ set(HEADER_FILES
 	include/mn/memory/Leak.h
 	include/mn/memory/Stack.h
 	include/mn/memory/Virtual.h
-	include/mn/io/Stream.h
-	include/mn/io/File.h
 	include/mn/Atomic.h
 	include/mn/Base.h
 	include/mn/Buf.h
@@ -17,7 +15,7 @@ set(HEADER_FILES
 	include/mn/Logger.h
 	include/mn/Defer.h
 	include/mn/Exports.h
-	include/mn/File.h
+	include/mn/Path.h
 	include/mn/Fixed_Buf.h
 	include/mn/IO.h
 	include/mn/Map.h
@@ -46,7 +44,6 @@ set(SOURCE_FILES
 	src/mn/memory/Leak.cpp
 	src/mn/memory/Stack.cpp
 	src/mn/memory/Virtual.cpp
-	src/mn/io/Stream.cpp
 	src/mn/Base.cpp
 	src/mn/Memory_Stream.cpp
 	src/mn/OS.cpp
@@ -65,8 +62,8 @@ if(WIN32)
 	set(SOURCE_FILES ${SOURCE_FILES} 
 		src/mn/winos/Debug.cpp
 		src/mn/winos/Logger.cpp
+		src/mn/winos/Path.cpp
 		src/mn/winos/File.cpp
-		src/mn/winos/ioFile.cpp
 		src/mn/winos/Thread.cpp
 		src/mn/winos/Virtual_Memory.cpp
 		src/mn/winos/Atomic.cpp

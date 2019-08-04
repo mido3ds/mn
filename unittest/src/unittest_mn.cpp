@@ -14,6 +14,7 @@
 #include <mn/Bytes.h>
 #include <mn/memory/Leak.h>
 #include <mn/Task.h>
+#include <mn/Path.h>
 
 using namespace mn;
 

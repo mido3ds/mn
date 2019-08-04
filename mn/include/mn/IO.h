@@ -1427,9 +1427,9 @@ namespace mn
 	inline static Str
 	str_tmpf(const char* format, TArgs&& ... args)
 	{
-		Stream stream = stream_tmp();
+		Memory_Stream stream = stream_tmp();
 		vprintf(stream, format, std::forward<TArgs>(args)...);
-		return str_from_c(stream_str(stream), memory::tmp());
+		return str_from_c(stream->str.ptr, memory::tmp());
 	}
 
 	/**

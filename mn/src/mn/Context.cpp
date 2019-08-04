@@ -3,6 +3,7 @@
 #include "mn/memory/Leak.h"
 #include "mn/Stream.h"
 #include "mn/Reader.h"
+#include "mn/Memory_Stream.h"
 
 #include <assert.h>
 #include <stdio.h>
@@ -55,7 +56,7 @@ namespace mn
 		self->_allocator_tmp = alloc_construct_from<memory::Arena>(memory::clib(), 4ULL * 1024ULL * 1024ULL, memory::clib());
 
 
-		self->_stream_tmp = stream_memory_new(memory::clib());
+		self->_stream_tmp = memory_stream_new(memory::clib());
 		self->reader_tmp = reader_with_allocator(nullptr, memory::clib());
 	}
 
@@ -63,7 +64,7 @@ namespace mn
 	context_free(Context* self)
 	{
 		free_destruct_from(memory::clib(), self->_allocator_tmp);
-		stream_free(self->_stream_tmp);
+		memory_stream_free(self->_stream_tmp);
 		reader_free(self->reader_tmp);
 	}
 
@@ -113,11 +114,11 @@ namespace mn
 		}
 	}
 
-	Stream
+	Memory_Stream
 	stream_tmp()
 	{
-		Stream res = context_local()->_stream_tmp;
-		stream_cursor_move_to_start(res);
+		Memory_Stream res = context_local()->_stream_tmp;
+		memory_stream_cursor_to_start(res);
 		return res;
 	}
 

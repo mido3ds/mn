@@ -1,17 +1,25 @@
 #pragma once
 
 #include "mn/Exports.h"
+#include "mn/Stream.h"
 #include "mn/Str.h"
 
 namespace mn
 {
-	/**
-	 * @brief      Memory Stream structure think of it as an in-memory equivalent of a file
-	 */
-	struct Memory_Stream
+	typedef struct IMemory_Stream* Memory_Stream;
+	struct IMemory_Stream final: IStream
 	{
-		Str str;
+		mn::Str str;
 		int64_t cursor;
+
+		MN_EXPORT virtual
+		~IMemory_Stream() override;
+
+		MN_EXPORT virtual size_t
+		read(Block data) override;
+
+		MN_EXPORT virtual size_t
+		write(Block data) override;
 	};
 
 	/**
@@ -29,7 +37,7 @@ namespace mn
 	 * @param      self  The memory stream
 	 */
 	MN_EXPORT void
-	memory_stream_free(Memory_Stream& self);
+	memory_stream_free(Memory_Stream self);
 
 	/**
 	 * @brief      Destruct function overload for the memory stream
@@ -37,7 +45,7 @@ namespace mn
 	 * @param      self  The memory stream
 	 */
 	inline static void
-	destruct(Memory_Stream& self)
+	destruct(Memory_Stream self)
 	{
 		memory_stream_free(self);
 	}
@@ -51,7 +59,7 @@ namespace mn
 	 * @return     The size of the written data in bytes
 	 */
 	MN_EXPORT size_t
-	memory_stream_write(Memory_Stream& self, Block data);
+	memory_stream_write(Memory_Stream self, Block data);
 
 	/**
 	 * @brief      Reads into the given block from the memory stream
@@ -62,7 +70,7 @@ namespace mn
 	 * @return     The size of the read data in bytes
 	 */
 	MN_EXPORT size_t
-	memory_stream_read(Memory_Stream& self, Block data);
+	memory_stream_read(Memory_Stream self, Block data);
 
 	/**
 	 * @brief      Returns the size of the memory stream in bytes
@@ -70,10 +78,10 @@ namespace mn
 	 * @param      self  The memory stream
 	 */
 	MN_EXPORT int64_t
-	memory_stream_size(const Memory_Stream& self);
+	memory_stream_size(Memory_Stream self);
 
 	MN_EXPORT bool
-	memory_stream_eof(const Memory_Stream& self);
+	memory_stream_eof(Memory_Stream self);
 
 	/**
 	 * @brief      Returns the position of the cursor in the memory stream
@@ -81,7 +89,7 @@ namespace mn
 	 * @param      self  The memory stream
 	 */
 	MN_EXPORT int64_t
-	memory_stream_cursor_pos(const Memory_Stream& self);
+	memory_stream_cursor_pos(Memory_Stream self);
 
 	/**
 	 * @brief      Moves the cursor by the given offset
@@ -90,7 +98,7 @@ namespace mn
 	 * @param[in]  offset  The offset
 	 */
 	MN_EXPORT void
-	memory_stream_cursor_move(Memory_Stream& self, int64_t offset);
+	memory_stream_cursor_move(Memory_Stream self, int64_t offset);
 
 	/**
 	 * @brief      Moves the cursor to the given absolute position
@@ -99,7 +107,7 @@ namespace mn
 	 * @param[in]  abs   The absolute position
 	 */
 	MN_EXPORT void
-	memory_stream_cursor_set(Memory_Stream& self, int64_t abs);
+	memory_stream_cursor_set(Memory_Stream self, int64_t abs);
 
 	/**
 	 * @brief      Moves the cursor to the start of the memory stream
@@ -107,7 +115,7 @@ namespace mn
 	 * @param      self  The memory stream
 	 */
 	MN_EXPORT void
-	memory_stream_cursor_to_start(Memory_Stream& self);
+	memory_stream_cursor_to_start(Memory_Stream self);
 
 	/**
 	 * @brief      Moves the cursor to the end of the memory stream
@@ -115,7 +123,7 @@ namespace mn
 	 * @param      self  The memory stream
 	 */
 	MN_EXPORT void
-	memory_stream_cursor_to_end(Memory_Stream& self);
+	memory_stream_cursor_to_end(Memory_Stream self);
 
 	/**
 	 * @brief      Ensures the memory stream has the capacity to hold the given size(in bytes)
@@ -124,7 +132,7 @@ namespace mn
 	 * @param[in]  size  The size (in bytes)
 	 */
 	MN_EXPORT void
-	memory_stream_reserve(Memory_Stream& self, size_t size);
+	memory_stream_reserve(Memory_Stream self, size_t size);
 
 	/**
 	 * @brief      Returns the capacity of the memory stream
@@ -132,7 +140,7 @@ namespace mn
 	 * @param      self  The memory stream
 	 */
 	MN_EXPORT size_t
-	memory_stream_capacity(Memory_Stream& self);
+	memory_stream_capacity(Memory_Stream self);
 
 	/**
 	 * @brief      Clears the memory stream
@@ -140,7 +148,7 @@ namespace mn
 	 * @param      self  The memory stream
 	 */
 	MN_EXPORT void
-	memory_stream_clear(Memory_Stream& self);
+	memory_stream_clear(Memory_Stream self);
 
 	/**
 	 * @brief      Returns the memory block starting from the cursor with the given
@@ -151,7 +159,7 @@ namespace mn
 	 * @param[in]  size  The size (in bytes)
 	 */
 	MN_EXPORT Block
-	memory_stream_block_ahead(Memory_Stream& self, size_t size);
+	memory_stream_block_ahead(Memory_Stream self, size_t size);
 
 	/**
 	 * @brief      Returns the memory block starting from the cursor with the given
@@ -162,5 +170,17 @@ namespace mn
 	 * @param[in]  size  The size (in bytes)
 	 */
 	MN_EXPORT Block
-	memory_stream_block_behind(Memory_Stream& self, size_t size);
+	memory_stream_block_behind(Memory_Stream self, size_t size);
+
+	/**
+	 * @brief      Pipes data into the memory stream with the given size
+	 *
+	 * @param      self    The memory stream to pipe the data into
+	 * @param[in]  stream  The stream to pipe the data from
+	 * @param[in]  size    The size(in bytes) of the data to be piped
+	 *
+	 * @return     The size of the piped data(in bytes)
+	 */
+	MN_EXPORT size_t
+	memory_stream_pipe(Memory_Stream self, Stream stream, size_t size);
 }

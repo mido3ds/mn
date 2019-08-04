@@ -1,5 +1,6 @@
 #include "mn/Logger.h"
 #include "mn/Thread.h"
+#include "mn/File.h"
 
 namespace mn
 {
@@ -7,7 +8,7 @@ namespace mn
 	{
 		Logger()
 		{
-			current_stream = stream_stderr();
+			current_stream = file_stderr();
 			mtx = mutex_new("log mutex");
 		}
 
