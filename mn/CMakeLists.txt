@@ -34,6 +34,8 @@ set(HEADER_FILES
 	include/mn/Rune.h
 	include/mn/Context.h
 	include/mn/Task.h
+	include/mn/Fmt.h
+	include/mn/Read.h
 	include/utf8proc/utf8proc.h
 )
 
@@ -97,6 +99,11 @@ add_library(mn
 )
 
 add_library(MoustaphaSaad::mn ALIAS mn)
+
+target_link_libraries(mn
+	PUBLIC
+		fmt::fmt
+)
 
 # make it reflect the same structure as the one on disk
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${HEADER_FILES})

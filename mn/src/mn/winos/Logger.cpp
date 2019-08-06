@@ -57,7 +57,7 @@ namespace mn
 
 		mutex_lock(_log->mtx);
 
-		vprintf(_log->current_stream, str.ptr);
+		stream_print(_log->current_stream, str.ptr);
 
 		mutex_unlock(_log->mtx);
 	}

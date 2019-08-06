@@ -1,8 +1,7 @@
 #pragma once
 
 #include "mn/Exports.h"
-#include "mn/Memory_Stream.h"
-#include "mn/IO.h"
+#include "mn/Fmt.h"
 
 namespace mn
 {
@@ -19,8 +18,6 @@ namespace mn
 	[[noreturn]] inline static void
 	panic(const char* fmt, TArgs&& ... args)
 	{
-		Memory_Stream cause = memory_stream_new(memory::tmp());
-		vprintf(cause, fmt, std::forward<TArgs>(args)...);
-		_panic(cause->str.ptr);
+		_panic(str_tmpf(fmt, args...).ptr);
 	}
 }
