@@ -11,52 +11,52 @@
 namespace fmt
 {
 	template<>
-	struct fmt::formatter<mn::Str> {
+	struct formatter<mn::Str> {
 		template <typename ParseContext>
 		constexpr auto parse(ParseContext &ctx) { return ctx.begin(); }
 
 		template <typename FormatContext>
 		auto format(const mn::Str &str, FormatContext &ctx) {
-			return fmt::format_to(ctx.out(), "{}", str.ptr);
+			return format_to(ctx.out(), "{}", str.ptr);
 		}
 	};
 
 	template<typename T>
-	struct fmt::formatter<mn::Buf<T>> {
+	struct formatter<mn::Buf<T>> {
 		template <typename ParseContext>
 		constexpr auto parse(ParseContext &ctx) { return ctx.begin(); }
 
 		template <typename FormatContext>
 		auto format(const mn::Buf<T> &buf, FormatContext &ctx) {
-			fmt::format_to(ctx.out(), "[{}]{{", buf.count);
+			format_to(ctx.out(), "[{}]{{", buf.count);
 			for(size_t i = 0; i < buf.count; ++i)
 			{
 				if(i != 0)
-					fmt::format_to(ctx.out(), ", ");
-				fmt::format_to(ctx.out(), "{}: {}", i, buf[i]);
+					format_to(ctx.out(), ", ");
+				format_to(ctx.out(), "{}: {}", i, buf[i]);
 			}
-			fmt::format_to(ctx.out(), " }}");
+			format_to(ctx.out(), " }}");
 			return ctx.begin();
 		}
 	};
 
 	template<typename TKey, typename TValue, typename THash>
-	struct fmt::formatter<mn::Map<TKey, TValue, THash>> {
+	struct formatter<mn::Map<TKey, TValue, THash>> {
 		template <typename ParseContext>
 		constexpr auto parse(ParseContext &ctx) { return ctx.begin(); }
 
 		template <typename FormatContext>
 		auto format(const mn::Map<TKey, TValue, THash> &map, FormatContext &ctx) {
-			fmt::format_to(ctx.out(), "[{}]{{ ", map.count);
+			format_to(ctx.out(), "[{}]{{ ", map.count);
 			size_t i = 0;
 			for(auto it = map_begin(map); it != map_end(map); it = map_next(map, it))
 			{
 				if(i != 0)
-					fmt::format_to(ctx.out(), ", ");
-				fmt::format_to(ctx.out(), "{}: {}", it->key, it->value);
+					format_to(ctx.out(), ", ");
+				format_to(ctx.out(), "{}: {}", it->key, it->value);
 				++i;
 			}
-			fmt::format_to(ctx.out(), " }}");
+			format_to(ctx.out(), " }}");
 			return ctx.begin();
 		}
 	};
