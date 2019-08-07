@@ -12,7 +12,6 @@ set(HEADER_FILES
 	include/mn/Base.h
 	include/mn/Buf.h
 	include/mn/Debug.h
-	include/mn/Logger.h
 	include/mn/Defer.h
 	include/mn/Exports.h
 	include/mn/Path.h
@@ -63,7 +62,6 @@ set(SOURCE_FILES
 if(WIN32)
 	set(SOURCE_FILES ${SOURCE_FILES} 
 		src/mn/winos/Debug.cpp
-		src/mn/winos/Logger.cpp
 		src/mn/winos/Path.cpp
 		src/mn/winos/File.cpp
 		src/mn/winos/Thread.cpp

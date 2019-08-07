@@ -97,7 +97,7 @@ namespace mn
 
 	template<typename ... Args>
 	inline static size_t
-	stream_print(Stream stream, const char* format_str, Args&& ... args)
+	print_to(Stream stream, const char* format_str, Args&& ... args)
 	{
 		fmt::memory_buffer buf;
 		fmt::format_to(buf, format_str, args...);
