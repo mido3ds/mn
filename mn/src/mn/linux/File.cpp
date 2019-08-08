@@ -16,28 +16,28 @@
 
 namespace mn
 {
-	IFile
+	File
 	_file_stdout()
 	{
-		IFile _stdout{};
+		static IFile _stdout{};
 		_stdout.linux_handle = STDOUT_FILENO;
-		return _stdout;
+		return &_stdout;
 	}
 
-	IFile
+	File
 	_file_stderr()
 	{
-		IFile _stderr{};
+		static IFile _stderr{};
 		_stderr.linux_handle = STDERR_FILENO;
-		return _stderr;
+		return &_stderr;
 	}
 
-	IFile
+	File
 	_file_stdin()
 	{
-		IFile _stdin{};
+		static IFile _stdin{};
 		_stdin.linux_handle = STDIN_FILENO;
-		return _stdin;
+		return &_stdin;
 	}
 
 	//API
@@ -80,22 +80,22 @@ namespace mn
 	File
 	file_stdout()
 	{
-		static IFile _f = _file_stdout();
-		return &_f;
+		static File _f = _file_stdout();
+		return _f;
 	}
 
 	File
 	file_stderr()
 	{
-		static IFile _f = _file_stderr();
-		return &_f;
+		static File _f = _file_stderr();
+		return _f;
 	}
 
 	File
 	file_stdin()
 	{
-		static IFile _f = _file_stdin();
-		return &_f;
+		static File _f = _file_stdin();
+		return _f;
 	}
 
 	File

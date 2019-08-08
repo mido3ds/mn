@@ -17,6 +17,8 @@ namespace fmt
 
 		template <typename FormatContext>
 		auto format(const mn::Str &str, FormatContext &ctx) {
+			if (str.count == 0)
+				return ctx.begin();
 			return format_to(ctx.out(), "{}", str.ptr);
 		}
 	};
@@ -66,7 +68,7 @@ namespace mn
 {
 	template<typename ... Args>
 	inline static Str
-	strf(Str out, const char* format_str, Args&& ... args)
+	strf(Str out, const char* format_str, const Args& ... args)
 	{
 		fmt::memory_buffer buf;
 		fmt::format_to(buf, format_str, args...);
@@ -76,28 +78,28 @@ namespace mn
 
 	template<typename ... Args>
 	inline static Str
-	strf(Allocator allocator, const char* format_str, Args&& ... args)
+	strf(Allocator allocator, const char* format_str, const Args& ... args)
 	{
 		return strf(str_with_allocator(allocator), format_str, args...);
 	}
 
 	template<typename ... Args>
 	inline static Str
-	strf(const char* format_str, Args&& ... args)
+	strf(const char* format_str, const Args& ... args)
 	{
 		return strf(str_new(), format_str, args...);
 	}
 
 	template<typename ... Args>
 	inline static Str
-	str_tmpf(const char* format_str, Args&& ... args)
+	str_tmpf(const char* format_str, const Args& ... args)
 	{
 		return strf(str_tmp(), format_str, args...);
 	}
 
 	template<typename ... Args>
 	inline static size_t
-	print_to(Stream stream, const char* format_str, Args&& ... args)
+	print_to(Stream stream, const char* format_str, const Args& ... args)
 	{
 		fmt::memory_buffer buf;
 		fmt::format_to(buf, format_str, args...);
@@ -106,15 +108,15 @@ namespace mn
 
 	template<typename ... Args>
 	inline static size_t
-	print(const char* format_str, Args&& ... args)
+	print(const char* format_str, const Args& ... args)
 	{
-		return stream_print(file_stdout(), format_str, args...);
+		return print_to(file_stdout(), format_str, args...);
 	}
 
 	template<typename ... Args>
 	inline static size_t
-	printerr(const char* format_str, Args&& ... args)
+	printerr(const char* format_str, const Args& ... args)
 	{
-		return stream_print(file_stderr(), format_str, args...);
+		return print_to(file_stderr(), format_str, args...);
 	}
 }

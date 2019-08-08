@@ -3,6 +3,7 @@
 #include "mn/Exports.h"
 #include "mn/Base.h"
 #include "mn/Str.h"
+#include "mn/Stream.h"
 
 namespace mn
 {
@@ -12,7 +13,6 @@ namespace mn
 	 * text/string input like the usage in function `reads`
 	 */
 	typedef struct IReader* Reader;
-	typedef struct IStream* Stream;
 
 	/**
 	 * @brief      Returns the reader of the standard input

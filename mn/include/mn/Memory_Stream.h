@@ -183,4 +183,19 @@ namespace mn
 	 */
 	MN_EXPORT size_t
 	memory_stream_pipe(Memory_Stream self, Stream stream, size_t size);
+
+	inline static const char*
+	memory_stream_ptr(Memory_Stream self)
+	{
+		return self->str.ptr;
+	}
+
+	inline static Str
+	memory_stream_str(Memory_Stream self)
+	{
+		Str res = self->str;
+		self->str = str_with_allocator(self->str.allocator);
+		self->cursor = 0;
+		return res;
+	}
 }

@@ -28,19 +28,19 @@ namespace mn
 		return buffer;
 	}
 
-	inline static IFile
+	inline static File
 	_file_stdout()
 	{
 		constexpr const uint32_t MY_ENABLE_VIRTUAL_TERMINAL_PROCESSING = 4;
 
-		IFile file;
+		static IFile file{};
 		file.winos_handle = GetStdHandle(STD_OUTPUT_HANDLE);
 
 		DWORD mode;
 		GetConsoleMode(file.winos_handle, &mode);
 		mode |= MY_ENABLE_VIRTUAL_TERMINAL_PROCESSING;
 		SetConsoleMode(file.winos_handle, mode);
-		return file;
+		return &file;
 	}
 
 	struct Mutex_Stdout_Wrapper
@@ -69,12 +69,12 @@ namespace mn
 		return wrapper.mtx;
 	}
 
-	inline static IFile
+	inline static File
 	_file_stderr()
 	{
-		IFile file;
+		static IFile file{};
 		file.winos_handle = GetStdHandle(STD_ERROR_HANDLE);
-		return file;
+		return &file;
 	}
 
 	struct Mutex_Stderr_Wrapper
@@ -125,12 +125,12 @@ namespace mn
 		return wrapper.mtx;
 	}
 
-	inline static IFile
+	inline static File
 	_file_stdin()
 	{
-		IFile file;
+		static IFile file{};
 		file.winos_handle = GetStdHandle(STD_INPUT_HANDLE);
-		return file;
+		return &file;
 	}
 
 
@@ -205,22 +205,22 @@ namespace mn
 	File
 	file_stdout()
 	{
-		static IFile _stdout = _file_stdout();
-		return &_stdout;
+		static File _stdout = _file_stdout();
+		return _stdout;
 	}
 
 	File
 	file_stderr()
 	{
-		static IFile _stderr = _file_stderr();
-		return &_stderr;
+		static File _stderr = _file_stderr();
+		return _stderr;
 	}
 
 	File
 	file_stdin()
 	{
-		static IFile _stdin = _file_stdin();
-		return &_stdin;
+		static File _stdin = _file_stdin();
+		return _stdin;
 	}
 
 

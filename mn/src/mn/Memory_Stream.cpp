@@ -43,7 +43,7 @@ namespace mn
 	Memory_Stream
 	memory_stream_new(Allocator allocator)
 	{
-		Memory_Stream self = alloc_construct_from<IMemory_Stream>(allocator);
+		Memory_Stream self = alloc_construct<IMemory_Stream>();
 		self->str = str_with_allocator(allocator);
 		self->cursor = 0;
 		return self;
@@ -52,7 +52,7 @@ namespace mn
 	void
 	memory_stream_free(Memory_Stream self)
 	{
-		free_destruct_from(self->str.allocator, self);
+		free_destruct(self);
 	}
 
 	size_t
