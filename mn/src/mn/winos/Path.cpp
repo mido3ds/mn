@@ -10,6 +10,7 @@
 
 #include "mn/Thread.h"
 #include "mn/OS.h"
+#include "mn/Defer.h"
 
 #include <chrono>
 
@@ -119,6 +120,7 @@ namespace mn
 	path_exists(const char* path)
 	{
 		Block os_path = to_os_encoding(path_os_encoding(path));
+		mn_defer(free(os_path));
 		DWORD attributes = GetFileAttributes((LPCWSTR)os_path.ptr);
 		return attributes != INVALID_FILE_ATTRIBUTES;
 	}
@@ -127,6 +129,7 @@ namespace mn
 	path_is_folder(const char* path)
 	{
 		Block os_path = to_os_encoding(path_os_encoding(path));
+		mn_defer(free(os_path));
 		DWORD attributes = GetFileAttributes((LPCWSTR)os_path.ptr);
 		return (attributes != INVALID_FILE_ATTRIBUTES &&
 				attributes &  FILE_ATTRIBUTE_DIRECTORY);
@@ -136,6 +139,7 @@ namespace mn
 	path_is_file(const char* path)
 	{
 		Block os_path = to_os_encoding(path_os_encoding(path));
+		mn_defer(free(os_path));
 		DWORD attributes = GetFileAttributes((LPCWSTR)os_path.ptr);
 		return (attributes != INVALID_FILE_ATTRIBUTES &&
 				!(attributes &  FILE_ATTRIBUTE_DIRECTORY));
@@ -145,7 +149,8 @@ namespace mn
 	path_current(Allocator allocator)
 	{
 		DWORD required_size = GetCurrentDirectory(0, NULL);
-		Block os_str = alloc_from(memory::tmp(), required_size * sizeof(TCHAR), alignof(TCHAR));
+		Block os_str = alloc(required_size * sizeof(TCHAR), alignof(TCHAR));
+		mn_defer(free(os_str));
 		[[maybe_unused]] DWORD written_size = GetCurrentDirectory((DWORD)(os_str.size/sizeof(TCHAR)), (LPWSTR)os_str.ptr);
 		assert((size_t)(written_size+1) == (os_str.size / sizeof(TCHAR)) && "GetCurrentDirectory Failed");
 		Str res = from_os_encoding(os_str, allocator);
@@ -157,6 +162,7 @@ namespace mn
 	path_current_change(const char* path)
 	{
 		Block os_path = to_os_encoding(path_os_encoding(path));
+		mn_defer(free(os_path));
 		[[maybe_unused]] bool result = SetCurrentDirectory((LPCWSTR)os_path.ptr);
 		assert(result && "SetCurrentDirectory Failed");
 	}
@@ -165,6 +171,7 @@ namespace mn
 	path_absolute(const char* path, Allocator allocator)
 	{
 		Block os_path = to_os_encoding(path_os_encoding(path));
+		mn_defer(free(os_path));
 		DWORD required_size = GetFullPathName((LPCWSTR)os_path.ptr, 0, NULL, NULL);
 		Block full_path = alloc_from(memory::tmp(), required_size * sizeof(TCHAR), alignof(TCHAR));
 		[[maybe_unused]] DWORD written_size = GetFullPathName((LPCWSTR)os_path.ptr, required_size, (LPWSTR)full_path.ptr, NULL);
@@ -209,6 +216,7 @@ namespace mn
 
 		Buf<Path_Entry> res = buf_with_allocator<Path_Entry>(allocator);
 		Block os_path = to_os_encoding(path_os_encoding(tmp_path));
+		mn_defer(free(os_path));
 		WIN32_FIND_DATA file_data{};
 		HANDLE search_handle = FindFirstFileEx((LPCWSTR)os_path.ptr,
 			FindExInfoBasic, &file_data, FindExSearchNameMatch, NULL, FIND_FIRST_EX_CASE_SENSITIVE);
@@ -247,9 +255,11 @@ namespace mn
 		//Str tmp = str_with_allocator(memory::tmp());
 		//str_pushf(tmp, "\\\\?\\%s", src);
 		Block os_src = to_os_encoding(path_os_encoding(src));
+		mn_defer(free(os_src));
 		//str_clear(tmp);
 		//str_pushf(tmp, "\\\\?\\%s", dst);
 		Block os_dst = to_os_encoding(path_os_encoding(dst));
+		mn_defer(free(os_dst));
 		return CopyFile((LPCWSTR)os_src.ptr, (LPCWSTR)os_dst.ptr, TRUE);
 	}
 
@@ -259,6 +269,7 @@ namespace mn
 		//Str tmp = str_with_allocator(memory::tmp());
 		//str_pushf(tmp, "\\\\?\\%s", path);
 		Block os_path = to_os_encoding(path_os_encoding(path));
+		mn_defer(free(os_path));
 		return DeleteFile((LPCWSTR)os_path.ptr);
 	}
 
@@ -266,7 +277,9 @@ namespace mn
 	file_move(const char* src, const char* dst)
 	{
 		Block os_src = to_os_encoding(path_os_encoding(src));
+		mn_defer(free(os_src));
 		Block os_dst = to_os_encoding(path_os_encoding(dst));
+		mn_defer(free(os_dst));
 		return MoveFile((LPCWSTR)os_src.ptr, (LPCWSTR)os_dst.ptr);
 	}
 
@@ -302,6 +315,7 @@ namespace mn
 	folder_make(const char* path)
 	{
 		Block os_path = to_os_encoding(path_os_encoding(path));
+		mn_defer(free(os_path));
 		DWORD attributes = GetFileAttributes((LPCWSTR)os_path.ptr);
 		if (attributes != INVALID_FILE_ATTRIBUTES)
 			return attributes & FILE_ATTRIBUTE_DIRECTORY;
@@ -312,6 +326,7 @@ namespace mn
 	folder_remove(const char* path)
 	{
 		Block os_path = to_os_encoding(path_os_encoding(path));
+		mn_defer(free(os_path));
 		DWORD attributes = GetFileAttributes((LPCWSTR)os_path.ptr);
 		if (attributes == INVALID_FILE_ATTRIBUTES)
 			return true;
