@@ -12,7 +12,7 @@ namespace mn
 	{
 		Allocator allocator;
 		Stream stream;
-		Memory_Stream buffer;
+		IMemory_Stream buffer;
 	};
 
 	struct Stdin_Reader_Wrapper
@@ -22,12 +22,13 @@ namespace mn
 		Stdin_Reader_Wrapper()
 		{
 			self.stream = file_stdin();
-			self.buffer = memory_stream_new();
+			self.buffer.str = str_new();
+			self.buffer.cursor = 0;
 		}
 
 		~Stdin_Reader_Wrapper()
 		{
-			memory_stream_free(self.buffer);
+			str_free(self.buffer.str);
 		}
 	};
 
@@ -45,7 +46,8 @@ namespace mn
 		Reader self = alloc_from<IReader>(allocator);
 		self->allocator = allocator;
 		self->stream = stream;
-		self->buffer = memory_stream_new();
+		self->buffer.str = str_new();
+		self->buffer.cursor = 0;
 		return self;
 	}
 
@@ -55,7 +57,8 @@ namespace mn
 		Reader self = alloc_from<IReader>(allocator);
 		self->allocator = allocator;
 		self->stream = stream;
-		self->buffer = memory_stream_new(allocator);
+		self->buffer.str = str_with_allocator(allocator);
+		self->buffer.cursor = 0;
 		return self;
 	}
 
@@ -66,9 +69,10 @@ namespace mn
 		Reader self = alloc_from<IReader>(allocator);
 		self->allocator = allocator;
 		self->stream = nullptr;
-		self->buffer = memory_stream_new();
-		memory_stream_write(self->buffer, Block{ str.ptr, str.count });
-		memory_stream_cursor_to_start(self->buffer);
+		self->buffer.str = str_with_allocator(allocator);
+		self->buffer.cursor = 0;
+		memory_stream_write(&self->buffer, Block{ str.ptr, str.count });
+		memory_stream_cursor_to_start(&self->buffer);
 		return self;
 	}
 
@@ -79,17 +83,17 @@ namespace mn
 			return reader_str(str);
 
 		assert(self->stream == nullptr);
-		memory_stream_clear(self->buffer);
-		memory_stream_write(self->buffer, Block { str.ptr, str.count });
-		str_null_terminate(self->buffer->str); //for strtoull bug since it need null terminated string
-		memory_stream_cursor_to_start(self->buffer);
+		memory_stream_clear(&self->buffer);
+		memory_stream_write(&self->buffer, Block { str.ptr, str.count });
+		str_null_terminate(self->buffer.str); //for strtoull bug since it need null terminated string
+		memory_stream_cursor_to_start(&self->buffer);
 		return self;
 	}
 
 	void
 	reader_free(Reader self)
 	{
-		memory_stream_free(self->buffer);
+		str_free(self->buffer.str);
 		if(self->stream)
 			stream_free(self->stream);
 
@@ -100,35 +104,35 @@ namespace mn
 	reader_peek(Reader self, size_t size)
 	{
 		//get the available data in the buffer
-		size_t available_size = self->buffer->str.count - self->buffer->cursor;
+		size_t available_size = self->buffer.str.count - self->buffer.cursor;
 
 		//if the user needs to peek on the already buffered data the return it as is
 		if(size == 0)
-			return memory_stream_block_ahead(self->buffer, available_size);
+			return memory_stream_block_ahead(&self->buffer, available_size);
 
 		//save the old cursor
-		int64_t old_cursor = self->buffer->cursor;
+		int64_t old_cursor = self->buffer.cursor;
 		if(available_size < size)
 		{
 			size_t diff = size - available_size;
-			memory_stream_cursor_to_end(self->buffer);
+			memory_stream_cursor_to_end(&self->buffer);
 			if(self->stream)
-				available_size += memory_stream_pipe(self->buffer, self->stream, diff);
-			self->buffer->cursor = old_cursor;
+				available_size += memory_stream_pipe(&self->buffer, self->stream, diff);
+			self->buffer.cursor = old_cursor;
 		}
-		return memory_stream_block_ahead(self->buffer, available_size);
+		return memory_stream_block_ahead(&self->buffer, available_size);
 	}
 
 	size_t
 	reader_skip(Reader self, size_t size)
 	{
 		//get the available data in the buffer
-		size_t available_size = self->buffer->str.count - self->buffer->cursor;
+		size_t available_size = self->buffer.str.count - self->buffer.cursor;
 
 		size_t result = available_size < size ? available_size : size;
-		memory_stream_cursor_move(self->buffer, result);
-		if(self->buffer->str.count - self->buffer->cursor == 0)
-			memory_stream_clear(self->buffer);
+		memory_stream_cursor_move(&self->buffer, result);
+		if(self->buffer.str.count - self->buffer.cursor == 0)
+			memory_stream_clear(&self->buffer);
 		return result;
 	}
 
@@ -142,17 +146,17 @@ namespace mn
 		size_t request_size = data.size;
 		size_t read_size = 0;
 		//get the available data in the buffer
-		size_t available_size = self->buffer->str.count - self->buffer->cursor;
+		size_t available_size = self->buffer.str.count - self->buffer.cursor;
 		if(available_size > 0)
 		{
-			read_size += memory_stream_read(self->buffer, data);
+			read_size += memory_stream_read(&self->buffer, data);
 			request_size -= read_size;
 		}
 
 		if(request_size == 0)
 			return read_size;
 
-		memory_stream_clear(self->buffer);
+		memory_stream_clear(&self->buffer);
 		if(self->stream)
 			read_size += stream_read(self->stream, data + read_size);
 		return read_size;
