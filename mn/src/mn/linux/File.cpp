@@ -40,11 +40,24 @@ namespace mn
 		return &_stdin;
 	}
 
+	inline static bool
+	_is_std_file(void* h)
+	{
+		return (
+			h == _file_stdout()->winos_handle ||
+			h == _file_stderr()->winos_handle ||
+			h == _file_stdin()->winos_handle
+		);
+	}
+
 	//API
 	IFile::~IFile()
 	{
-		if(linux_handle != -1)
+		if (linux_handle != -1 &&
+			_is_std_file(linux_handle) == false)
+		{
 			::close(linux_handle);
+		}
 	}
 
 	size_t

@@ -133,12 +133,25 @@ namespace mn
 		return &file;
 	}
 
+	inline static bool
+	_is_std_file(void* h)
+	{
+		return (
+			h == _file_stdout()->winos_handle ||
+			h == _file_stderr()->winos_handle ||
+			h == _file_stdin()->winos_handle
+		);
+	}
+
 
 	//API
 	IFile::~IFile()
 	{
-		if(winos_handle != INVALID_HANDLE_VALUE)
+		if (winos_handle != INVALID_HANDLE_VALUE &&
+			_is_std_file(winos_handle) == false)
+		{
 			CloseHandle(winos_handle);
+		}
 	}
 
 	size_t
