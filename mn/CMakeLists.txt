@@ -12,10 +12,9 @@ set(HEADER_FILES
 	include/mn/Base.h
 	include/mn/Buf.h
 	include/mn/Debug.h
-	include/mn/Logger.h
 	include/mn/Defer.h
 	include/mn/Exports.h
-	include/mn/File.h
+	include/mn/Path.h
 	include/mn/Fixed_Buf.h
 	include/mn/IO.h
 	include/mn/Map.h
@@ -30,10 +29,11 @@ set(HEADER_FILES
 	include/mn/Stream.h
 	include/mn/Thread.h
 	include/mn/Virtual_Memory.h
-	include/mn/Bytes.h
 	include/mn/Rune.h
 	include/mn/Context.h
 	include/mn/Task.h
+	include/mn/Fmt.h
+	include/mn/Read.h
 	include/utf8proc/utf8proc.h
 )
 
@@ -61,7 +61,7 @@ set(SOURCE_FILES
 if(WIN32)
 	set(SOURCE_FILES ${SOURCE_FILES} 
 		src/mn/winos/Debug.cpp
-		src/mn/winos/Logger.cpp
+		src/mn/winos/Path.cpp
 		src/mn/winos/File.cpp
 		src/mn/winos/Thread.cpp
 		src/mn/winos/Virtual_Memory.cpp
@@ -70,6 +70,7 @@ if(WIN32)
 elseif(UNIX)
 	set(SOURCE_FILES ${SOURCE_FILES} 
 		src/mn/linux/Debug.cpp
+		src/mn/linux/Path.cpp
 		src/mn/linux/File.cpp
 		src/mn/linux/Thread.cpp
 		src/mn/linux/Virtual_Memory.cpp
@@ -95,6 +96,11 @@ add_library(mn
 )
 
 add_library(MoustaphaSaad::mn ALIAS mn)
+
+target_link_libraries(mn
+	PUBLIC
+		fmt::fmt
+)
 
 # make it reflect the same structure as the one on disk
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${HEADER_FILES})

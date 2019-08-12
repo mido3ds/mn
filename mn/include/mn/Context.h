@@ -14,7 +14,6 @@ namespace mn
 
 	using Allocator = memory::Interface*;
 
-	typedef struct IStream* Stream;
 	typedef struct IReader* Reader;
 
 	struct Context
@@ -28,7 +27,6 @@ namespace mn
 		memory::Arena* _allocator_tmp;
 
 		//Local tmp stream
-		Stream _stream_tmp;
 		Reader reader_tmp;
 	};
 
@@ -75,9 +73,6 @@ namespace mn
 		MN_EXPORT Arena*
 		tmp();
 	}
-
-	MN_EXPORT Stream
-	stream_tmp();
 
 	MN_EXPORT Reader
 	reader_tmp();

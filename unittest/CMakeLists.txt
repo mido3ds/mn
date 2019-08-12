@@ -7,17 +7,17 @@ set(SOURCE_FILES
 )
 
 # add executable target
-add_executable(unittest
+add_executable(mn_unittest
 	${SOURCE_FILES}
 )
 
-target_link_libraries(unittest
+target_link_libraries(mn_unittest
 	PRIVATE
 		MoustaphaSaad::mn
 )
 
 # add doctest folder
-target_include_directories(unittest
+target_include_directories(mn_unittest
 	PRIVATE
 		${CMAKE_CURRENT_SOURCE_DIR}/doctest
 )

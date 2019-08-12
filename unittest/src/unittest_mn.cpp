@@ -11,9 +11,15 @@
 #include <mn/Str_Intern.h>
 #include <mn/Ring.h>
 #include <mn/OS.h>
-#include <mn/Bytes.h>
 #include <mn/memory/Leak.h>
 #include <mn/Task.h>
+#include <mn/Path.h>
+#include <mn/Fmt.h>
+#include <mn/Defer.h>
+
+#include <chrono>
+#include <iostream>
+#include <sstream>
 
 using namespace mn;
 
@@ -422,25 +428,6 @@ TEST_CASE("complex data ring case")
 	allocator_pop();
 }
 
-TEST_CASE("bytes")
-{
-	Bytes b = bytes_new();
-	bytes_push8(b, 100);
-	bytes_push16(b, 500);
-	bytes_push16(b, uint16_t(-500));
-	bytes_push32f(b, 3.14f);
-
-	bytes_rewind(b);
-
-	CHECK(bytes_pop8(b) == 100);
-	CHECK(bytes_pop16(b) == 500);
-	CHECK(int16_t(bytes_pop16(b)) == -500);
-	CHECK(bytes_pop32f(b) == 3.14f);
-	CHECK(bytes_eof(b) == true);
-
-	bytes_free(b);
-}
-
 TEST_CASE("Rune")
 {
 	CHECK(rune_upper('a') == 'A');
@@ -465,4 +452,46 @@ TEST_CASE("Task")
 
 	task_free(add);
 	task_free(inc);
+}
+
+struct V2 
+{
+	int x, y;
+};
+
+inline static std::ostream&
+operator<<(std::ostream& out, const V2& v)
+{
+	out << "V2{ " << v.x << ", " << v.y << " }";
+	return out;
+}
+
+TEST_CASE("Fmt")
+{
+	SUBCASE("str formatting")
+	{
+		Str n = strf("{}", str_lit("mostafa"));
+		CHECK(n == "mostafa");
+		str_free(n);
+	}
+
+	SUBCASE("buf formatting")
+	{
+		Buf<int> b = buf_lit({1, 2, 3});
+		Str n = strf("{}", b);
+		CHECK(n == "[3]{0: 1, 1: 2, 2: 3 }");
+		str_free(n);
+		buf_free(b);
+	}
+
+	SUBCASE("map formatting")
+	{
+		Map<Str, V2> m = map_new<Str, V2>();
+		map_insert(m, str_from_c("ABC"), V2{654, 765});
+		map_insert(m, str_from_c("DEF"), V2{6541, 7651});
+		Str n = strf("{}", m);
+		CHECK(n == "[2]{ ABC: V2{ 654, 765 }, DEF: V2{ 6541, 7651 } }");
+		str_free(n);
+		destruct(m);
+	}
 }
