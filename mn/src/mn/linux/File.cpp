@@ -41,12 +41,12 @@ namespace mn
 	}
 
 	inline static bool
-	_is_std_file(void* h)
+	_is_std_file(int h)
 	{
 		return (
-			h == _file_stdout()->winos_handle ||
-			h == _file_stderr()->winos_handle ||
-			h == _file_stdin()->winos_handle
+			h == _file_stdout()->linux_handle ||
+			h == _file_stderr()->linux_handle ||
+			h == _file_stdin()->linux_handle
 		);
 	}
 
