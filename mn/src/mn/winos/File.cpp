@@ -185,6 +185,17 @@ namespace mn
 		return bytes_written;
 	}
 
+	int64_t
+	IFile::size()
+	{
+		LARGE_INTEGER size;
+		if(GetFileSizeEx(winos_handle, &size))
+		{
+			return *(int64_t*)(&size);
+		}
+		return -1;
+	}
+
 	//helpers
 	Block
 	to_os_encoding(const Str& utf8)

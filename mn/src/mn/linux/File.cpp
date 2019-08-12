@@ -72,6 +72,17 @@ namespace mn
 		return ::write(linux_handle, data.ptr, data.size);
 	}
 
+	int64_t
+	IFile::size()
+	{
+		struct stat file_stats;
+		if(::fstat(linux_handle, &file_stats) == 0)
+		{
+			return file_stats.st_size;
+		}
+		return -1;
+	}
+
 	Block
 	to_os_encoding(const Str& utf8)
 	{

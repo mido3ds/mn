@@ -17,6 +17,12 @@ namespace mn
 		return self->write(data);
 	}
 
+	int64_t
+	stream_size(Stream self)
+	{
+		return self->size();
+	}
+
 	void
 	stream_free(Stream self)
 	{

@@ -39,6 +39,12 @@ namespace mn
 		return data.size;
 	}
 
+	int64_t
+	IMemory_Stream::size()
+	{
+		return int64_t(str.count);
+	}
+
 
 	Memory_Stream
 	memory_stream_new(Allocator allocator)

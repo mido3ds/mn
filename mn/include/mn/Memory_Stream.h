@@ -20,6 +20,9 @@ namespace mn
 
 		MN_EXPORT virtual size_t
 		write(Block data) override;
+
+		MN_EXPORT virtual int64_t
+		size() override;
 	};
 
 	/**
