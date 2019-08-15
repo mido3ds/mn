@@ -51,13 +51,15 @@ namespace mn
 	}
 
 	//API
-	IFile::~IFile()
+	void
+	IFile::dispose()
 	{
 		if (linux_handle != -1 &&
 			_is_std_file(linux_handle) == false)
 		{
 			::close(linux_handle);
 		}
+		free(this);
 	}
 
 	size_t
