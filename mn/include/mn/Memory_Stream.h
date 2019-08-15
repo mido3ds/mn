@@ -12,8 +12,8 @@ namespace mn
 		mn::Str str;
 		int64_t cursor;
 
-		MN_EXPORT virtual
-		~IMemory_Stream() override;
+		MN_EXPORT virtual void
+		dispose() override;
 
 		MN_EXPORT virtual size_t
 		read(Block data) override;

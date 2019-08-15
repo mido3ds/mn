@@ -26,6 +26,6 @@ namespace mn
 	void
 	stream_free(Stream self)
 	{
-		free_destruct(self);
+		self->dispose();
 	}
 }

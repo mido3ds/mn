@@ -15,8 +15,8 @@ namespace mn
 			int linux_handle;
 		};
 
-		MN_EXPORT virtual
-		~IFile() override;
+		MN_EXPORT virtual void
+		dispose() override;
 
 		MN_EXPORT virtual size_t
 		read(Block data) override;

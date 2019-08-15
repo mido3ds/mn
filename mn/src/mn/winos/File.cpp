@@ -145,13 +145,15 @@ namespace mn
 
 
 	//API
-	IFile::~IFile()
+	void
+	IFile::dispose()
 	{
 		if (winos_handle != INVALID_HANDLE_VALUE &&
 			_is_std_file(winos_handle) == false)
 		{
 			CloseHandle(winos_handle);
 		}
+		free(this);
 	}
 
 	size_t
@@ -325,7 +327,7 @@ namespace mn
 	void
 	file_close(File self)
 	{
-		free_destruct(self);
+		self->dispose();
 	}
 
 	bool

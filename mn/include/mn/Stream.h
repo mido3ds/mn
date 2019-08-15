@@ -10,7 +10,7 @@ namespace mn
 	typedef struct IStream* Stream;
 	struct IStream
 	{
-		virtual ~IStream() = default;
+		virtual void dispose() = 0;
 		virtual size_t read(Block data) = 0;
 		virtual size_t write(Block data) = 0;
 		virtual int64_t size() = 0;
