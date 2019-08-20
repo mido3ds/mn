@@ -8,6 +8,7 @@ set(HEADER_FILES
 	include/mn/memory/Leak.h
 	include/mn/memory/Stack.h
 	include/mn/memory/Virtual.h
+	include/mn/memory/Fast_Leak.h
 	include/mn/Atomic.h
 	include/mn/Base.h
 	include/mn/Buf.h
@@ -44,6 +45,7 @@ set(SOURCE_FILES
 	src/mn/memory/Leak.cpp
 	src/mn/memory/Stack.cpp
 	src/mn/memory/Virtual.cpp
+	src/mn/memory/Fast_Leak.cpp
 	src/mn/Base.cpp
 	src/mn/Memory_Stream.cpp
 	src/mn/OS.cpp
@@ -140,6 +142,13 @@ elseif(UNIX)
 	)
 endif()
 
+if(MN_LEAK)
+	message(STATUS "Leak Detector enabled")
+	target_compile_definitions(mn
+		PRIVATE
+			MN_LEAK=1
+	)
+endif(MN_LEAK)
 
 # enable C++17
 # disable any compiler specifc extensions

@@ -1,6 +1,7 @@
 #include "mn/Context.h"
 #include "mn/Memory.h"
 #include "mn/memory/Leak.h"
+#include "mn/memory/Fast_Leak.h"
 #include "mn/Stream.h"
 #include "mn/Reader.h"
 #include "mn/Memory_Stream.h"
@@ -47,7 +48,11 @@ namespace mn
 			self->_allocator_stack[i] = nullptr;
 
 			#if DEBUG
-				self->_allocator_stack[0] = memory::leak();
+				#if MN_LEAK
+					self->_allocator_stack[0] = memory::leak();
+				#else
+					self->_allocator_stack[0] = memory::fast_leak();
+				#endif
 			#else
 				self->_allocator_stack[0] = memory::clib();
 			#endif
