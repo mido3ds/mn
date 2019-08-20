@@ -1,6 +1,7 @@
 #include "mn/memory/Fast_Leak.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 
 namespace mn::memory
 {
