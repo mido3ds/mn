@@ -67,6 +67,15 @@ namespace mn
 		return str;
 	}
 
+	const char*
+	rune_prev(const char* str)
+	{
+		--str;
+		while(*str && ((*str & 0xC0) == 0x80))
+			--str;
+		return str;
+	}
+
 	Rune
 	rune_read(const char* c)
 	{

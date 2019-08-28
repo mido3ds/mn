@@ -130,6 +130,15 @@ TEST_CASE("str push")
 	str_pushf(str, " age: %d", 25);
 	CHECK(str == "Mostafa Saad Abdel-Hameed age: 25");
 
+	Str new_str = str_new();
+	for(const char* it = begin(str); it != end(str); it = rune_next(it))
+	{
+		Rune r = rune_read(it);
+		str_push(new_str, r);
+	}
+	CHECK(new_str == str);
+
+	str_free(new_str);
 	str_free(str);
 }
 
@@ -221,6 +230,19 @@ TEST_CASE("str split")
 	CHECK(res.count == 1);
 	CHECK(res[0] == "test");
 	destruct(res);
+}
+
+TEST_CASE("str trim")
+{
+	Str s = str_from_c("     \r\ntrim  \v");
+	str_trim(s);
+	CHECK(s == "trim");
+	str_free(s);
+
+	s = str_from_c("     \r\ntrim \n koko \v");
+	str_trim(s);
+	CHECK(s == "trim \n koko");
+	str_free(s);
 }
 
 TEST_CASE("map general cases")

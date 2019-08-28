@@ -7,6 +7,7 @@
 
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <utility>
 #include <assert.h>
 
@@ -127,6 +128,9 @@ namespace mn
 	MN_EXPORT void
 	str_block_push(Str& self, Block block);
 
+	MN_EXPORT void
+	str_push(Str& self, Rune r);
+
 	/**
 	 * @brief      uses printf family of functions to write a formatted string into the string
 	 *
@@ -213,6 +217,15 @@ namespace mn
 	str_find(const char* self, const char* target, size_t start)
 	{
 		return str_find(str_lit(self), str_lit(target), start);
+	}
+
+	MN_EXPORT size_t
+	str_find(const Str& self, Rune r, size_t start_in_bytes);
+
+	inline static size_t
+	str_find(const char* self, Rune r, size_t start_in_bytes)
+	{
+		return str_find(str_lit(self), r, start_in_bytes);
 	}
 
 	MN_EXPORT void
@@ -388,6 +401,105 @@ namespace mn
 	 */
 	MN_EXPORT Str
 	str_clone(const Str& other, Allocator allocator = allocator_top());
+
+	template<typename TFunc>
+	inline static void
+	str_trim_left_pred(Str& self, TFunc&& f)
+	{
+		const char* it = begin(self);
+		for(; it != end(self); it = rune_next(it))
+		{
+			Rune c = rune_read(it);
+			if(f(c) == false)
+				break;
+		}
+
+		size_t s = size_t(it - self.ptr);
+		::memmove(self.ptr, it, self.count - s);
+		self.count -= s;
+		str_null_terminate(self);
+	}
+
+	inline static void
+	str_trim_left(Str& self, const Str& cutset)
+	{
+		str_trim_left_pred(self, [&cutset](Rune r) { return str_find(cutset, r, 0) != size_t(-1); });
+	}
+
+	inline static void
+	str_trim_left(Str& self, const char* cutset)
+	{
+		str_trim_left(self, str_lit(cutset));
+	}
+
+	inline static void
+	str_trim_left(Str& self)
+	{
+		str_trim_left(self, str_lit("\n\t\r\v "));
+	}
+
+	template<typename TFunc>
+	inline static void
+	str_trim_right_pred(Str& self, TFunc&& f)
+	{
+		auto it = rune_prev(end(self));
+		for(; it != begin(self); it = rune_prev(it))
+		{
+			auto c = rune_read(it);
+			if(f(c) == false)
+			{
+				//then ignore this rune
+				it = rune_next(it);
+				break;
+			}
+		}
+		size_t s = size_t(it - self.ptr);
+		str_resize(self, s);
+	}
+
+	inline static void
+	str_trim_right(Str& self, const Str& cutset)
+	{
+		str_trim_right_pred(self, [&cutset](Rune r) { return str_find(cutset, r, 0) != size_t(-1); });
+	}
+
+	inline static void
+	str_trim_right(Str& self, const char* cutset)
+	{
+		str_trim_right(self, str_lit(cutset));
+	}
+
+	inline static void
+	str_trim_right(Str& self)
+	{
+		str_trim_right(self, str_lit("\n\t\r\v "));
+	}
+
+	template<typename TFunc>
+	inline static void
+	str_trim_pred(Str& self, TFunc&& f)
+	{
+		str_trim_left_pred(self, f);
+		str_trim_right_pred(self, f);
+	}
+
+	inline static void
+	str_trim(Str& self, const Str& cutset)
+	{
+		str_trim_pred(self, [&cutset](Rune r) { return str_find(cutset, r, 0) != size_t(-1); });
+	}
+
+	inline static void
+	str_trim(Str& self, const char* cutset)
+	{
+		str_trim(self, str_lit(cutset));
+	}
+
+	inline static void
+	str_trim(Str& self)
+	{
+		str_trim(self, str_lit("\n\t\r\v "));
+	}
 
 	inline static bool
 	str_empty(const Str& self)

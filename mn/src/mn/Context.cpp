@@ -60,7 +60,7 @@ namespace mn
 
 		self->_allocator_tmp = alloc_construct_from<memory::Arena>(memory::clib(), 4ULL * 1024ULL * 1024ULL, memory::clib());
 
-		self->reader_tmp = reader_with_allocator(nullptr, memory::clib());
+		self->reader_tmp = reader_new(nullptr, memory::clib());
 	}
 
 	void

@@ -30,6 +30,9 @@ namespace mn
 	MN_EXPORT const char*
 	rune_next(const char* str);
 
+	MN_EXPORT const char*
+	rune_prev(const char* str);
+
 	MN_EXPORT Rune
 	rune_read(const char* c);
 }

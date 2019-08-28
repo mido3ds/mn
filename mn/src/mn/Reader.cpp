@@ -40,13 +40,12 @@ namespace mn
 	}
 
 	Reader
-	reader_new(Stream stream)
+	reader_new(Stream stream, Allocator allocator)
 	{
-		Allocator allocator = allocator_top();
 		Reader self = alloc_from<IReader>(allocator);
 		self->allocator = allocator;
 		self->stream = stream;
-		self->buffer.str = str_new();
+		self->buffer.str = str_with_allocator(allocator);
 		self->buffer.cursor = 0;
 		return self;
 	}
@@ -94,9 +93,6 @@ namespace mn
 	reader_free(Reader self)
 	{
 		str_free(self->buffer.str);
-		if(self->stream)
-			stream_free(self->stream);
-
 		free_from(self->allocator, self);
 	}
 

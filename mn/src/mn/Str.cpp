@@ -88,6 +88,20 @@ namespace mn
 	}
 
 	void
+	str_push(Str& self, Rune r)
+	{
+		int s = rune_size(r);
+		assert(s > 0 && s <= 4);
+		size_t self_len = self.count;
+		buf_resize(self, self.count + s + 1);
+		--self.count;
+		const char* bytes = (const char*)&r;
+		for(int i = 0; i < s; ++i)
+			self.ptr[self_len + i] = bytes[i];
+		self.ptr[self.count] = '\0';
+	}
+
+	void
 	str_null_terminate(Str& self)
 	{
 		if (self.count == 0)
@@ -105,6 +119,19 @@ namespace mn
 			if (::memcmp(self.ptr + i, target.ptr, target.count) == 0)
 				return i;
 
+		return size_t(-1);
+	}
+
+	size_t
+	str_find(const Str& self, Rune r, size_t start_in_bytes)
+	{
+		assert(start_in_bytes < self.count);
+		for(auto it = begin(self) + start_in_bytes; it != end(self); it = rune_next(it))
+		{
+			Rune c = rune_read(it);
+			if(c == r)
+				return it - self.ptr;
+		}
 		return size_t(-1);
 	}
 
