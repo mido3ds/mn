@@ -92,4 +92,14 @@ namespace mn
 	 */
 	MN_EXPORT size_t
 	reader_read(Reader reader, Block data);
+
+	// Returns the size of the consumed in bytes
+	MN_EXPORT size_t
+	reader_consumed(Reader reader);
+
+	// Returns reader progress if the underlying stream supports size operation
+	// if you have read half of the file it will return 0.5
+	// if stream doesn't support size, like sockets, etc.. it will return 0
+	MN_EXPORT float
+	reader_progress(Reader reader);
 }

@@ -13,6 +13,7 @@ namespace mn
 		Allocator allocator;
 		Stream stream;
 		IMemory_Stream buffer;
+		size_t consumed_bytes;
 	};
 
 	struct Stdin_Reader_Wrapper
@@ -24,6 +25,7 @@ namespace mn
 			self.stream = file_stdin();
 			self.buffer.str = str_new();
 			self.buffer.cursor = 0;
+			self.consumed_bytes = 0;
 		}
 
 		~Stdin_Reader_Wrapper()
@@ -47,6 +49,7 @@ namespace mn
 		self->stream = stream;
 		self->buffer.str = str_with_allocator(allocator);
 		self->buffer.cursor = 0;
+		self->consumed_bytes = 0;
 		return self;
 	}
 
@@ -58,6 +61,7 @@ namespace mn
 		self->stream = stream;
 		self->buffer.str = str_with_allocator(allocator);
 		self->buffer.cursor = 0;
+		self->consumed_bytes = 0;
 		return self;
 	}
 
@@ -70,6 +74,7 @@ namespace mn
 		self->stream = nullptr;
 		self->buffer.str = str_with_allocator(allocator);
 		self->buffer.cursor = 0;
+		self->consumed_bytes = 0;
 		memory_stream_write(&self->buffer, Block{ str.ptr, str.count });
 		memory_stream_cursor_to_start(&self->buffer);
 		return self;
@@ -129,6 +134,7 @@ namespace mn
 		memory_stream_cursor_move(&self->buffer, result);
 		if(self->buffer.str.count - self->buffer.cursor == 0)
 			memory_stream_clear(&self->buffer);
+		self->consumed_bytes += result;
 		return result;
 	}
 
@@ -149,12 +155,32 @@ namespace mn
 			request_size -= read_size;
 		}
 
-		if(request_size == 0)
+		if (request_size == 0)
+		{
+			self->consumed_bytes += read_size;
 			return read_size;
+		}
 
 		memory_stream_clear(&self->buffer);
 		if(self->stream)
 			read_size += stream_read(self->stream, data + read_size);
+
+		self->consumed_bytes += read_size;
 		return read_size;
+	}
+
+	size_t
+	reader_consumed(Reader reader)
+	{
+		return reader->consumed_bytes;
+	}
+
+	float
+	reader_progress(Reader reader)
+	{
+		int64_t size = stream_size(reader->stream);
+		if (size == 0)
+			return 0.0f;
+		return float(reader->consumed_bytes) / float(size);
 	}
 }
