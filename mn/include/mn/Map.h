@@ -640,6 +640,25 @@ namespace mn
 		self.values = new_values;
 	}
 
+	template<typename TKey, typename TValue, typename THash = Hash<TKey>>
+	inline static Map<TKey, TValue, THash>
+	map_clone(const Map<TKey, TValue, THash>& other, Allocator allocator = allocator_top())
+	{
+		Map<TKey, TValue, THash> self{};
+		self.flags = buf_clone(other.flags, allocator);
+		self.values = buf_clone(other.values, allocator);
+		self.hasher = other.hasher;
+		self.count = other.count;
+		return self;
+	}
+
+	template<typename TKey, typename TValue, typename THash = Hash<TKey>>
+	inline static Map<TKey, TValue, THash>
+	clone(const Map<TKey, TValue, THash>& other)
+	{
+		return clone(other);
+	}
+
 	/**
 	 * @brief      Returns a iterator/pointer to the first element in the hash map
 	 *
