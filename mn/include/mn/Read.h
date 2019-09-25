@@ -130,6 +130,7 @@ namespace mn
 		if(*begin == '-')
 			return 0;
 
+		errno = 0;
 		uint64_t tmp_value = ::strtoull(begin, &end, base);
 
 		if(errno == ERANGE)
@@ -148,6 +149,7 @@ namespace mn
 
 		char* begin = (char*)peeked_content.ptr;
 		char* end = (char*)peeked_content.ptr + peeked_content.size;
+		errno = 0;
 		int64_t tmp_value = ::strtoll(begin, &end, base);
 
 		if(errno == ERANGE)
@@ -166,6 +168,7 @@ namespace mn
 
 		char* begin = (char*)peeked_content.ptr;
 		char* end = (char*)peeked_content.ptr + peeked_content.size;
+		errno = 0;
 		float tmp_value = ::strtof(begin, &end);
 
 		if(errno == ERANGE)
@@ -184,6 +187,7 @@ namespace mn
 
 		char* begin = (char*)peeked_content.ptr;
 		char* end = (char*)peeked_content.ptr + peeked_content.size;
+		errno = 0;
 		double tmp_value = ::strtod(begin, &end);
 
 		if(errno == ERANGE)
