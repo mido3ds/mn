@@ -60,11 +60,11 @@ namespace mn
 
 				str_pushf(
 					str,
-					"[%zu]: %s, %s:%ul\n",
+					"[%zu]: %s, %s:%u\n",
 					frames_count - i - 1,
 					symbol->Name,
 					line_found ? line.FileName : "<NO_FILE_FOUND>",
-					line_found ? line.LineNumber : 0UL
+					line_found ? line.LineNumber + 1 : 0UL
 				);
 			}
 			else
@@ -75,10 +75,10 @@ namespace mn
 
 				str_pushf(
 					str,
-					"[%zu]: unknown symbol, %s:%ul\n",
+					"[%zu]: unknown symbol, %s:%u\n",
 					frames_count - i - 1,
 					line_found ? line.FileName : "<NO_FILE_FOUND>",
-					line_found ? line.LineNumber : 0UL
+					line_found ? line.LineNumber + 1 : 0UL
 				);
 			}
 		}
