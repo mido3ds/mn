@@ -52,10 +52,35 @@ namespace mn
 		size_t frames_count = CaptureStackBackTrace(0, STACK_MAX, callstack, NULL);
 		for(size_t i = 0; i < frames_count; ++i)
 		{
-			if(SymFromAddr(process_handle, (DWORD64)(callstack[i]), NULL, symbol))
-				str_pushf(str, "[%zu]: %s\n", frames_count - i - 1, symbol->Name);
+			if (SymFromAddr(process_handle, (DWORD64)(callstack[i]), NULL, symbol))
+			{
+				IMAGEHLP_LINE64 line;
+				DWORD dis = 0;
+				BOOL line_found = SymGetLineFromAddr64(process_handle, symbol->Address, &dis, &line);
+
+				str_pushf(
+					str,
+					"[%zu]: %s, %s:%ul\n",
+					frames_count - i - 1,
+					symbol->Name,
+					line_found ? line.FileName : "<NO_FILE_FOUND>",
+					line_found ? line.LineNumber : 0UL
+				);
+			}
 			else
-				str_pushf(str, "[%zu]: unknown symbol\n", frames_count - i - 1);
+			{
+				IMAGEHLP_LINE64 line;
+				DWORD dis = 0;
+				BOOL line_found = SymGetLineFromAddr64(process_handle, symbol->Address, &dis, &line);
+
+				str_pushf(
+					str,
+					"[%zu]: unknown symbol, %s:%ul\n",
+					frames_count - i - 1,
+					line_found ? line.FileName : "<NO_FILE_FOUND>",
+					line_found ? line.LineNumber : 0UL
+				);
+			}
 		}
 		#endif
 		return str;
