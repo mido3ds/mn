@@ -67,7 +67,7 @@ TEST_CASE("tmp allocator")
 {
 	{
 		Str name = str_with_allocator(memory::tmp());
-		str_pushf(name, "Name: %s", "Mostafa");
+		strf(name, "Name: {}", "Mostafa");
 		CHECK(name == str_lit("Name: Mostafa"));
 	}
 
@@ -75,7 +75,7 @@ TEST_CASE("tmp allocator")
 
 	{
 		Str name = str_with_allocator(memory::tmp());
-		str_pushf(name, "Name: %s", "Mostafa");
+		strf(name, "Name: {}", "Mostafa");
 		CHECK(name == str_lit("Name: Mostafa"));
 	}
 
@@ -128,7 +128,7 @@ TEST_CASE("str push")
 	str_push(str, " Abdel-Hameed");
 	CHECK(str == str_lit("Mostafa Saad Abdel-Hameed"));
 
-	str_pushf(str, " age: %d", 25);
+	strf(str, " age: {}", 25);
 	CHECK(str == "Mostafa Saad Abdel-Hameed age: 25");
 
 	Str new_str = str_new();
