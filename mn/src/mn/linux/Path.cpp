@@ -1,5 +1,6 @@
 #include "mn/Path.h"
 #include "mn/OS.h"
+#include "mn/IO.h"
 
 #define _LARGEFILE64_SOURCE 1
 #include <sys/sysinfo.h>
@@ -145,7 +146,7 @@ namespace mn
 			return str_from_c(res, allocator);
 		//here we fallback to windows-like interface and just concatencate cwd with path
 		Str cwd = path_current(allocator);
-		str_pushf(cwd, "/%s", path);
+		cwd = strf(cwd, "/{}", path);
 		return cwd;
 	}
 
