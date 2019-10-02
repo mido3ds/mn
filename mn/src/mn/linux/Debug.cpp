@@ -1,4 +1,5 @@
 #include "mn/Debug.h"
+#include "mn/IO.h"
 
 #include <cxxabi.h>
 #include <execinfo.h>
@@ -48,7 +49,7 @@ namespace mn
 				//function maybe inlined
 				if(mangled_name_size == 0)
 				{
-					str_pushf(str, "[%zu]: unknown symbol\n", frames_count - i - 1);
+					str = strf(str, "[{}]: unknown symbol\n", frames_count - i - 1);
 					continue;
 				}
 
@@ -61,9 +62,9 @@ namespace mn
 				abi::__cxa_demangle(name_buffer, demangled_buffer, &demangled_buffer_length, &status);
 				demangled_buffer[MAX_NAME_LEN] = 0;
 				if(status == 0)
-					str_pushf(str, "[%zu]: %s\n", frames_count - i - 1, demangled_buffer);
+					str = strf(str, "[{}]: {}\n", frames_count - i - 1, demangled_buffer);
 				else
-					str_pushf(str, "[%zu]: %s\n", frames_count - i - 1, name_buffer);
+					str = strf(str, "[{}]: {}\n", frames_count - i - 1, name_buffer);
 			}
 			::free(symbols);
 		}

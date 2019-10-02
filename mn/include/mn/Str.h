@@ -132,29 +132,6 @@ namespace mn
 	str_push(Str& self, Rune r);
 
 	/**
-	 * @brief      uses printf family of functions to write a formatted string into the string
-	 *
-	 * @param      self       The string
-	 * @param[in]  fmt        The format
-	 * @param[in]  args       The arguments of the printf
-	 */
-	template<typename ... TArgs>
-	inline static void
-	str_pushf(Str& self, const char* fmt, TArgs&& ... args)
-	{
-		size_t size = self.cap - self.count;
-		size_t len = ::snprintf(self.ptr + self.count, size, fmt, std::forward<TArgs>(args)...) + 1;
-		if(len > size)
-		{
-			buf_reserve(self, len);
-			size = self.cap - self.count;
-			len = ::snprintf(self.ptr + self.count, size, fmt, std::forward<TArgs>(args)...) + 1;
-			assert(len <= size);
-		}
-		self.count += len - 1;
-	}
-
-	/**
 	 * @brief      Ensures that the string is null terminated
 	 *
 	 * @param      self  The string

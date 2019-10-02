@@ -1,5 +1,6 @@
 #include "mn/Debug.h"
 #include "mn/Str.h"
+#include "mn/IO.h"
 
 #include <string.h>
 
@@ -58,9 +59,9 @@ namespace mn
 				DWORD dis = 0;
 				BOOL line_found = SymGetLineFromAddr64(process_handle, symbol->Address, &dis, &line);
 
-				str_pushf(
+				str = strf(
 					str,
-					"[%zu]: %s, %s:%u\n",
+					"[{}]: {}, {}:{}\n",
 					frames_count - i - 1,
 					symbol->Name,
 					line_found ? line.FileName : "<NO_FILE_FOUND>",
@@ -73,10 +74,11 @@ namespace mn
 				DWORD dis = 0;
 				BOOL line_found = SymGetLineFromAddr64(process_handle, symbol->Address, &dis, &line);
 
-				str_pushf(
+				str = strf(
 					str,
-					"[%zu]: unknown symbol, %s:%u\n",
+					"[{}]: {}, {}:{}\n",
 					frames_count - i - 1,
+					symbol->Name,
 					line_found ? line.FileName : "<NO_FILE_FOUND>",
 					line_found ? line.LineNumber + 1 : 0UL
 				);
