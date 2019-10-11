@@ -521,6 +521,12 @@ TEST_CASE("Fmt")
 
 TEST_CASE("Deque")
 {
+	SUBCASE("empty deque")
+	{
+		Deque n = deque_new<int>();
+		deque_free(n);
+	}
+
 	SUBCASE("deque push")
 	{
 		Deque nums = deque_new<int>();

@@ -61,9 +61,11 @@ namespace mn::memory
 	void
 	Leak::free(Block block)
 	{
-		Node* ptr = ((Node*)block.ptr) - 1;
+		if (block)
+		{
+			Node* ptr = ((Node*)block.ptr) - 1;
 
-		mutex_lock(this->mtx);
+			mutex_lock(this->mtx);
 			if (ptr == this->head)
 				this->head = ptr->next;
 
@@ -72,10 +74,11 @@ namespace mn::memory
 
 			if (ptr->next)
 				ptr->next->prev = ptr->prev;
-		mutex_unlock(this->mtx);
+			mutex_unlock(this->mtx);
 
-		str_free(ptr->callstack);
-		::free(ptr);
+			str_free(ptr->callstack);
+			::free(ptr);
+		}
 	}
 
 	Leak*
