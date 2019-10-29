@@ -203,14 +203,14 @@ namespace mn
 	to_os_encoding(const Str& utf8)
 	{
 		int size_needed = MultiByteToWideChar(CP_UTF8,
-			MB_PRECOMPOSED, utf8.ptr, int(utf8.count), NULL, 0);
+			0, utf8.ptr, int(utf8.count), NULL, 0);
 
 		//+1 for the null termination
 		size_t required_size = (size_needed + 1) * sizeof(WCHAR);
 		Block buffer = alloc(required_size, alignof(WCHAR));
 
 		size_needed = MultiByteToWideChar(CP_UTF8,
-			MB_PRECOMPOSED, utf8.ptr, int(utf8.cap), (LPWSTR)buffer.ptr, int(buffer.size));
+			0, utf8.ptr, int(utf8.cap), (LPWSTR)buffer.ptr, int(buffer.size));
 		return buffer;
 	}
 
