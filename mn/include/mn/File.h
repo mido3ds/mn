@@ -37,7 +37,7 @@ namespace mn
 	 * @return     A Block of memory containing the encoded string
 	 */
 	MN_EXPORT Block
-	to_os_encoding(const Str& utf8);
+	to_os_encoding(const Str& utf8, Allocator allocator = memory::tmp());
 
 	/**
 	 * @brief      Converts a string from utf-8 to os-specific encoding
@@ -47,7 +47,7 @@ namespace mn
 	 * @return     A Block of memory containing the encoded string
 	 */
 	MN_EXPORT Block
-	to_os_encoding(const char* utf8);
+	to_os_encoding(const char* utf8, Allocator allocator = memory::tmp());
 
 	/**
 	 * @brief      Converts from os-specific encoding to utf-8

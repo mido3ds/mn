@@ -64,7 +64,7 @@ namespace mn
 	deque_new()
 	{
 		Deque<T> self{};
-		self.allocator = mn::allocator_top();
+		self.allocator = allocator_top();
 		self.buckets = nullptr;
 		self.count = 0;
 		self.cap = 0;
@@ -98,8 +98,8 @@ namespace mn
 	deque_free(Deque<T>& self)
 	{
 		for (size_t i = 0; i < self.bucket_count; ++i)
-			mn::free_from(self.allocator, Block{ self.buckets[i], sizeof(T) * self.bucket_size });
-		mn::free_from(self.allocator, Block{ self.buckets, self.bucket_cap * sizeof(T*) });
+			free_from(self.allocator, Block{ self.buckets[i], sizeof(T) * self.bucket_size });
+		free_from(self.allocator, Block{ self.buckets, self.bucket_cap * sizeof(T*) });
 	}
 
 	template<typename T>
@@ -178,17 +178,17 @@ namespace mn
 		if(self.cap > self.count && self.back.bucket_index < self.bucket_count && deque_index_can_inc(self, self.back))
 			return;
 
-		T* bucket = (T*)mn::alloc_from(self.allocator, sizeof(T) * self.bucket_size, alignof(T)).ptr;
+		T* bucket = (T*)alloc_from(self.allocator, sizeof(T) * self.bucket_size, alignof(T)).ptr;
 		
 		// then we need to resize this array
 		if (self.bucket_count >= self.bucket_cap)
 		{
 			size_t cap = self.bucket_cap == 0 ? 8 : self.bucket_cap * 2;
-			T** new_bucket_array = (T**)mn::alloc_from(self.allocator, cap * sizeof(T*), alignof(T*)).ptr;
+			T** new_bucket_array = (T**)alloc_from(self.allocator, cap * sizeof(T*), alignof(T*)).ptr;
 			if (self.buckets != nullptr)
 			{
 				::memcpy(new_bucket_array, self.buckets, self.bucket_count * sizeof(T*));
-				mn::free_from(self.allocator, Block{ self.buckets, self.bucket_cap * sizeof(T*) });
+				free_from(self.allocator, Block{ self.buckets, self.bucket_cap * sizeof(T*) });
 			}
 			self.buckets = new_bucket_array;
 			self.bucket_cap = cap;
@@ -227,7 +227,7 @@ namespace mn
 		if (self.cap > self.count && deque_index_can_dec(self, self.front))
 			return;
 
-		T* bucket = (T*)mn::alloc_from(self.allocator, sizeof(T) * self.bucket_size, alignof(T)).ptr;
+		T* bucket = (T*)alloc_from(self.allocator, sizeof(T) * self.bucket_size, alignof(T)).ptr;
 
 		if (self.bucket_count < self.bucket_cap)
 		{
@@ -236,11 +236,11 @@ namespace mn
 		else
 		{
 			size_t cap = self.bucket_cap == 0 ? 8 : self.bucket_cap * 2;
-			T** new_bucket_array = (T**)mn::alloc_from(self.allocator, cap * sizeof(T*), alignof(T*)).ptr;
+			T** new_bucket_array = (T**)alloc_from(self.allocator, cap * sizeof(T*), alignof(T*)).ptr;
 			if (self.buckets)
 			{
 				::memcpy(new_bucket_array + 1, self.buckets, self.bucket_count * sizeof(T*));
-				mn::free_from(self.allocator, Block{ self.buckets, self.bucket_cap * sizeof(T*) });
+				free_from(self.allocator, Block{ self.buckets, self.bucket_cap * sizeof(T*) });
 			}
 			self.buckets = new_bucket_array;
 			self.bucket_cap = cap;
@@ -336,7 +336,7 @@ namespace mn
 
 	template<typename T>
 	inline static Deque<T>
-	clone(const mn::Deque<T>& other)
+	clone(const Deque<T>& other)
 	{
 		return deque_clone(other);
 	}

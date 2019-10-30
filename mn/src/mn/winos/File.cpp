@@ -2,6 +2,7 @@
 #include "mn/Defer.h"
 #include "mn/Memory.h"
 #include "mn/Thread.h"
+#include "mn/Scope.h"
 
 #define NOMINMAX
 #define WIN32_LEAN_AND_MEAN
@@ -200,14 +201,14 @@ namespace mn
 
 	//helpers
 	Block
-	to_os_encoding(const Str& utf8)
+	to_os_encoding(const Str& utf8, Allocator allocator)
 	{
 		int size_needed = MultiByteToWideChar(CP_UTF8,
 			0, utf8.ptr, int(utf8.count), NULL, 0);
 
 		//+1 for the null termination
 		size_t required_size = (size_needed + 1) * sizeof(WCHAR);
-		Block buffer = alloc(required_size, alignof(WCHAR));
+		Block buffer = alloc_from(allocator, required_size, alignof(WCHAR));
 
 		size_needed = MultiByteToWideChar(CP_UTF8,
 			0, utf8.ptr, int(utf8.cap), (LPWSTR)buffer.ptr, int(buffer.size));
@@ -215,9 +216,9 @@ namespace mn
 	}
 
 	Block
-	to_os_encoding(const char* utf8)
+	to_os_encoding(const char* utf8, Allocator allocator)
 	{
-		return to_os_encoding(str_lit(utf8));
+		return to_os_encoding(str_lit(utf8), allocator);
 	}
 
 	Str
@@ -254,6 +255,8 @@ namespace mn
 	File
 	file_open(const char* filename, IO_MODE io_mode, OPEN_MODE open_mode)
 	{
+		mn_scope();
+
 		//translate the io mode
 		DWORD desired_access;
 		switch(io_mode)
@@ -300,7 +303,6 @@ namespace mn
 		}
 
 		Block os_str = to_os_encoding(filename);
-		mn_defer(free(os_str));
 		LPWSTR win_filename = (LPWSTR)os_str.ptr;
 		HANDLE windows_handle = CreateFile (win_filename, desired_access, 0, NULL,
 											creation_disposition,

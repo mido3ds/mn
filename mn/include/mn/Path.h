@@ -34,7 +34,7 @@ namespace mn
 	 * @return     A String containing the encoded path
 	 */
 	MN_EXPORT Str
-	path_os_encoding(const char* path);
+	path_os_encoding(const char* path, Allocator allocator = memory::tmp());
 
 	/**
 	 * @brief      Converts from standard encoding(linux-like) to os-specific encoding
@@ -44,9 +44,9 @@ namespace mn
 	 * @return     A String containing the encoded path
 	 */
 	inline static Str
-	path_os_encoding(const Str& path)
+	path_os_encoding(const Str& path, Allocator allocator = memory::tmp())
 	{
-		return path_os_encoding(path.ptr);
+		return path_os_encoding(path.ptr, allocator);
 	}
 
 	/**
@@ -339,16 +339,16 @@ namespace mn
 	}
 
 	MN_EXPORT Str
-	file_tmp(const mn::Str& base, const mn::Str& ext, Allocator allocator = allocator_top());
+	file_tmp(const Str& base, const Str& ext, Allocator allocator = allocator_top());
 
 	inline static Str
-	file_tmp(const char* base, const mn::Str& ext, Allocator allocator = allocator_top())
+	file_tmp(const char* base, const Str& ext, Allocator allocator = allocator_top())
 	{
 		return file_tmp(str_lit(base), ext, allocator);
 	}
 
 	inline static Str
-	file_tmp(const mn::Str& base, const char* ext, Allocator allocator = allocator_top())
+	file_tmp(const Str& base, const char* ext, Allocator allocator = allocator_top())
 	{
 		return file_tmp(base, str_lit(ext), allocator);
 	}

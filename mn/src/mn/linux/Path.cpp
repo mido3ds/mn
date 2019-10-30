@@ -1,6 +1,7 @@
 #include "mn/Path.h"
 #include "mn/OS.h"
 #include "mn/IO.h"
+#include "mn/Scope.h"
 
 #define _LARGEFILE64_SOURCE 1
 #include <sys/sysinfo.h>
@@ -37,9 +38,9 @@ namespace mn
 	}
 
 	Str
-	path_os_encoding(const char* path)
+	path_os_encoding(const char* path, Allocator allocator)
 	{
-		return str_from_c(path, memory::tmp());
+		return str_from_c(path, allocator);
 	}
 
 	Str
@@ -261,6 +262,8 @@ namespace mn
 	bool
 	folder_remove(const char* path)
 	{
+		mn_scope();
+
 		Buf<Path_Entry> files = path_entries(path, memory::tmp());
 		Str tmp_path = str_with_allocator(memory::tmp());
 		for(size_t i = 2; i < files.count; ++i)
@@ -291,6 +294,8 @@ namespace mn
 	bool
 	folder_copy(const char* src, const char* dst)
 	{
+		mn_scope();
+
 		Buf<Path_Entry> files = path_entries(src, memory::tmp());
 
 		//create the folder no matter what

@@ -9,7 +9,7 @@ namespace mn
 	typedef struct IMemory_Stream* Memory_Stream;
 	struct IMemory_Stream final: IStream
 	{
-		mn::Str str;
+		Str str;
 		int64_t cursor;
 
 		MN_EXPORT virtual void

@@ -86,21 +86,21 @@ namespace mn
 	}
 
 	Block
-	to_os_encoding(const Str& utf8)
+	to_os_encoding(const Str& utf8, Allocator allocator)
 	{
-		return Block { utf8.ptr, utf8.count + 1 };
+		return block_clone(block_from(utf8), allocator);
 	}
 
 	Block
-	to_os_encoding(const char* utf8)
+	to_os_encoding(const char* utf8, Allocator allocator)
 	{
-		return to_os_encoding(str_lit(utf8));
+		return to_os_encoding(str_lit(utf8), allocator);
 	}
 
 	Str
-	from_os_encoding(Block os_str)
+	from_os_encoding(Block os_str, Allocator allocator)
 	{
-		return str_lit((char*)os_str.ptr);
+		return str_from_c((char*)os_str.ptr, allocator);
 	}
 
 	File
