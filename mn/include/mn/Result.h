@@ -111,3 +111,24 @@ namespace mn
 		bool operator!=(bool v) const { return !operator==(v); }
 	};
 }
+
+namespace fmt
+{
+	template<>
+	struct formatter<mn::Err>
+	{
+		template<typename ParseContext>
+		constexpr auto
+		parse(ParseContext &ctx)
+		{
+			return ctx.begin();
+		}
+
+		template<typename FormatContext>
+		auto
+		format(const mn::Err &err, FormatContext &ctx)
+		{
+			return format_to(ctx.out(), "{}", err.msg);
+		}
+	};
+} // namespace fmt

@@ -248,6 +248,11 @@ TEST_CASE("str trim")
 	str_trim(s);
 	CHECK(s == "trim \n koko");
 	str_free(s);
+
+	s = str_from_c("r");
+	str_trim(s);
+	CHECK(s == "r");
+	str_free(s);
 }
 
 TEST_CASE("map general cases")
@@ -646,3 +651,4 @@ TEST_CASE("Result error code")
 		CHECK(err == Err_Code::ZERO_DIV);
 	}
 }
+
