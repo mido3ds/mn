@@ -366,6 +366,30 @@ TEST_CASE("reader")
 	reader_free(reader);
 }
 
+TEST_CASE("reader with empty newline")
+{
+	auto text = R"""(my name is mostafa
+
+mostafa is 26 years old)""";
+	Reader reader = reader_wrap_str(nullptr, text);
+	Str str = str_new();
+
+	size_t read_count = readln(reader, str);
+	CHECK(read_count == 19);
+	CHECK(str == "my name is mostafa");
+
+	read_count = readln(reader, str);
+	CHECK(read_count == 1);
+	CHECK(str == "");
+
+	read_count = readln(reader, str);
+	CHECK(read_count == 23);
+	CHECK(str == "mostafa is 26 years old");
+
+	str_free(str);
+	reader_free(reader);
+}
+
 TEST_CASE("path windows os encoding")
 {
 	auto os_path = path_os_encoding("C:/bin/my_file.exe");
