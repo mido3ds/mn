@@ -18,6 +18,7 @@
 #include <mn/Defer.h>
 #include <mn/Deque.h>
 #include <mn/Scope.h>
+#include <mn/Result.h>
 
 #include <chrono>
 #include <iostream>
@@ -571,5 +572,53 @@ TEST_CASE("Deque")
 		CHECK(deque_back(nums) == 7);
 
 		deque_free(nums);
+	}
+}
+
+Result<int> my_div(int a, int b)
+{
+	if (b == 0)
+		return Err{ "can't calc '{}/{}' because b is 0", a, b };
+	return a / b;
+}
+
+enum class Err_Code { OK, ZERO_DIV };
+
+Result<int, Err_Code> my_div2(int a, int b)
+{
+	if (b == 0)
+		return Err_Code::ZERO_DIV;
+	return a / b;
+}
+
+TEST_CASE("Result default error")
+{
+	SUBCASE("no err")
+	{
+		auto [r, err] = my_div(4, 2);
+		CHECK(err == false);
+		CHECK(r == 2);
+	}
+
+	SUBCASE("err")
+	{
+		auto [r, err] = my_div(4, 0);
+		CHECK(err == true);
+	}
+}
+
+TEST_CASE("Result error code")
+{
+	SUBCASE("no err")
+	{
+		auto [r, err] = my_div2(4, 2);
+		CHECK(err == Err_Code::OK);
+		CHECK(r == 2);
+	}
+
+	SUBCASE("err")
+	{
+		auto [r, err] = my_div2(4, 0);
+		CHECK(err == Err_Code::ZERO_DIV);
 	}
 }
