@@ -11,7 +11,7 @@
 
 namespace mn
 {
-	static Memory_Profile_Interface MEMORY_PROFILE = Memory_Profile_Interface{};
+	static Memory_Profile_Interface MEMORY_PROFILE;
 
 	struct Context_Wrapper
 	{
