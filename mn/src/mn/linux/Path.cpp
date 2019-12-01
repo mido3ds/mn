@@ -1,6 +1,7 @@
 #include "mn/Path.h"
 #include "mn/OS.h"
 #include "mn/IO.h"
+#include "mn/Defer.h"
 
 #define _LARGEFILE64_SOURCE 1
 #include <sys/sysinfo.h>
