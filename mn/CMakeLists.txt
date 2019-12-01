@@ -35,7 +35,6 @@ set(HEADER_FILES
 	include/mn/Fmt.h
 	include/mn/Read.h
 	include/mn/Deque.h
-	include/mn/Scope.h
 	include/mn/Result.h
 	include/utf8proc/utf8proc.h
 )

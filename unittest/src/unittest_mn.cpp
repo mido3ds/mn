@@ -17,7 +17,6 @@
 #include <mn/Fmt.h>
 #include <mn/Defer.h>
 #include <mn/Deque.h>
-#include <mn/Scope.h>
 #include <mn/Result.h>
 
 #include <chrono>
@@ -67,8 +66,6 @@ TEST_CASE("arena allocator")
 
 TEST_CASE("tmp allocator")
 {
-	mn_scope();
-
 	{
 		Str name = str_with_allocator(memory::tmp());
 		name = strf(name, "Name: {}", "Mostafa");

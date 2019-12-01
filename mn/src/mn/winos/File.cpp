@@ -2,7 +2,6 @@
 #include "mn/Defer.h"
 #include "mn/Memory.h"
 #include "mn/Thread.h"
-#include "mn/Scope.h"
 
 #define NOMINMAX
 #define WIN32_LEAN_AND_MEAN
@@ -255,8 +254,6 @@ namespace mn
 	File
 	file_open(const char* filename, IO_MODE io_mode, OPEN_MODE open_mode)
 	{
-		mn_scope();
-
 		//translate the io mode
 		DWORD desired_access;
 		switch(io_mode)
@@ -302,7 +299,9 @@ namespace mn
 				break;
 		}
 
-		Block os_str = to_os_encoding(filename);
+		Block os_str = to_os_encoding(filename, allocator_top());
+		mn_defer(mn::free(os_str));
+
 		LPWSTR win_filename = (LPWSTR)os_str.ptr;
 		HANDLE windows_handle = CreateFile (win_filename, desired_access, 0, NULL,
 											creation_disposition,
