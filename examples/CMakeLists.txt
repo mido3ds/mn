@@ -23,3 +23,9 @@ target_link_libraries(example-freq
 	PRIVATE
 		MoustaphaSaad::mn
 )
+
+add_executable(mndoc mndoc.cpp)
+target_link_libraries(mndoc
+	PRIVATE
+		MoustaphaSaad::mn
+)
