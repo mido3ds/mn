@@ -16,6 +16,8 @@
 
 #include <assert.h>
 
+#include <chrono>
+
 namespace mn
 {
 	Str
@@ -253,6 +255,35 @@ namespace mn
 		return ::rename(src, dst) == 0;
 	}
 
+	Str
+	file_tmp(const Str &base, const Str &ext, Allocator allocator)
+	{
+		Str _base;
+		if (base.count != 0)
+			_base = path_normalize(str_clone(base));
+		else
+			_base = folder_tmp();
+		mn_defer(str_free(_base));
+
+		Str res = str_clone(_base, allocator);
+		while (true)
+		{
+			str_clear(res);
+
+			auto duration_nanos = std::chrono::high_resolution_clock::now().time_since_epoch();
+			uint64_t nanos =
+				std::chrono::duration_cast<std::chrono::duration<uint64_t, std::nano>>(duration_nanos).count();
+			if (ext.count != 0)
+				res = path_join(res, str_tmpf("mn_file_tmp_{}.{}", nanos, ext));
+			else
+				res = path_join(res, str_tmpf("mn_file_tmp_{}", nanos));
+
+			if (path_exists(res) == false)
+				break;
+		}
+		return res;
+	}
+
 	bool
 	folder_make(const char* path)
 	{
@@ -343,5 +374,11 @@ namespace mn
 		}
 
 		return i == files.count;
+	}
+
+	Str
+	folder_tmp(Allocator allocator)
+	{
+		return str_from_c(secure_getenv("TMPDIR"), allocator);
 	}
 }
