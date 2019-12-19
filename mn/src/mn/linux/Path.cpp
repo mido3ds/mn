@@ -166,7 +166,10 @@ namespace mn
 			if(c == '/')
 				break;
 		}
-		result.count -= i;
+		if (i > result.count)
+			result.count = 0;
+		else
+			result.count -= i;
 		str_null_terminate(result);
 		return result;
 	}
