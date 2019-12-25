@@ -8,6 +8,7 @@
 #include <Windows.h>
 #include <mbstring.h>
 #include <tchar.h>
+#undef DELETE
 
 namespace mn
 {
@@ -252,7 +253,7 @@ namespace mn
 
 	//files
 	File
-	file_open(const char* filename, IO_MODE io_mode, OPEN_MODE open_mode)
+	file_open(const char* filename, IO_MODE io_mode, OPEN_MODE open_mode, SHARE_MODE share_mode)
 	{
 		//translate the io mode
 		DWORD desired_access;
@@ -299,14 +300,48 @@ namespace mn
 				break;
 		}
 
+		DWORD sharing_disposition;
+		switch (share_mode)
+		{
+		case SHARE_MODE::READ:
+			sharing_disposition = FILE_SHARE_READ;
+			break;
+		case SHARE_MODE::WRITE:
+			sharing_disposition = FILE_SHARE_WRITE;
+			break;
+		case SHARE_MODE::DELETE:
+			sharing_disposition = FILE_SHARE_DELETE;
+			break;
+		case SHARE_MODE::READ_WRITE:
+			sharing_disposition = FILE_SHARE_READ | FILE_SHARE_WRITE;
+			break;
+		case SHARE_MODE::READ_DELETE:
+			sharing_disposition = FILE_SHARE_READ | FILE_SHARE_DELETE;
+			break;
+		case SHARE_MODE::WRITE_DELETE:
+			sharing_disposition = FILE_SHARE_WRITE | FILE_SHARE_DELETE;
+			break;
+		case SHARE_MODE::ALL:
+			sharing_disposition = FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE;
+			break;
+		case SHARE_MODE::NONE:
+		default:
+			sharing_disposition = NULL;
+			break;
+		}
+
 		Block os_str = to_os_encoding(filename, allocator_top());
 		mn_defer(mn::free(os_str));
 
 		LPWSTR win_filename = (LPWSTR)os_str.ptr;
-		HANDLE windows_handle = CreateFile (win_filename, desired_access, 0, NULL,
-											creation_disposition,
-											FILE_ATTRIBUTE_NORMAL,
-											NULL);
+		HANDLE windows_handle = CreateFile(
+			win_filename,
+			desired_access,
+			sharing_disposition,
+			NULL,
+			creation_disposition,
+			FILE_ATTRIBUTE_NORMAL,
+			NULL);
 
 		if(windows_handle == INVALID_HANDLE_VALUE)
 			return nullptr;
@@ -402,5 +437,27 @@ namespace mn
 		LARGE_INTEGER position, offset;
 		offset.QuadPart = 0;
 		return SetFilePointerEx(self->winos_handle, offset, &position, FILE_END);
+	}
+
+	bool
+	file_lock(File self, int64_t offset, int64_t size)
+	{
+		assert(offset >= 0 && size >= 0);
+		DWORD offset_low  = (DWORD)(offset & (0x00000000FFFFFFFF));
+		DWORD offset_high = (DWORD)(offset & (0xFFFFFFFF00000000));
+		DWORD size_low  = (DWORD)(size & (0x00000000FFFFFFFF));
+		DWORD size_high = (DWORD)(size & (0xFFFFFFFF00000000));
+		return LockFile(self->winos_handle, offset_low, offset_high, size_low, size_high);
+	}
+
+	bool
+	file_unlock(File self, int64_t offset, int64_t size)
+	{
+		assert(offset >= 0 && size >= 0);
+		DWORD offset_low  = (DWORD)(offset & (0x00000000FFFFFFFF));
+		DWORD offset_high = (DWORD)(offset & (0xFFFFFFFF00000000));
+		DWORD size_low  = (DWORD)(size & (0x00000000FFFFFFFF));
+		DWORD size_high = (DWORD)(size & (0xFFFFFFFF00000000));
+		return UnlockFile(self->winos_handle, offset_low, offset_high, size_low, size_high);
 	}
 }
