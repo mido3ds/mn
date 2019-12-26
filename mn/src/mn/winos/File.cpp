@@ -303,28 +303,28 @@ namespace mn
 		DWORD sharing_disposition;
 		switch (share_mode)
 		{
-		case SHARE_MODE::READ:
+		case SHARE_MODE_READ:
 			sharing_disposition = FILE_SHARE_READ;
 			break;
-		case SHARE_MODE::WRITE:
+		case SHARE_MODE_WRITE:
 			sharing_disposition = FILE_SHARE_WRITE;
 			break;
-		case SHARE_MODE::DELETE:
+		case SHARE_MODE_DELETE:
 			sharing_disposition = FILE_SHARE_DELETE;
 			break;
-		case SHARE_MODE::READ_WRITE:
+		case SHARE_MODE_READ_WRITE:
 			sharing_disposition = FILE_SHARE_READ | FILE_SHARE_WRITE;
 			break;
-		case SHARE_MODE::READ_DELETE:
+		case SHARE_MODE_READ_DELETE:
 			sharing_disposition = FILE_SHARE_READ | FILE_SHARE_DELETE;
 			break;
-		case SHARE_MODE::WRITE_DELETE:
+		case SHARE_MODE_WRITE_DELETE:
 			sharing_disposition = FILE_SHARE_WRITE | FILE_SHARE_DELETE;
 			break;
-		case SHARE_MODE::ALL:
+		case SHARE_MODE_ALL:
 			sharing_disposition = FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE;
 			break;
-		case SHARE_MODE::NONE:
+		case SHARE_MODE_NONE:
 		default:
 			sharing_disposition = NULL;
 			break;

@@ -79,16 +79,16 @@ namespace mn
 		OPEN_APPEND
 	};
 
-	enum class SHARE_MODE
+	enum SHARE_MODE
 	{
-		READ,
-		WRITE,
-		DELETE,
-		READ_WRITE,
-		READ_DELETE,
-		WRITE_DELETE,
-		ALL,
-		NONE,
+		SHARE_MODE_READ,
+		SHARE_MODE_WRITE,
+		SHARE_MODE_DELETE,
+		SHARE_MODE_READ_WRITE,
+		SHARE_MODE_READ_DELETE,
+		SHARE_MODE_WRITE_DELETE,
+		SHARE_MODE_ALL,
+		SHARE_MODE_NONE,
 	};
 
 	/**
@@ -131,10 +131,10 @@ namespace mn
 	 * @param[in]  open_mode  The open mode
 	 */
 	MN_EXPORT File
-	file_open(const char* filename, IO_MODE io_mode, OPEN_MODE open_mode, SHARE_MODE share_mode = SHARE_MODE::ALL);
+	file_open(const char* filename, IO_MODE io_mode, OPEN_MODE open_mode, SHARE_MODE share_mode = SHARE_MODE_ALL);
 
 	inline static File
-	file_open(const Str& filename, IO_MODE io_mode, OPEN_MODE open_mode, SHARE_MODE share_mode = SHARE_MODE::ALL)
+	file_open(const Str& filename, IO_MODE io_mode, OPEN_MODE open_mode, SHARE_MODE share_mode = SHARE_MODE_ALL)
 	{
 		return file_open(filename.ptr, io_mode, open_mode, share_mode);
 	}

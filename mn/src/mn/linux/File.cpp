@@ -182,7 +182,7 @@ namespace mn
 		// NONE which is available only in O_CREAT mode
 		switch(share_mode)
 		{
-			case SHARE_MODE::NONE:
+			case SHARE_MODE_NONE:
 				if(flags & O_CREAT)
 					flags |= O_EXCL;
 				break;

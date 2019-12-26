@@ -16,6 +16,7 @@ set(HEADER_FILES
 	include/mn/Exports.h
 	include/mn/Path.h
 	include/mn/Fixed_Buf.h
+	include/mn/File.h
 	include/mn/IO.h
 	include/mn/Map.h
 	include/mn/Memory.h
