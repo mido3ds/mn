@@ -341,8 +341,7 @@ namespace mn
 		}
 		else
 		{
-			assert(false && "unreachable");
-			mutex_unlock(self->mtx);
+			panic("unreachable");
 		}
 	}
 
