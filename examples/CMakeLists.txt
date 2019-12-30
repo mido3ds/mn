@@ -35,3 +35,15 @@ target_link_libraries(example-worker
 	PRIVATE
 		MoustaphaSaad::mn
 )
+
+add_executable(example-echo-server example-echo-server.cpp)
+target_link_libraries(example-echo-server
+	PRIVATE
+		MoustaphaSaad::mn
+)
+
+add_executable(example-echo-client example-echo-client.cpp)
+target_link_libraries(example-echo-client
+	PRIVATE
+		MoustaphaSaad::mn
+)

@@ -84,6 +84,7 @@ elseif(UNIX)
 		src/mn/linux/Thread.cpp
 		src/mn/linux/Virtual_Memory.cpp
 		src/mn/linux/IPC.cpp
+		src/mn/linux/Socket.cpp
 	)
 endif()
 

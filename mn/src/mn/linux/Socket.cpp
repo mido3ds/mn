@@ -1,35 +1,14 @@
 #include "mn/Socket.h"
 #include "mn/Fabric.h"
 
-#include <WinSock2.h>
-#include <WS2tcpip.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <sys/unistd.h>
+#include <fcntl.h>
+#include <netdb.h>
 
 namespace mn
 {
-	struct _WIN_NET_INIT
-	{
-		_WIN_NET_INIT()
-		{
-			WORD wVersionRequested;
-			WSADATA wsaData;
-			int err;
-
-			wVersionRequested = MAKEWORD(2, 2);
-			err = WSAStartup(wVersionRequested, &wsaData);
-
-			assert(err == 0 && "WSAStartup failed");
-
-			assert(LOBYTE(wsaData.wVersion) == 2 && HIBYTE(wsaData.wVersion) == 2 &&
-				"Could not find a usable version of Winsock.dll");
-		}
-
-		~_WIN_NET_INIT()
-		{
-			WSACleanup();
-		}
-	};
-	static _WIN_NET_INIT _WIN_NET_INIT_INSTANCE;
-
 	inline static int
 	_socket_family_to_os(SOCKET_FAMILY f)
 	{
@@ -54,11 +33,13 @@ namespace mn
 		{
 		case SOCKET_TYPE_TCP:
 			type = SOCK_STREAM;
-			protocol = IPPROTO_TCP;
+			if(auto p = ::getprotobyname("tcp"))
+				protocol = p->p_proto;
 			break;
 		case SOCKET_TYPE_UDP:
 			type = SOCK_DGRAM;
-			protocol = IPPROTO_UDP;
+			if(auto p = ::getprotobyname("udp"))
+				protocol = p->p_proto;
 			break;
 		default:
 			assert(false && "unreachable");
@@ -102,8 +83,8 @@ namespace mn
 		af = _socket_family_to_os(socket_family);
 		_socket_type_to_os(socket_type, type, protocol);
 
-		auto handle = socket(af, type, protocol);
-		if (handle == INVALID_SOCKET)
+		auto handle = ::socket(af, type, protocol);
+		if (handle == -1)
 			return nullptr;
 
 		auto self = mn::alloc_construct<ISocket>();
@@ -116,7 +97,7 @@ namespace mn
 	void
 	socket_close(Socket self)
 	{
-		::closesocket(self->handle);
+		::close(self->handle);
 		mn::free_destruct(self);
 	}
 
@@ -135,7 +116,7 @@ namespace mn
 		worker_block_ahead();
 		res = ::connect(self->handle, info->ai_addr, int(info->ai_addrlen));
 		worker_block_clear();
-		if (res == SOCKET_ERROR)
+		if (res == -1)
 			return false;
 
 		return true;
@@ -155,7 +136,7 @@ namespace mn
 			return false;
 
 		res = ::bind(self->handle, info->ai_addr, int(info->ai_addrlen));
-		if (res == SOCKET_ERROR)
+		if (res == -1)
 			return false;
 
 		return true;
@@ -167,10 +148,8 @@ namespace mn
 		if (max_connections == 0)
 			max_connections = SOMAXCONN;
 
-		worker_block_ahead();
 		int res = ::listen(self->handle, max_connections);
-		worker_block_clear();
-		if (res == SOCKET_ERROR)
+		if (res == -1)
 			return false;
 		return true;
 	}
@@ -181,7 +160,7 @@ namespace mn
 		worker_block_ahead();
 		auto handle = ::accept(self->handle, nullptr, nullptr);
 		worker_block_clear();
-		if(handle == INVALID_SOCKET)
+		if(handle == -1)
 			return nullptr;
 
 		auto other = mn::alloc_construct<ISocket>();
@@ -194,63 +173,29 @@ namespace mn
 	void
 	socket_disconnect(Socket self)
 	{
-		::shutdown(self->handle, SD_SEND);
+		::shutdown(self->handle, SHUT_WR);
 	}
 
 	size_t
 	socket_read(Socket self, Block data)
 	{
-		size_t recieved_bytes = 0;
-
-		WSABUF data_buf{};
-		data_buf.len = ULONG(data.size);
-		data_buf.buf = (char*)data.ptr;
-
-		DWORD flags = 0;
-
 		worker_block_ahead();
-		int status = ::WSARecv(
-			self->handle,
-			&data_buf,
-			1,
-			(LPDWORD)&recieved_bytes,
-			&flags,
-			NULL,
-			NULL
-		);
+		auto res = ::recv(self->handle, data.ptr, data.size, 0);
 		worker_block_clear();
-
-		if(status == 0)
-			return recieved_bytes;
-		return 0;
+		if(res == -1)
+			return 0;
+		return res;
 	}
 
 	size_t
 	socket_write(Socket self, Block data)
 	{
-		size_t sent_bytes = 0;
-
-		WSABUF data_buf{};
-		data_buf.len = ULONG(data.size);
-		data_buf.buf = (char*)data.ptr;
-
-		DWORD flags = 0;
-
 		worker_block_ahead();
-		int status = ::WSASend(
-			self->handle,
-			&data_buf,
-			1,
-			(LPDWORD)&sent_bytes,
-			flags,
-			NULL,
-			NULL
-		);
+		auto res = ::send(self->handle, data.ptr, data.size, 0);
 		worker_block_clear();
-
-		if(status == 0)
-			return sent_bytes;
-		return 0;
+		if(res == -1)
+			return 0;
+		return res;
 	}
 
 	int64_t
