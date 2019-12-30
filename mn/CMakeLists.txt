@@ -39,6 +39,7 @@ set(HEADER_FILES
 	include/mn/Result.h
 	include/mn/IPC.h
 	include/mn/Fabric.h
+	include/mn/Socket.h
 	include/utf8proc/utf8proc.h
 )
 
@@ -73,6 +74,7 @@ if(WIN32)
 		src/mn/winos/Thread.cpp
 		src/mn/winos/Virtual_Memory.cpp
 		src/mn/winos/IPC.cpp
+		src/mn/winos/Socket.cpp
 	)
 elseif(UNIX)
 	set(SOURCE_FILES ${SOURCE_FILES} 
@@ -127,6 +129,7 @@ if(WIN32)
 	target_link_libraries(mn
 		PRIVATE
 			dbghelp
+			ws2_32
 	)
 	target_compile_options(mn
 		PRIVATE

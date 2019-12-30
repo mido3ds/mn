@@ -4,11 +4,6 @@
 #include <mn/Path.h>
 #include <mn/Defer.h>
 
-constexpr auto HELP_MSG = R"""(example-cat
-a simple tool to concatenate files
-'example-cat [FILE]...'
-)""";
-
 int
 main(int argc, char **argv)
 {
