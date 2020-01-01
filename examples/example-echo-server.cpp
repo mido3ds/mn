@@ -21,11 +21,6 @@ serve_client(mn::Socket client)
 		read_bytes = mn::socket_read(client, mn::block_from(data));
 		if(read_bytes > 0)
 		{
-			auto line = mn::str_new();
-			auto socket_reader = mn::reader_new(client);
-			mn::readln(socket_reader, line);
-			mn::print_to(client, "the answer is {}\n", 42);
-
 			mn::str_resize(data, read_bytes);
 			write_bytes = mn::socket_write(client, mn::block_from(data));
 			assert(write_bytes == read_bytes && "socket_write failed");
