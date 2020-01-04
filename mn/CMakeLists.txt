@@ -40,6 +40,7 @@ set(HEADER_FILES
 	include/mn/IPC.h
 	include/mn/Fabric.h
 	include/mn/Socket.h
+	include/mn/Library.h
 	include/utf8proc/utf8proc.h
 )
 
@@ -75,6 +76,7 @@ if(WIN32)
 		src/mn/winos/Virtual_Memory.cpp
 		src/mn/winos/IPC.cpp
 		src/mn/winos/Socket.cpp
+		src/mn/winos/Library.cpp
 	)
 elseif(UNIX)
 	set(SOURCE_FILES ${SOURCE_FILES} 
@@ -85,6 +87,7 @@ elseif(UNIX)
 		src/mn/linux/Virtual_Memory.cpp
 		src/mn/linux/IPC.cpp
 		src/mn/linux/Socket.cpp
+		src/mn/linux/Library.cpp
 	)
 endif()
 
@@ -139,7 +142,7 @@ if(WIN32)
 elseif(UNIX)
 	target_link_libraries(mn
 		PRIVATE
-			pthread rt
+			pthread rt dl
 	)
 	target_compile_definitions(mn
 		PUBLIC
