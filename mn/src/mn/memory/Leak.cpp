@@ -36,6 +36,8 @@ namespace mn::memory
 			it = it->next;
 		}
 		::fprintf(stderr, "Leaks count: %zu, Leaks size(bytes): %zu\n", count, size);
+		::fprintf(stderr, "Press any key to continue...\n");
+		::getchar();
 	}
 
 	Block

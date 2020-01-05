@@ -22,6 +22,8 @@ namespace mn::memory
 				atomic_count.load(),
 				atomic_size.load()
 			);
+			::fprintf(stderr, "Press any key to continue...\n");
+			::getchar();
 		}
 	}
 
