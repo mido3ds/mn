@@ -52,7 +52,11 @@ namespace mn
 		size_t steal_count = 0;
 
 		mutex_lock(self->job_q_mtx);
-		steal_count = self->job_q.count / 2;
+		if (self->job_q.count < 2)
+			steal_count = self->job_q.count;
+		else
+			steal_count = self->job_q.count / 2;
+
 		steal_count = steal_count > jobs_count ? jobs_count : steal_count;
 
 		for(size_t i = 0; i < steal_count; ++i)
