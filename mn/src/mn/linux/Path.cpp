@@ -271,7 +271,7 @@ namespace mn
 		Str res = str_clone(_base, allocator);
 		while (true)
 		{
-			str_clear(res);
+			str_resize(res, _base.count);
 
 			auto duration_nanos = std::chrono::high_resolution_clock::now().time_since_epoch();
 			uint64_t nanos =
