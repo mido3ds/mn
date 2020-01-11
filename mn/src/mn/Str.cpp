@@ -90,8 +90,20 @@ namespace mn
 	void
 	str_push(Str& self, Rune r)
 	{
+		auto old_count = self.count;
+		// +5 = 4 for the rune + 1 for the null termination
+		buf_resize(self, self.count + 5);
+
+		auto width = rune_encode(r, Block{ self.ptr + old_count, 4 });
+		assert(width <= 4);
+		// adjust the size back
+		self.count -= (4 - width) + 1;
+		self.ptr[self.count] = '\0';
+		
+		/*
 		int s = rune_size(r);
 		assert(s > 0 && s <= 4);
+		buf_resize(self, self.count + 4);
 		size_t self_len = self.count;
 		buf_resize(self, self.count + s + 1);
 		--self.count;
@@ -99,6 +111,7 @@ namespace mn
 		for(int i = 0; i < s; ++i)
 			self.ptr[self_len + i] = bytes[i];
 		self.ptr[self.count] = '\0';
+		*/
 	}
 
 	void
@@ -264,5 +277,27 @@ namespace mn
 		::memcpy(self.ptr, other.ptr, self.count);
 		self.ptr[self.count] = '\0';
 		return self;
+	}
+
+	void
+	str_lower(Str& self)
+	{
+		auto new_str = str_with_allocator(self.allocator);
+		str_reserve(new_str, self.count);
+		for(const char* it = begin(self); it != end(self); it = rune_next(it))
+			str_push(new_str, rune_lower(rune_read(it)));
+		str_free(self);
+		self = new_str;
+	}
+
+	void
+	str_upper(Str& self)
+	{
+		auto new_str = str_with_allocator(self.allocator);
+		str_reserve(new_str, self.count);
+		for(const char* it = begin(self); it != end(self); it = rune_next(it))
+			str_push(new_str, rune_upper(rune_read(it)));
+		str_free(self);
+		self = new_str;
 	}
 }

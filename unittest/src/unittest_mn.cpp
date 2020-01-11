@@ -253,6 +253,19 @@ TEST_CASE("str trim")
 	str_free(s);
 }
 
+TEST_CASE("String lower case and upper case")
+{
+	auto word = str_from_c("مصطفى");
+	str_lower(word);
+	CHECK(word == "مصطفى");
+	str_free(word);
+
+	auto word2 = str_from_c("PERCHÉa");
+	str_lower(word2);
+	CHECK(word2 == "perchéa");
+	str_free(word2);
+}
+
 TEST_CASE("map general cases")
 {
 	auto num = map_new<int, int>();

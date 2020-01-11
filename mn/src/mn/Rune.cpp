@@ -2,6 +2,8 @@
 
 #include "utf8proc/utf8proc.h"
 
+#include <assert.h>
+
 namespace mn
 {
 	size_t
@@ -85,12 +87,30 @@ namespace mn
 		if(*c == 0)
 			return 0;
 
-		Rune rune = 0;
-		uint8_t* result = (uint8_t*)&rune;
-		const uint8_t* it = (const uint8_t*)c;
-		*result++ = *it++;
-		while (*it && ((*it & 0xC0) == 0x80))
-			*result++ = *it++;
-		return rune;
+		size_t str_count = 1;
+		for(size_t i = 1; i < 4; ++i)
+		{
+			if(c[i] == 0)
+				break;
+			else
+				++str_count;
+		}
+
+		Rune r = 0;
+		utf8proc_iterate((utf8proc_uint8_t*)c, str_count, (utf8proc_int32_t*)&r);
+		return r;
+	}
+
+	bool
+	rune_valid(Rune c)
+	{
+		return utf8proc_codepoint_valid((utf8proc_int32_t)c);
+	}
+
+	size_t
+	rune_encode(Rune c, Block b)
+	{
+		assert(b.size >= 4);
+		return utf8proc_encode_char(c, (utf8proc_uint8_t*)b.ptr);
 	}
 }

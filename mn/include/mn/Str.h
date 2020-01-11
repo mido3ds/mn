@@ -572,6 +572,12 @@ namespace mn
 		return self.count == 0;
 	}
 
+	MN_EXPORT void
+	str_lower(Str& self);
+
+	MN_EXPORT void
+	str_upper(Str& self);
+
 	/**
 	 * @brief      Clone function overload for the string type
 	 *
