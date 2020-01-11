@@ -264,6 +264,11 @@ TEST_CASE("String lower case and upper case")
 	str_lower(word2);
 	CHECK(word2 == "perchéa");
 	str_free(word2);
+
+	auto word3 = str_from_c("Æble");
+	str_lower(word3);
+	CHECK(word3 == "æble");
+	str_free(word3);
 }
 
 TEST_CASE("map general cases")
