@@ -68,7 +68,7 @@ set(SOURCE_FILES
 
 # list os specfic files
 if(WIN32)
-	set(SOURCE_FILES ${SOURCE_FILES} 
+	set(SOURCE_FILES ${SOURCE_FILES}
 		src/mn/winos/Debug.cpp
 		src/mn/winos/Path.cpp
 		src/mn/winos/File.cpp
@@ -79,7 +79,7 @@ if(WIN32)
 		src/mn/winos/Library.cpp
 	)
 elseif(UNIX)
-	set(SOURCE_FILES ${SOURCE_FILES} 
+	set(SOURCE_FILES ${SOURCE_FILES}
 		src/mn/linux/Debug.cpp
 		src/mn/linux/Path.cpp
 		src/mn/linux/File.cpp
@@ -101,10 +101,22 @@ if(MSVC)
 endif(MSVC)
 
 
+# unity build files
+set(UNITY_BUILD_FILES
+	src/Build.cpp
+)
+
+# ignore source files
+foreach(SRC_FILE ${SOURCE_FILES})
+	set_source_files_properties(${SRC_FILE} PROPERTIES HEADER_FILE_ONLY true)
+endforeach(SRC_FILE)
+
+
 # add library target
 add_library(mn
 	${HEADER_FILES}
 	${SOURCE_FILES}
+	${UNITY_BUILD_FILES}
 	${TOOL_FILES}
 )
 
@@ -118,6 +130,7 @@ target_link_libraries(mn
 # make it reflect the same structure as the one on disk
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${HEADER_FILES})
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SOURCE_FILES})
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${UNITY_BUILD_FILES})
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${TOOL_FILES})
 
 
