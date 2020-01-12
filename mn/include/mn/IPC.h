@@ -5,7 +5,7 @@
 
 namespace mn::ipc
 {
-	typedef struct IMutex *Mutex;
+	typedef struct IIPC_Mutex *Mutex;
 
 	enum class LOCK_RESULT
 	{

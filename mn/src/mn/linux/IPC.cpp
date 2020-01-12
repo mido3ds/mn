@@ -20,7 +20,7 @@ namespace mn::ipc
 		std::atomic<int32_t> atomic_rc;
 	};
 
-	struct IMutex
+	struct IIPC_Mutex
 	{
 		IShared_Mutex* shared_mtx;
 		int shm_fd;
@@ -98,7 +98,7 @@ namespace mn::ipc
 			shared_mtx->atomic_rc.fetch_add(1);
 		}
 
-		auto self = alloc<IMutex>();
+		auto self = alloc<IIPC_Mutex>();
 		self->shared_mtx = shared_mtx;
 		self->shm_fd = shm_fd;
 		self->name = clone(name);
