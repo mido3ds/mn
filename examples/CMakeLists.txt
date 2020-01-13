@@ -47,3 +47,15 @@ target_link_libraries(example-echo-client
 	PRIVATE
 		MoustaphaSaad::mn
 )
+
+add_executable(example-file-lock-increment example-file-lock-increment.cpp)
+target_link_libraries(example-file-lock-increment
+	PRIVATE
+		MoustaphaSaad::mn
+)
+
+add_executable(example-file-lock-reset example-file-lock-reset.cpp)
+target_link_libraries(example-file-lock-reset
+	PRIVATE
+		MoustaphaSaad::mn
+)
