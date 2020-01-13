@@ -446,24 +446,86 @@ namespace mn
 	}
 
 	bool
-	file_lock(File self, int64_t offset, int64_t size)
+	file_write_try_lock(File self, int64_t offset, int64_t size)
 	{
 		assert(offset >= 0 && size >= 0);
+
 		DWORD offset_low  = (DWORD)(offset & (0x00000000FFFFFFFF));
 		DWORD offset_high = (DWORD)(offset & (0xFFFFFFFF00000000));
 		DWORD size_low  = (DWORD)(size & (0x00000000FFFFFFFF));
 		DWORD size_high = (DWORD)(size & (0xFFFFFFFF00000000));
-		return LockFile(self->winos_handle, offset_low, offset_high, size_low, size_high);
+
+		OVERLAPPED ov{};
+		ov.Offset = offset_low;
+		ov.OffsetHigh = offset_high;
+
+		return LockFileEx(self->winos_handle, LOCKFILE_EXCLUSIVE_LOCK | LOCKFILE_FAIL_IMMEDIATELY, 0, size_low, size_high, &ov);
+	}
+
+	void
+	file_write_lock(File handle, int64_t offset, int64_t size)
+	{
+		worker_block_on([&]{
+			return file_write_try_lock(handle, offset, size);
+		});
 	}
 
 	bool
-	file_unlock(File self, int64_t offset, int64_t size)
+	file_write_unlock(File self, int64_t offset, int64_t size)
 	{
 		assert(offset >= 0 && size >= 0);
+
 		DWORD offset_low  = (DWORD)(offset & (0x00000000FFFFFFFF));
 		DWORD offset_high = (DWORD)(offset & (0xFFFFFFFF00000000));
 		DWORD size_low  = (DWORD)(size & (0x00000000FFFFFFFF));
 		DWORD size_high = (DWORD)(size & (0xFFFFFFFF00000000));
-		return UnlockFile(self->winos_handle, offset_low, offset_high, size_low, size_high);
+
+		OVERLAPPED ov{};
+		ov.Offset = offset_low;
+		ov.OffsetHigh = offset_high;
+
+		return UnlockFileEx(self->winos_handle, 0, size_low, size_high, &ov);
+	}
+
+	bool
+	file_read_try_lock(File self, int64_t offset, int64_t size)
+	{
+		assert(offset >= 0 && size >= 0);
+
+		DWORD offset_low  = (DWORD)(offset & (0x00000000FFFFFFFF));
+		DWORD offset_high = (DWORD)(offset & (0xFFFFFFFF00000000));
+		DWORD size_low  = (DWORD)(size & (0x00000000FFFFFFFF));
+		DWORD size_high = (DWORD)(size & (0xFFFFFFFF00000000));
+
+		OVERLAPPED ov{};
+		ov.Offset = offset_low;
+		ov.OffsetHigh = offset_high;
+
+		return LockFileEx(self->winos_handle, LOCKFILE_FAIL_IMMEDIATELY, 0, size_low, size_high, &ov);
+	}
+
+	void
+	file_read_lock(File handle, int64_t offset, int64_t size)
+	{
+		worker_block_on([&]{
+			return file_read_try_lock(handle, offset, size);
+		});
+	}
+
+	bool
+	file_read_unlock(File self, int64_t offset, int64_t size)
+	{
+		assert(offset >= 0 && size >= 0);
+
+		DWORD offset_low  = (DWORD)(offset & (0x00000000FFFFFFFF));
+		DWORD offset_high = (DWORD)(offset & (0xFFFFFFFF00000000));
+		DWORD size_low  = (DWORD)(size & (0x00000000FFFFFFFF));
+		DWORD size_high = (DWORD)(size & (0xFFFFFFFF00000000));
+
+		OVERLAPPED ov{};
+		ov.Offset = offset_low;
+		ov.OffsetHigh = offset_high;
+
+		return UnlockFileEx(self->winos_handle, 0, size_low, size_high, &ov);
 	}
 }

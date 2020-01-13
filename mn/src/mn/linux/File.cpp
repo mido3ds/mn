@@ -279,7 +279,7 @@ namespace mn
 	}
 
 	bool
-	file_lock(File self, int64_t offset, int64_t size)
+	file_write_try_lock(File self, int64_t offset, int64_t size)
 	{
 		assert(offset >= 0 && size >= 0);
 		flock fl{};
@@ -290,8 +290,48 @@ namespace mn
 		return fcntl(self->linux_handle, F_SETLK, &fl) != -1;
 	}
 
+	void
+	file_write_lock(File handle, int64_t offset, int64_t size)
+	{
+		worker_block_on([&]{
+			return file_write_try_lock(handle, offset, size);
+		});
+	}
+
 	bool
-	file_unlock(File self, int64_t offset, int64_t size)
+	file_write_unlock(File self, int64_t offset, int64_t size)
+	{
+		assert(offset >= 0 && size >= 0);
+		flock fl{};
+		fl.l_type = F_UNLCK;
+		fl.l_whence = SEEK_SET;
+		fl.l_start = offset;
+		fl.l_len = size;
+		return fcntl(self->linux_handle, F_SETLK, &fl) != -1;
+	}
+
+	bool
+	file_read_try_lock(File self, int64_t offset, int64_t size)
+	{
+		assert(offset >= 0 && size >= 0);
+		flock fl{};
+		fl.l_type = F_RDLCK;
+		fl.l_whence = SEEK_SET;
+		fl.l_start = offset;
+		fl.l_len = size;
+		return fcntl(self->linux_handle, F_SETLK, &fl) != -1;
+	}
+
+	void
+	file_read_lock(File handle, int64_t offset, int64_t size)
+	{
+		worker_block_on([&]{
+			return file_read_try_lock(handle, offset, size);
+		});
+	}
+
+	bool
+	file_read_unlock(File self, int64_t offset, int64_t size)
 	{
 		assert(offset >= 0 && size >= 0);
 		flock fl{};

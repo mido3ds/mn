@@ -219,8 +219,22 @@ namespace mn
 	// locks can't overlap -> file_lock will fail
 	// you can lock a region beyond EOF to coordinate record addition to a file
 	MN_EXPORT bool
-	file_lock(File handle, int64_t offset, int64_t size);
+	file_write_try_lock(File handle, int64_t offset, int64_t size);
+
+	MN_EXPORT void
+	file_write_lock(File handle, int64_t offset, int64_t size);
 
 	MN_EXPORT bool
-	file_unlock(File handle, int64_t offset, int64_t size);
+	file_write_unlock(File handle, int64_t offset, int64_t size);
+
+	// specify a region of the file to be locked
+	// read locks allow multiple readers
+	MN_EXPORT bool
+	file_read_try_lock(File handle, int64_t offset, int64_t size);
+
+	MN_EXPORT void
+	file_read_lock(File handle, int64_t offset, int64_t size);
+
+	MN_EXPORT bool
+	file_read_unlock(File handle, int64_t offset, int64_t size);
 }

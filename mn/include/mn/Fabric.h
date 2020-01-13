@@ -50,6 +50,16 @@ namespace mn
 	MN_EXPORT void
 	worker_block_clear();
 
+	template<typename TFunc>
+	inline static void
+	worker_block_on(TFunc&& fn)
+	{
+		worker_block_ahead();
+		while(fn() == false)
+			mn::thread_sleep(1);
+		worker_block_clear();
+	}
+
 
 	// fabric
 	typedef struct IFabric* Fabric;
