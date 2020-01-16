@@ -199,7 +199,6 @@ namespace mn
 		}
 
 		int linux_handle = ::open(filename, flags, S_IRWXU);
-		assert(linux_handle != -1);
 		if(linux_handle == -1)
 			return nullptr;
 
