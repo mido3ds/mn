@@ -43,6 +43,22 @@ namespace mn
 		return self;
 	}
 
+	template<typename T, size_t Capacity>
+	inline static void
+	fixed_buf_free(Fixed_Buf<T, Capacity>& self)
+	{
+		self.count = 0;
+	}
+
+	template<typename T, size_t Capacity>
+	inline static void
+	destruct(Fixed_Buf<T, Capacity>& self)
+	{
+		for(size_t i = 0; i < self.count; ++i)
+			destruct(self[i]);
+		fixed_buf_free(self);
+	}
+
 	/**
 	* @brief      Pushes a new value to the given fixed_buf
 	*
