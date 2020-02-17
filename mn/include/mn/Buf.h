@@ -344,6 +344,52 @@ namespace mn
 	}
 
 	/**
+	 * @brief      insert a new value to the given buf at given index
+	 *
+	 * @param      self   The buf
+	 * @param      index  The insertion position
+	 * @param[in]  value  The value
+	 *
+	 * @return     A Pointer to the added element
+	 */
+	template<typename T, typename R>
+	inline static T*
+	buf_insert(Buf<T>& self,size_t index, const R& value)
+	{
+		if (self.count == self.cap)
+			buf_reserve(self, self.cap ? self.cap * 2 : 8);
+
+		++self.count;
+
+		for (size_t i = self.count - 1; i > index; --i) 
+			self.ptr[i] = self.ptr[i - 1];
+
+		self.ptr[index] = T(value);
+
+		return self.ptr + index;
+	}
+
+	/**
+	 * @brief      remove a value to the given buf at given index
+	 *
+	 * @param      self   The buf
+	 * @param      index  The deletion position
+	 * @param[in]  value  The value
+	 *
+	 * @return     void
+	 */
+	template<typename T, typename R>
+	inline static void
+	buf_remove(Buf<T>& self, size_t index)
+	{
+		if (self.count == 0) return;
+
+		for (size_t i = index ; i < self.count - 1 ; ++i)
+			self.ptr[i] = self.ptr[i + 1];
+		--self.count;
+	}
+
+	/**
 	 * @brief      Concats two Bufs together
 	 *
 	 * @param      self   The buf to concatenate to
