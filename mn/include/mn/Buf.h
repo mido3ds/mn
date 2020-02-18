@@ -374,7 +374,7 @@ namespace mn
 	 *
 	 * @return     void
 	 */
-	template<typename T, typename R>
+	template<typename T>
 	inline static void
 	buf_remove_ordered(Buf<T>& self, size_t index)
 	{
