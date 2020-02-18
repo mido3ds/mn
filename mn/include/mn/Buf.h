@@ -354,18 +354,14 @@ namespace mn
 	 */
 	template<typename T, typename R>
 	inline static T*
-	buf_insert(Buf<T>& self,size_t index, const R& value)
+	buf_insert(Buf<T>& self, size_t index, const R& value)
 	{
+		assert(index < self.count);
 		if (self.count == self.cap)
 			buf_reserve(self, self.cap ? self.cap * 2 : 8);
-
+		::memmove(self.ptr + index + 1, self.ptr + index, (self.count - index) * sizeof(T));
 		++self.count;
-
-		for (size_t i = self.count - 1; i > index; --i) 
-			self.ptr[i] = self.ptr[i - 1];
-
 		self.ptr[index] = T(value);
-
 		return self.ptr + index;
 	}
 
@@ -380,12 +376,10 @@ namespace mn
 	 */
 	template<typename T, typename R>
 	inline static void
-	buf_remove(Buf<T>& self, size_t index)
+	buf_remove_ordered(Buf<T>& self, size_t index)
 	{
-		if (self.count == 0) return;
-
-		for (size_t i = index ; i < self.count - 1 ; ++i)
-			self.ptr[i] = self.ptr[i + 1];
+		assert(index < self.count);
+		::memmove(self.ptr + index, self.ptr + index + 1, (self.count - index - 1) * sizeof(T));
 		--self.count;
 	}
 
