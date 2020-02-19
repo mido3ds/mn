@@ -94,6 +94,21 @@ TEST_CASE("buf push")
 	buf_free(arr);
 }
 
+TEST_CASE("buf insert and remove ordered")
+{
+	auto v = mn::buf_lit({1, 2, 3, 5});
+	mn::buf_insert(v, 3, 4);
+	for(size_t i = 0; i < v.count; ++i)
+		CHECK(v[i] == i + 1);
+	mn::buf_remove_ordered(v, 3);
+	CHECK(v.count == 4);
+	CHECK(v[0] == 1);
+	CHECK(v[1] == 2);
+	CHECK(v[2] == 3);
+	CHECK(v[3] == 5);
+	mn::buf_free(v);
+}
+
 TEST_CASE("range for loop")
 {
 	auto arr = buf_new<int>();
