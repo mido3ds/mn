@@ -1,10 +1,14 @@
 #include "mn/Debug.h"
 #include "mn/IO.h"
+#include "mn/Str.h"
+#include "mn/Defer.h"
 
 #include <cxxabi.h>
 #include <execinfo.h>
 
 #include <stdlib.h>
+
+#include <string.h>
 
 namespace mn
 {
@@ -16,9 +20,6 @@ namespace mn
 		constexpr size_t STACK_MAX = 4096;
 		void* callstack[STACK_MAX];
 
-		//+1 for null terminated string
-		char name_buffer[MAX_NAME_LEN+1];
-
 		//capture the call stack
 		size_t frames_count = backtrace(callstack, STACK_MAX);
 		//resolve the symbols
@@ -29,41 +30,36 @@ namespace mn
 			for(size_t i = 0; i < frames_count; ++i)
 			{
 				//isolate the function name
-				char *name_begin = nullptr, *name_end = nullptr, *name_it = symbols[i];
-				while(*name_it != 0)
-				{
-					if(*name_it == '(')
-						name_begin = name_it+1;
-					else if(*name_it == ')' || *name_it == '+')
-					{
-						name_end = name_it;
-						break;
-					}
-					++name_it;
-				}
+				//function name is the 4th element when spliting the symbol by space delimiter
+				//exe "0   example 0x000000010dd39efe main + 46"
 
-				
-				size_t mangled_name_size = name_end - name_begin;
+                Str symbol = str_from_c(symbols[i], allocator);
+				mn_defer(symbol);
+
+                auto tokens = mn::str_split(symbol, " ", true);
+
+                Str mangled_name{};
+                if(tokens.count > 3)
+                {
+                    mangled_name = tokens[3];
+                }
+
+                size_t mangled_name_size = mangled_name.count;
 				//function maybe inlined
-				if(mangled_name_size == 0)
+                if(mangled_name_size == 0)
 				{
 					str = strf(str, "[{}]: unknown symbol\n", frames_count - i - 1);
 					continue;
 				}
 
-				//copy the function name into the name buffer
-				size_t copy_size = mangled_name_size > MAX_NAME_LEN ? MAX_NAME_LEN : mangled_name_size;
-				memcpy(name_buffer, name_begin, copy_size);
-				name_buffer[copy_size] = 0;
-
 				int status = 0;
-				char* demangled_name = abi::__cxa_demangle(name_buffer, NULL, 0, &status);
+				char* demangled_name = abi::__cxa_demangle(mangled_name.ptr, NULL, 0, &status);
 
 				if(status == 0)
 					str = strf(str, "[{}]: {}\n", frames_count - i - 1, demangled_name);
 				else
-					str = strf(str, "[{}]: {}\n", frames_count - i - 1, name_buffer);
-				
+					str = strf(str, "[{}]: {}\n", frames_count - i - 1, mangled_name.ptr);
+					
 				::free(demangled_name);
 			}
 			::free(symbols);
