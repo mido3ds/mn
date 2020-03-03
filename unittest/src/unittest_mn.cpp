@@ -521,7 +521,13 @@ TEST_CASE("Rune")
 	CHECK(rune_upper('A') == 'A');
 	CHECK(rune_lower('A') == 'a');
 	CHECK(rune_lower('a') == 'a');
-	CHECK(rune_lower('م') == 'م');
+    #if defined(OS_WINDOWS)
+    CHECK(rune_lower('\u0645') == '\u0645');
+    #elif defined(OS_LINUX)
+    CHECK(rune_lower('U+0645') == 'U+0645');
+    #elif defined(OS_MACOS)
+    CHECK(rune_lower('U+0645') == 'U+0645');
+	#endif
 }
 
 TEST_CASE("Task")
