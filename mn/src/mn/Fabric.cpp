@@ -551,6 +551,52 @@ namespace mn
 		return res;
 	}
 
+	void
+	fabric_compute(Fabric self, Compute_Dims global, Compute_Dims local, mn::Task<void(Compute_Args)> fn)
+	{
+		std::atomic<size_t> available_concurrent_workers = self->workers.count;
+		Waitgroup wg = 0;
+		for (uint32_t z = 0; z < global.z; ++z)
+		{
+			for (uint32_t y = 0; y < global.y; ++y)
+			{
+				for (uint32_t x = 0; x < global.x; ++x)
+				{
+					worker_block_on([&available_concurrent_workers] { return available_concurrent_workers > 0; });
+					available_concurrent_workers.fetch_sub(1);
+					waitgroup_add(wg, 1);
+					worker_do(fabric_worker_next(self), [global_x = x, global_y = y, global_z = z, global, local, &available_concurrent_workers, &wg, &fn] {
+						for (uint32_t z = 0; z < local.z; ++z)
+						{
+							for (uint32_t y = 0; y < local.y; ++y)
+							{
+								for (uint32_t x = 0; x < local.x; ++x)
+								{
+									Compute_Args args;
+									args.workgroup_size = local;
+									args.workgroup_num = global;
+									args.workgroup_id = Compute_Dims{ global_x, global_y, global_z };
+									args.local_invocation_id = Compute_Dims{ x, y, z };
+									// workgroup_id * workgroup_size + local_invocation_id
+									args.global_invocation_id = Compute_Dims{
+										global_x * local.x + x,
+										global_y * local.y + y,
+										global_z * local.z + z,
+									};
+									fn(args);
+								}
+							}
+						}
+						waitgroup_done(wg);
+						available_concurrent_workers.fetch_add(1);
+					});
+				}
+			}
+		}
+		waitgroup_wait(wg);
+		mn::task_free(fn);
+	}
+
 	// Waitgroup
 	void
 	waitgroup_wait(Waitgroup& self)

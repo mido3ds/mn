@@ -95,6 +95,23 @@ namespace mn
 	MN_EXPORT Fabric
 	fabric_local();
 
+	struct Compute_Dims
+	{
+		uint32_t x, y, z;
+	};
+
+	struct Compute_Args
+	{
+		Compute_Dims workgroup_size;
+		Compute_Dims workgroup_num;
+		Compute_Dims workgroup_id;
+		Compute_Dims local_invocation_id;
+		Compute_Dims global_invocation_id;
+	};
+
+	MN_EXPORT void
+	fabric_compute(Fabric self, Compute_Dims global, Compute_Dims local, mn::Task<void(Compute_Args)> task);
+
 	//easy interface
 	template<typename TFunc>
 	inline static void
@@ -527,5 +544,19 @@ namespace mn
 	chan_recv(Auto_Chan<T> &self)
 	{
 		return chan_recv(self.handle);
+	}
+
+	template<typename TFunc>
+	inline static void
+	compute(Fabric f, Compute_Dims global, Compute_Dims local, TFunc&& fn)
+	{
+		fabric_compute(f, global, local, mn::Task<void(Compute_Args)>::make(std::forward<TFunc>(fn)));
+	}
+
+	template<typename TFunc>
+	inline static void
+	compute(Compute_Dims global, Compute_Dims local, TFunc&& fn)
+	{
+		fabric_compute(fabric_local(), global, local, mn::Task<void(Compute_Args)>::make(std::forward<TFunc>(fn)));
 	}
 }
