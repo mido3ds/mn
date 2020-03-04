@@ -112,6 +112,9 @@ namespace mn
 	MN_EXPORT void
 	fabric_compute(Fabric self, Compute_Dims global, Compute_Dims local, mn::Task<void(Compute_Args)> task);
 
+	MN_EXPORT void
+	fabric_compute_sized(Fabric self, Compute_Dims size, Compute_Dims local, mn::Task<void(Compute_Args)> task);
+
 	//easy interface
 	template<typename TFunc>
 	inline static void
@@ -558,5 +561,19 @@ namespace mn
 	compute(Compute_Dims global, Compute_Dims local, TFunc&& fn)
 	{
 		fabric_compute(fabric_local(), global, local, mn::Task<void(Compute_Args)>::make(std::forward<TFunc>(fn)));
+	}
+
+	template<typename TFunc>
+	inline static void
+	compute_sized(Fabric f, Compute_Dims total_size, Compute_Dims local, TFunc&& fn)
+	{
+		fabric_compute_sized(f, total_size, local, mn::Task<void(Compute_Args)>::make(std::forward<TFunc>(fn)));
+	}
+
+	template<typename TFunc>
+	inline static void
+	compute_sized(Compute_Dims total_size, Compute_Dims local, TFunc&& fn)
+	{
+		fabric_compute_sized(fabric_local(), total_size, local, mn::Task<void(Compute_Args)>::make(std::forward<TFunc>(fn)));
 	}
 }
