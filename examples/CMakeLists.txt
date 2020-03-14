@@ -72,8 +72,8 @@ target_link_libraries(example-sputnik-echo-client
 		MoustaphaSaad::mn
 )
 
-add_executable(playground playground.cpp)
-target_link_libraries(playground
+add_executable(mn_playground playground.cpp)
+target_link_libraries(mn_playground
 	PRIVATE
 		MoustaphaSaad::mn
 )
