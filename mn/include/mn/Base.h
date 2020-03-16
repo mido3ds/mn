@@ -3,6 +3,7 @@
 #include "mn/Exports.h"
 
 #include <stddef.h>
+#include <stdint.h>
 
 namespace mn
 {
@@ -141,4 +142,12 @@ namespace mn
 	{
 		return Block { (char*)block.ptr - offset, block.size + offset };
 	}
+
+	struct Timeout
+	{
+		uint64_t seconds;
+	};
+
+	constexpr inline Timeout NO_TIMEOUT{ 0 };
+	constexpr inline Timeout INFINITE_TIMEOUT{ 0xFFFFFFFFFFFFFFFF };
 }

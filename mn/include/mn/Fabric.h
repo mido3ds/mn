@@ -1,6 +1,7 @@
 #pragma once
 
 #include "mn/Exports.h"
+#include "mn/Base.h"
 #include "mn/Task.h"
 #include "mn/Ring.h"
 #include "mn/Thread.h"
@@ -8,6 +9,7 @@
 #include "mn/OS.h"
 
 #include <atomic>
+#include <chrono>
 #include <assert.h>
 
 namespace mn
@@ -57,6 +59,29 @@ namespace mn
 		worker_block_ahead();
 		while(fn() == false)
 			mn::thread_sleep(1);
+		worker_block_clear();
+	}
+
+	template<typename TFunc>
+	inline static void
+	worker_block_on_with_timeout(Timeout timeout, TFunc&& fn)
+	{
+		worker_block_ahead();
+		auto start = std::chrono::steady_clock::now();
+		while(fn() == false)
+		{
+			if (timeout == NO_TIMEOUT)
+			{
+				break;
+			}
+			else if (timeout != INFINITE_TIMEOUT)
+			{
+				auto t = std::chrono::steady_clock::now();
+				if (std::chrono::duration_cast<std::chrono::duration<uint64_t>>(t - start).count() >= timeout.seconds)
+					break;
+			}
+			mn::thread_sleep(1);
+		}
 		worker_block_clear();
 	}
 
