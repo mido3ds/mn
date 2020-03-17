@@ -146,6 +146,9 @@ namespace mn
 	struct Timeout
 	{
 		uint64_t seconds;
+
+		bool operator==(Timeout other) const { return seconds == other.seconds; }
+		bool operator!=(Timeout other) const { return seconds != other.seconds; }
 	};
 
 	constexpr inline Timeout NO_TIMEOUT{ 0 };
