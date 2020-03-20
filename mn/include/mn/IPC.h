@@ -44,38 +44,38 @@ namespace mn::ipc
 			void* winos_named_pipe;
 			int linux_domain_socket;
 		};
-		mn::Str name;
+		Str name;
 		uint64_t read_msg_size;
 
 		MN_EXPORT void
 		dispose() override;
 
 		MN_EXPORT size_t
-		read(mn::Block data) override;
+		read(Block data) override;
 
 		MN_EXPORT size_t
-		write(mn::Block data) override;
+		write(Block data) override;
 
 		MN_EXPORT int64_t
 		size() override;
 	};
 
 	MN_EXPORT Sputnik
-	sputnik_new(const mn::Str& name);
+	sputnik_new(const Str& name);
 
 	inline static Sputnik
 	sputnik_new(const char* name)
 	{
-		return sputnik_new(mn::str_lit(name));
+		return sputnik_new(str_lit(name));
 	}
 
 	MN_EXPORT Sputnik
-	sputnik_connect(const mn::Str& name);
+	sputnik_connect(const Str& name);
 
 	inline static Sputnik
 	sputnik_connect(const char* name)
 	{
-		return sputnik_connect(mn::str_lit(name));
+		return sputnik_connect(str_lit(name));
 	}
 
 	MN_EXPORT void
@@ -88,7 +88,7 @@ namespace mn::ipc
 	sputnik_accept(Sputnik self);
 
 	MN_EXPORT size_t
-	sputnik_read(Sputnik self, mn::Block data);
+	sputnik_read(Sputnik self, Block data, Timeout timeout);
 
 	MN_EXPORT size_t
 	sputnik_write(Sputnik self, mn::Block data);
@@ -110,9 +110,9 @@ namespace mn::ipc
 
 	// sputnik_msg_read reads a message unit from sputnik
 	MN_EXPORT Msg_Read_Return
-	sputnik_msg_read(Sputnik self, Block data);
+	sputnik_msg_read(Sputnik self, Block data, Timeout timeout);
 
 	// sputnik_msg_read_alloc allocates and reads a single message
 	MN_EXPORT Str
-	sputnik_msg_read_alloc(Sputnik self, Allocator allocator = allocator_top());
+	sputnik_msg_read_alloc(Sputnik self, Timeout timeout, Allocator allocator = allocator_top());
 }

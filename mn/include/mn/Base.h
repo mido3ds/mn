@@ -4,6 +4,7 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include <assert.h>
 
 namespace mn
 {
@@ -91,6 +92,7 @@ namespace mn
 	inline static Block
 	operator+(const Block& block, size_t offset)
 	{
+		assert(block.size >= offset);
 		return Block { (char*)block.ptr + offset, block.size - offset };
 	}
 
@@ -106,6 +108,7 @@ namespace mn
 	inline static Block
 	operator+(size_t offset, const Block& block)
 	{
+		assert(block.size >= offset);
 		return Block { (char*)block.ptr + offset, block.size - offset };
 	}
 
@@ -145,10 +148,10 @@ namespace mn
 
 	struct Timeout
 	{
-		uint64_t seconds;
+		uint64_t milliseconds;
 
-		bool operator==(Timeout other) const { return seconds == other.seconds; }
-		bool operator!=(Timeout other) const { return seconds != other.seconds; }
+		bool operator==(Timeout other) const { return milliseconds == other.milliseconds; }
+		bool operator!=(Timeout other) const { return milliseconds != other.milliseconds; }
 	};
 
 	constexpr inline Timeout NO_TIMEOUT{ 0 };

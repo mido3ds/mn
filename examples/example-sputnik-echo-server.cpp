@@ -18,7 +18,7 @@ serve_client(mn::ipc::Sputnik client)
 	do
 	{
 		mn::str_resize(data, 1024);
-		read_bytes = mn::ipc::sputnik_read(client, mn::block_from(data));
+		read_bytes = mn::ipc::sputnik_read(client, mn::block_from(data), mn::INFINITE_TIMEOUT);
 		if(read_bytes > 0)
 		{
 			mn::str_resize(data, read_bytes);
@@ -37,7 +37,7 @@ serve_client_msg(mn::ipc::Sputnik client)
 
 	do
 	{
-		auto msg = mn::ipc::sputnik_msg_read_alloc(client);
+		auto msg = mn::ipc::sputnik_msg_read_alloc(client, mn::INFINITE_TIMEOUT);
 		if(msg.count == 0)
 			break;
 		mn::ipc::sputnik_msg_write(client, block_from(msg));
