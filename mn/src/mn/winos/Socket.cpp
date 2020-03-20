@@ -77,7 +77,7 @@ namespace mn
 	size_t
 	ISocket::read(Block data)
 	{
-		return socket_read(this, data);
+		return socket_read(this, data, INFINITE_TIMEOUT);
 	}
 
 	size_t
@@ -197,10 +197,17 @@ namespace mn
 		::shutdown(self->handle, SD_SEND);
 	}
 
-	size_t
-	socket_read(Socket self, Block data)
+	void CALLBACK _completion_routine(DWORD dwError, DWORD cbTransferred, LPWSAOVERLAPPED lpOverlapped, DWORD dwFlags)
 	{
-		size_t recieved_bytes = 0;
+		return;
+	}
+
+	size_t
+	socket_read(Socket self, Block data, Timeout timeout)
+	{
+		pollfd pfd_read{};
+		pfd_read.fd = self->handle;
+		pfd_read.events = POLLIN;
 
 		WSABUF data_buf{};
 		data_buf.len = ULONG(data.size);
@@ -208,21 +215,32 @@ namespace mn
 
 		DWORD flags = 0;
 
+		INT milliseconds = 0;
+		if (timeout == INFINITE_TIMEOUT)
+			milliseconds = INFINITE;
+		else if (timeout == NO_TIMEOUT)
+			milliseconds = 0;
+		else
+			milliseconds = INT(timeout.milliseconds);
+
+		DWORD recieved_bytes = 0;
 		worker_block_ahead();
-		int status = ::WSARecv(
-			self->handle,
-			&data_buf,
-			1,
-			(LPDWORD)&recieved_bytes,
-			&flags,
-			NULL,
-			NULL
-		);
+		int ready = WSAPoll(&pfd_read, 1, milliseconds);
+		if (ready > 0)
+		{
+			::WSARecv(
+				self->handle,
+				&data_buf,
+				1,
+				&recieved_bytes,
+				&flags,
+				NULL,
+				NULL
+			);
+		}
 		worker_block_clear();
 
-		if(status == 0)
-			return recieved_bytes;
-		return 0;
+		return recieved_bytes;
 	}
 
 	size_t

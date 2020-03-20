@@ -206,7 +206,7 @@ namespace mn::ipc
 	}
 
 	size_t
-	sputnik_write(Sputnik self, mn::Block data, Timeout timeout)
+	sputnik_write(Sputnik self, mn::Block data)
 	{
 		DWORD bytes_written = 0;
 		worker_block_ahead();
@@ -232,7 +232,7 @@ namespace mn::ipc
 	}
 
 	void
-	sputnik_msg_write(Sputnik self, Block data, Timeout timeout)
+	sputnik_msg_write(Sputnik self, Block data)
 	{
 		uint64_t len = data.size;
 		sputnik_write(self, block_from(len));

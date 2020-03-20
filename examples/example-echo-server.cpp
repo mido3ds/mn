@@ -25,6 +25,10 @@ serve_client(mn::Socket client)
 			write_bytes = mn::socket_write(client, mn::block_from(data));
 			assert(write_bytes == read_bytes && "socket_write failed");
 		}
+		else if (read_bytes == 0)
+		{
+			mn::print("Read timeout\n");
+		}
 	} while(read_bytes > 0);
 }
 
