@@ -18,7 +18,7 @@ serve_client(mn::Socket client)
 	do
 	{
 		mn::str_resize(data, 1024);
-		read_bytes = mn::socket_read(client, mn::block_from(data));
+		read_bytes = mn::socket_read(client, mn::block_from(data), mn::INFINITE_TIMEOUT);
 		if(read_bytes > 0)
 		{
 			mn::str_resize(data, read_bytes);

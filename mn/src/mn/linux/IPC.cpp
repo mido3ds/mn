@@ -216,6 +216,8 @@ namespace mn::ipc
 		if(ready > 0)
 			res = ::read(self->linux_domain_socket, data.ptr, data.size);
 		worker_block_clear();
+		if(res == -1)
+			return 0;
 		return res;
 	}
 

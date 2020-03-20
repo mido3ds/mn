@@ -32,7 +32,7 @@ main()
 		assert(write_bytes == line.count && "socket_write failed");
 
 		mn::str_resize(line, 1024);
-		read_bytes = socket_read(socket, mn::block_from(line));
+		read_bytes = socket_read(socket, mn::block_from(line), mn::INFINITE_TIMEOUT);
 		assert(read_bytes == write_bytes);
 
 		mn::str_resize(line, read_bytes);

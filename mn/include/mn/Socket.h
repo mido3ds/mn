@@ -77,7 +77,7 @@ namespace mn
 	socket_disconnect(Socket self);
 
 	MN_EXPORT size_t
-	socket_read(Socket self, Block data);
+	socket_read(Socket self, Block data, Timeout timeout);
 
 	MN_EXPORT size_t
 	socket_write(Socket self, Block data);

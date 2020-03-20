@@ -6,6 +6,7 @@
 #include <sys/unistd.h>
 #include <fcntl.h>
 #include <netdb.h>
+#include <poll.h>
 
 namespace mn
 {
@@ -58,7 +59,7 @@ namespace mn
 	size_t
 	ISocket::read(Block data)
 	{
-		return socket_read(this, data);
+		return socket_read(this, data, INFINITE_TIMEOUT);
 	}
 
 	size_t
@@ -177,10 +178,25 @@ namespace mn
 	}
 
 	size_t
-	socket_read(Socket self, Block data)
+	socket_read(Socket self, Block data, Timeout timeout)
 	{
+		pollfd pfd_read{};
+		pfd_read.fd = self->handle;
+		pfd_read.events = POLLIN;
+
+		int milliseconds = 0;
+		if(timeout == INFINITE_TIMEOUT)
+			milliseconds = -1;
+		else if(timeout == NO_TIMEOUT)
+			milliseconds = 0;
+		else
+			milliseconds = int(timeout.milliseconds);
+
+		size_t res = 0;
 		worker_block_ahead();
-		auto res = ::recv(self->handle, data.ptr, data.size, 0);
+		int ready = poll(&pfd_read, 1, milliseconds);
+		if(ready > 0)
+			res = ::recv(self->handle, data.ptr, data.size, 0);
 		worker_block_clear();
 		if(res == -1)
 			return 0;
