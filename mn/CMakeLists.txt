@@ -197,6 +197,9 @@ if(MN_LEAK)
 		PRIVATE
 			MN_LEAK=1
 	)
+	if(UNIX)
+		target_link_options(mn PUBLIC -rdynamic)
+	endif(UNIX)
 endif(MN_LEAK)
 
 # enable C++17

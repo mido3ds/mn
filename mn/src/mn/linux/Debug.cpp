@@ -47,7 +47,7 @@ namespace mn
 				//function maybe inlined
 				if(mangled_name_size == 0)
 				{
-					str = strf(str, "[{}]: unknown symbol\n", frames_count - i - 1);
+					str = strf(str, "[{}]: {}\n", frames_count - i - 1, symbols[i]);
 					continue;
 				}
 
