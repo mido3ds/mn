@@ -1,6 +1,7 @@
 #include <mn/IO.h>
 #include <mn/IPC.h>
 #include <mn/Defer.h>
+#include <mn/Thread.h>
 
 #include <assert.h>
 
@@ -33,6 +34,20 @@ main()
 	auto client = mn::ipc::sputnik_connect("sputnik");
 	assert(client && "sputnik_connect failed");
 	mn_defer(mn::ipc::sputnik_free(client));
+
+	while (true)
+	{
+		auto msg_2way = mn::str_lit("Client");
+		mn::ipc::sputnik_msg_write(client, mn::block_from(msg_2way));
+
+		auto msg = mn::ipc::sputnik_msg_read_alloc(client, mn::INFINITE_TIMEOUT);
+		if (msg.count == 0)
+			break;
+		mn::print("msg: '{}'\n", msg);
+		mn::str_free(msg);
+		mn::thread_sleep(1000);
+	}
+	return 0;
 
 	auto line = mn::str_new();
 	mn_defer(mn::str_free(line));

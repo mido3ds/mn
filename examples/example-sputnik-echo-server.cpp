@@ -45,6 +45,27 @@ serve_client_msg(mn::ipc::Sputnik client)
 	} while(true);
 }
 
+void
+serve_client_msg2(mn::ipc::Sputnik client)
+{
+	mn_defer({
+		mn::ipc::sputnik_free(client);
+	});
+
+	do
+	{
+		auto msg_2way = mn::str_lit("Server");
+		mn::ipc::sputnik_msg_write(client, mn::block_from(msg_2way));
+
+		auto msg = mn::ipc::sputnik_msg_read_alloc(client, mn::INFINITE_TIMEOUT);
+		if (msg.count == 0)
+			break;
+		mn::print("msg: '{}'\n", msg);
+		mn::str_free(msg);
+		mn::thread_sleep(1000);
+	} while (true);
+}
+
 int
 main()
 {
@@ -61,7 +82,7 @@ main()
 	while(mn::ipc::sputnik_listen(server))
 	{
 		auto client = mn::ipc::sputnik_accept(server);
-		mn::go(f, [client]{ serve_client_msg(client); });
+		mn::go(f, [client]{ serve_client_msg2(client); });
 	}
 	return 0;
 }
