@@ -7,6 +7,16 @@
 
 namespace mn
 {
+	enum STREAM_CURSOR_OP
+	{
+		STREAM_CURSOR_GET,
+		STREAM_CURSOR_MOVE,
+		STREAM_CURSOR_SET,
+		STREAM_CURSOR_START,
+		STREAM_CURSOR_END,
+	};
+	constexpr inline int64_t STREAM_CURSOR_ERROR = INT64_MIN;
+
 	typedef struct IStream* Stream;
 	struct IStream
 	{
@@ -14,6 +24,7 @@ namespace mn
 		virtual size_t read(Block data) = 0;
 		virtual size_t write(Block data) = 0;
 		virtual int64_t size() = 0;
+		virtual int64_t cursor_op(STREAM_CURSOR_OP op, int64_t offset) = 0;
 	};
 
 	MN_EXPORT size_t
@@ -33,5 +44,35 @@ namespace mn
 	destruct(Stream self)
 	{
 		stream_free(self);
+	}
+
+	inline static int64_t
+	stream_cursor_pos(Stream self)
+	{
+		return self->cursor_op(STREAM_CURSOR_GET, 0);
+	}
+
+	inline static int64_t
+	stream_cursor_move(Stream self, int64_t offset)
+	{
+		return self->cursor_op(STREAM_CURSOR_MOVE, offset);
+	}
+
+	inline static int64_t
+	stream_cursor_set(Stream self, int64_t abs)
+	{
+		return self->cursor_op(STREAM_CURSOR_SET, abs);
+	}
+
+	inline static int64_t
+	stream_cursor_to_start(Stream self)
+	{
+		return self->cursor_op(STREAM_CURSOR_START, 0);
+	}
+
+	inline static int64_t
+	stream_cursor_to_end(Stream self)
+	{
+		return self->cursor_op(STREAM_CURSOR_END, 0);
 	}
 }

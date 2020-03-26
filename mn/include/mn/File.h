@@ -7,6 +7,23 @@
 namespace mn
 {
 	typedef struct IFile* File;
+
+	// just forward declaration because this language require this kind of thing
+	MN_EXPORT int64_t
+	file_cursor_pos(File handle);
+
+	MN_EXPORT bool
+	file_cursor_move(File handle, int64_t offset);
+
+	MN_EXPORT bool
+	file_cursor_set(File handle, int64_t absolute);
+
+	MN_EXPORT bool
+	file_cursor_move_to_start(File handle);
+
+	MN_EXPORT bool
+	file_cursor_move_to_end(File handle);
+
 	struct IFile final: IStream
 	{
 		union
@@ -27,6 +44,31 @@ namespace mn
 
 		MN_EXPORT virtual int64_t
 		size() override;
+
+		virtual int64_t
+		cursor_op(STREAM_CURSOR_OP op, int64_t arg) override
+		{
+			switch (op)
+			{
+			case STREAM_CURSOR_GET:
+				return file_cursor_pos(this);
+			case STREAM_CURSOR_MOVE:
+				file_cursor_move(this, arg);
+				return file_cursor_pos(this);
+			case STREAM_CURSOR_SET:
+				file_cursor_set(this, arg);
+				return file_cursor_pos(this);
+			case STREAM_CURSOR_START:
+				file_cursor_move_to_start(this);
+				return 0;
+			case STREAM_CURSOR_END:
+				file_cursor_move_to_end(this);
+				return file_cursor_pos(this);
+			default:
+				assert(false && "unreachable");
+				return STREAM_CURSOR_ERROR;
+			}
+		}
 	};
 
 

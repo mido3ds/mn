@@ -19,6 +19,7 @@
 #include <mn/Deque.h>
 #include <mn/Result.h>
 #include <mn/Fabric.h>
+#include <mn/Block_Stream.h>
 
 #include <chrono>
 #include <iostream>

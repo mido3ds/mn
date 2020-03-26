@@ -7,6 +7,14 @@
 namespace mn
 {
 	typedef struct IMemory_Stream* Memory_Stream;
+
+	// just forward declaration because this language require this kind of thing
+	MN_EXPORT void
+	memory_stream_cursor_move(Memory_Stream self, int64_t offset);
+
+	MN_EXPORT void
+	memory_stream_cursor_set(Memory_Stream self, int64_t abs);
+
 	struct IMemory_Stream final: IStream
 	{
 		Str str;
@@ -23,6 +31,31 @@ namespace mn
 
 		MN_EXPORT virtual int64_t
 		size() override;
+
+		virtual int64_t
+		cursor_op(STREAM_CURSOR_OP op, int64_t arg) override
+		{
+			switch (op)
+			{
+			case STREAM_CURSOR_GET:
+				return this->cursor;
+			case STREAM_CURSOR_MOVE:
+				memory_stream_cursor_move(this, arg);
+				return this->cursor;
+			case STREAM_CURSOR_SET:
+				memory_stream_cursor_set(this, arg);
+				return this->cursor;
+			case STREAM_CURSOR_START:
+				this->cursor = 0;
+				return 0;
+			case STREAM_CURSOR_END:
+				this->cursor = this->str.count;
+				return this->cursor;
+			default:
+				assert(false && "unreachable");
+				return STREAM_CURSOR_ERROR;
+			}
+		}
 	};
 
 	/**

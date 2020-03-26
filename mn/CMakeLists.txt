@@ -10,6 +10,7 @@ set(HEADER_FILES
 	include/mn/memory/Virtual.h
 	include/mn/memory/Fast_Leak.h
 	include/mn/Base.h
+	include/mn/Block_Stream.h
 	include/mn/Buf.h
 	include/mn/Debug.h
 	include/mn/Defer.h

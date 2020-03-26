@@ -35,6 +35,13 @@ namespace mn
 
 		MN_EXPORT virtual int64_t
 		size() override;
+
+		virtual int64_t
+		cursor_op(STREAM_CURSOR_OP op, int64_t arg) override
+		{
+			assert(false && "sockets doesn't support cursor operations");
+			return STREAM_CURSOR_ERROR;
+		}
 	};
 
 	MN_EXPORT Socket
