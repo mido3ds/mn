@@ -109,6 +109,7 @@ namespace mn::ipc
 		auto self = mn::alloc_construct<ISputnik>();
 		self->winos_named_pipe = handle;
 		self->name = clone(name);
+		self->read_msg_size = 0;
 		return self;
 	}
 
@@ -131,6 +132,7 @@ namespace mn::ipc
 		auto self = mn::alloc_construct<ISputnik>();
 		self->winos_named_pipe = handle;
 		self->name = clone(name);
+		self->read_msg_size = 0;
 		return self;
 	}
 
@@ -198,6 +200,7 @@ namespace mn::ipc
 		auto other = mn::alloc_construct<ISputnik>();
 		other->winos_named_pipe = self->winos_named_pipe;
 		other->name = clone(self->name);
+		other->read_msg_size = 0;
 
 		self->winos_named_pipe = handle;
 
@@ -226,8 +229,10 @@ namespace mn::ipc
 			milliseconds = 0;
 		else
 			milliseconds = DWORD(timeout.milliseconds);
-		WaitForSingleObject(overlapped.hEvent, milliseconds);
+		auto wakeup = WaitForSingleObject(overlapped.hEvent, milliseconds);
 		worker_block_clear();
+		if (wakeup == WAIT_TIMEOUT)
+			CancelIo(self->winos_named_pipe);
 		CloseHandle(overlapped.hEvent);
 		return overlapped.InternalHigh;
 	}
