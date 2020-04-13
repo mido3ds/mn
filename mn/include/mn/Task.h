@@ -15,7 +15,7 @@ namespace mn
 		struct Concept
 		{
 			virtual ~Concept() = default;
-			virtual R invoke(Args&&... args) = 0;
+			virtual R invoke(Args... args) = 0;
 		};
 
 		template<typename F, bool Small>
@@ -36,7 +36,7 @@ namespace mn
 				:fn(std::forward<G>(f))
 			{}
 
-			R invoke(Args&&... args) override
+			R invoke(Args... args) override
 			{
 				return std::invoke(fn, std::forward<Args>(args)...);
 			}
@@ -67,7 +67,7 @@ namespace mn
 				free_destruct_from(allocator, fn);
 			}
 
-			R invoke(Args&&... args) override
+			R invoke(Args... args) override
 			{
 				return std::invoke(*fn, std::forward<Args>(args)...);
 			}
