@@ -215,11 +215,6 @@ namespace mn
 		::shutdown(self->handle, SD_SEND);
 	}
 
-	void CALLBACK _completion_routine(DWORD dwError, DWORD cbTransferred, LPWSAOVERLAPPED lpOverlapped, DWORD dwFlags)
-	{
-		return;
-	}
-
 	size_t
 	socket_read(Socket self, Block data, Timeout timeout)
 	{

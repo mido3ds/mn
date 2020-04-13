@@ -60,7 +60,7 @@ namespace mn::ipc
 		size() override;
 
 		virtual int64_t
-		cursor_op(STREAM_CURSOR_OP op, int64_t arg) override
+		cursor_op(STREAM_CURSOR_OP, int64_t) override
 		{
 			assert(false && "sputnik doesn't support cursor operations");
 			return STREAM_CURSOR_ERROR;

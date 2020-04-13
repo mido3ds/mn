@@ -146,7 +146,7 @@ namespace mn::ipc
 	}
 
 	bool
-	sputnik_listen(Sputnik self)
+	sputnik_listen(Sputnik)
 	{
 		// this function doesn't map to anything on windows since in socket api it's used to change the state of a socket
 		// to be able to accept connections, in named pipes on windows however this is unnecessary

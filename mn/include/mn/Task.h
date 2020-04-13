@@ -2,8 +2,7 @@
 
 #include "mn/Memory.h"
 
-#include <type_traits>
-#include <functional>
+#include <utility>
 
 namespace mn
 {
@@ -74,12 +73,13 @@ namespace mn
 			}
 		};
 
-		static constexpr size_t SMALL_SIZE = sizeof(void*) * 8;
-		std::aligned_storage_t<SMALL_SIZE> concept;
+		static constexpr size_t SMALL_SIZE = sizeof(void*) * 7;
+		alignas(Concept) unsigned char concept[SMALL_SIZE];
+		bool isSet;
 
 		Concept& _self()
 		{
-			return *static_cast<Concept*>(static_cast<void*>(&concept));
+			return *static_cast<Concept*>(static_cast<void*>(concept));
 		}
 
 		R operator()(Args... args)
@@ -87,13 +87,23 @@ namespace mn
 			return _self().invoke(std::forward<Args>(args)...);
 		}
 
+		operator bool() const { return isSet; }
+
+		inline static Task<R(Args...)>
+		make()
+		{
+			Task<R(Args...)> self{};
+			return self;
+		}
+
 		template<typename F>
 		inline static Task<R(Args...)>
 		make(F&& f)
 		{
-			constexpr bool is_small = sizeof(Model<std::decay_t<F>, true>) <= SMALL_SIZE;
+			constexpr bool is_small = sizeof(Model<F, true>) <= SMALL_SIZE;
 			Task<R(Args...)> self{};
-			::new (&self.concept) Model<std::decay_t<F>, is_small>(std::forward<F>(f));
+			::new (&self.concept) Model<F, is_small>(std::forward<F>(f));
+			self.isSet = true;
 			return self;
 		}
 
@@ -101,9 +111,10 @@ namespace mn
 		inline static Task<R(Args...)>
 		make_with_allocator(Allocator allocator, F&& f)
 		{
-			constexpr bool is_small = sizeof(Model<std::decay_t<F>, true>) <= SMALL_SIZE;
+			constexpr bool is_small = sizeof(Model<F, true>) <= SMALL_SIZE;
 			Task<R(Args...)> self{};
-			::new (&self.concept) Model<std::decay_t<F>, is_small>(allocator, std::forward<F>(f));
+			::new (&self.concept) Model<F, is_small>(allocator, std::forward<F>(f));
+			self.isSet = true;
 			return self;
 		}
 	};
@@ -112,7 +123,11 @@ namespace mn
 	inline static void
 	task_free(Task<R(Args...)>& self)
 	{
-		self._self().~Concept();
+		if (self.isSet)
+		{
+			self._self().~Concept();
+			self.isSet = false;
+		}
 	}
 
 	template<typename R, typename ... Args>
