@@ -3,6 +3,7 @@
 #include "mn/Memory.h"
 
 #include <utility>
+#include <functional>
 
 namespace mn
 {
