@@ -66,7 +66,7 @@ namespace mn
 	inline static size_t
 	block_stream_read(Block_Stream& self, Block data)
 	{
-		if (self.cursor >= self.data.size)
+		if (size_t(self.cursor) >= self.data.size)
 			return 0;
 
 		size_t available_size = self.data.size - self.cursor;
