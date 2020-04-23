@@ -42,6 +42,7 @@ set(HEADER_FILES
 	include/mn/Fabric.h
 	include/mn/Socket.h
 	include/mn/Library.h
+	include/mn/Process.h
 	include/utf8proc/utf8proc.h
 )
 
@@ -78,6 +79,7 @@ if(WIN32)
 		src/mn/winos/IPC.cpp
 		src/mn/winos/Socket.cpp
 		src/mn/winos/Library.cpp
+		src/mn/winos/Process.cpp
 	)
 elseif(UNIX AND NOT APPLE)
 	set(SOURCE_FILES ${SOURCE_FILES}
@@ -89,6 +91,7 @@ elseif(UNIX AND NOT APPLE)
 		src/mn/linux/IPC.cpp
 		src/mn/linux/Socket.cpp
 		src/mn/linux/Library.cpp
+		src/mn/linux/Process.cpp
 	)
 elseif(APPLE)
 	set(SOURCE_FILES ${SOURCE_FILES}
@@ -100,6 +103,7 @@ elseif(APPLE)
 		src/mn/mac/IPC.cpp
 		src/mn/mac/Socket.cpp
 		src/mn/mac/Library.cpp
+		src/mn/mac/Process.cpp
 	)
 endif()
 
