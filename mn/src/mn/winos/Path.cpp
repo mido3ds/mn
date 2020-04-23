@@ -197,7 +197,7 @@ namespace mn
 		Block full_path = alloc(required_size * sizeof(TCHAR), alignof(TCHAR));
 		mn_defer(mn::free(full_path));
 
-		[[maybe_unused]] DWORD written_size = GetFullPathName((LPCWSTR)os_path.ptr, required_size, (LPWSTR)full_path.ptr, NULL);
+		[[maybe_unused]] DWORD written_size = GetFullPathName((LPCWSTR)os_str.ptr, required_size, (LPWSTR)full_path.ptr, NULL);
 		assert(written_size+1 == required_size && "GetFullPathName failed");
 
 		Str res = from_os_encoding(full_path, allocator);
@@ -366,7 +366,7 @@ namespace mn
 		DWORD attributes = GetFileAttributes((LPCWSTR)os_str.ptr);
 		if (attributes != INVALID_FILE_ATTRIBUTES)
 			return attributes & FILE_ATTRIBUTE_DIRECTORY;
-		return CreateDirectory((LPCWSTR)os_path.ptr, NULL);
+		return CreateDirectory((LPCWSTR)os_str.ptr, NULL);
 	}
 
 	bool
@@ -410,7 +410,7 @@ namespace mn
 			}
 		}
 
-		return RemoveDirectory((LPCWSTR)os_path.ptr);
+		return RemoveDirectory((LPCWSTR)os_str.ptr);
 	}
 
 	bool
