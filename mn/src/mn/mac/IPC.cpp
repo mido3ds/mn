@@ -82,7 +82,7 @@ namespace mn::ipc
 		_mutex_unlock(mtx, 0, 0);
 	}
 
-    void
+	void
 	ISputnik::dispose()
 	{
 		sputnik_free(this);

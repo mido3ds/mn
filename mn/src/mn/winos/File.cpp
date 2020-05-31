@@ -217,7 +217,7 @@ namespace mn
 		Block buffer = alloc_from(allocator, required_size, alignof(WCHAR));
 
 		size_needed = MultiByteToWideChar(CP_UTF8,
-			0, utf8.ptr, int(utf8.cap), (LPWSTR)buffer.ptr, int(buffer.size));
+			0, utf8.ptr, int(utf8.count), (LPWSTR)buffer.ptr, int(buffer.size));
 		return buffer;
 	}
 

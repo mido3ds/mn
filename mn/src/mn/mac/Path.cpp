@@ -206,15 +206,15 @@ namespace mn
 		return res;
 	}
 
-    int64_t
-    file_last_write_time(const char* path)
-    {
-        struct stat sb{};
-        if (::stat(path, &sb) != 0)
-            return 0;
-        return int64_t(sb.st_mtime);
-    }
-    
+	int64_t
+	file_last_write_time(const char* path)
+	{
+		struct stat sb{};
+		if (::stat(path, &sb) != 0)
+			return 0;
+		return int64_t(sb.st_mtime);
+	}
+	
 	bool
 	file_copy(const char* src, const char* dst)
 	{
@@ -390,6 +390,6 @@ namespace mn
 	Str
 	folder_tmp(Allocator allocator)
 	{
-        return str_from_c(getenv("TMPDIR"), allocator);
+		return str_from_c(getenv("TMPDIR"), allocator);
 	}
 }
