@@ -216,8 +216,10 @@ namespace mn
 		size_t required_size = (size_needed + 1) * sizeof(WCHAR);
 		Block buffer = alloc_from(allocator, required_size, alignof(WCHAR));
 
-		size_needed = MultiByteToWideChar(CP_UTF8,
-			0, utf8.ptr, int(utf8.count), (LPWSTR)buffer.ptr, int(buffer.size));
+		MultiByteToWideChar(CP_UTF8, 0, utf8.ptr, int(utf8.count), (LPWSTR)buffer.ptr, size_needed);
+
+		auto ptr = (WCHAR*)buffer.ptr;
+		ptr[size_needed] = WCHAR(0);
 		return buffer;
 	}
 
