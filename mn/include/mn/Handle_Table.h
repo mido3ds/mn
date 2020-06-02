@@ -145,10 +145,23 @@ namespace mn
 	}
 
 	template<typename T>
+	inline static bool
+	handle_table_exists(const Handle_Table<T>& self, uint64_t v)
+	{
+		auto h = handle_table_index_from_uint64(v);
+		auto& entry = self._map[h.index];
+		return entry.generation == h.generation;
+	}
+
+	template<typename T>
 	inline static T
 	handle_table_get(Handle_Table<T>& self, uint64_t v)
 	{
 		auto h = handle_table_index_from_uint64(v);
-		return self.items[self._map[h.index].items_index].item;
+		auto &entry = self._map[h.index];
+		T* ptr = nullptr;
+		if (entry.generation == h.generation)
+			ptr = &self.items[entry.items_index].item;
+		return *ptr;
 	}
 }
