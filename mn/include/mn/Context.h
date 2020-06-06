@@ -93,4 +93,33 @@ namespace mn
 
 	MN_EXPORT void
 	memory_profile_free(void* ptr, size_t size);
+
+	// Log Wrapper
+	struct Log_Interface
+	{
+		void* self;
+		void (*debug)(void* self, const char* msg);
+		void (*info)(void* self, const char* msg);
+		void (*warning)(void* self, const char* msg);
+		void (*error)(void* self, const char* msg);
+		void (*critical)(void* self, const char* msg);
+	};
+
+	MN_EXPORT Log_Interface
+	log_interface_set(Log_Interface self);
+
+	MN_EXPORT void
+	log_debug_str(const char* msg);
+
+	MN_EXPORT void
+	log_info_str(const char* msg);
+
+	MN_EXPORT void
+	log_warning_str(const char* msg);
+
+	MN_EXPORT void
+	log_error_str(const char* msg);
+
+	MN_EXPORT void
+	log_critical_str(const char* msg);
 }

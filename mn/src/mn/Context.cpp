@@ -5,6 +5,7 @@
 #include "mn/Stream.h"
 #include "mn/Reader.h"
 #include "mn/Memory_Stream.h"
+#include "mn/Fmt.h"
 
 #include <assert.h>
 #include <stdio.h>
@@ -12,6 +13,7 @@
 namespace mn
 {
 	static Memory_Profile_Interface MEMORY_PROFILE;
+	static Log_Interface LOG;
 
 	struct Context_Wrapper
 	{
@@ -144,5 +146,58 @@ namespace mn
 	{
 		if(MEMORY_PROFILE.profile_free)
 			MEMORY_PROFILE.profile_free(MEMORY_PROFILE.self, ptr, size);
+	}
+
+	Log_Interface
+	log_interface_set(Log_Interface self)
+	{
+		auto res = LOG;
+		LOG = self;
+		return res;
+	}
+
+	void
+	log_debug_str(const char* msg)
+	{
+		if (LOG.debug)
+			LOG.debug(LOG.self, msg);
+		else
+			mn::printerr("[debug]: {}\n", msg);
+	}
+
+	void
+	log_info_str(const char* msg)
+	{
+		if (LOG.info)
+			LOG.info(LOG.self, msg);
+		else
+			mn::printerr("[info]: {}\n", msg);
+	}
+
+	void
+	log_warning_str(const char* msg)
+	{
+		if (LOG.warning)
+			LOG.warning(LOG.self, msg);
+		else
+			mn::printerr("[warning]: {}\n", msg);
+	}
+
+	void
+	log_error_str(const char* msg)
+	{
+		if (LOG.error)
+			LOG.error(LOG.self, msg);
+		else
+			mn::printerr("[error]: {}\n", msg);
+	}
+
+	void
+	log_critical_str(const char* msg)
+	{
+		if (LOG.critical)
+			LOG.critical(LOG.self, msg);
+		else
+			mn::printerr("[critical]: {}\n", msg);
 	}
 }

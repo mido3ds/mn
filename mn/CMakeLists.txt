@@ -45,6 +45,7 @@ set(HEADER_FILES
 	include/mn/Library.h
 	include/mn/Process.h
 	include/mn/Handle_Table.h
+	include/mn/Log.h
 	include/utf8proc/utf8proc.h
 )
 
