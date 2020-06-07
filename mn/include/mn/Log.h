@@ -52,4 +52,12 @@ namespace mn
 		mn::str_free(msg);
 		abort();
 	}
+
+	template<typename... TArgs>
+	inline static void
+	log_ensure(bool expr, const char* fmt, TArgs&&... args)
+	{
+		if (expr == false)
+			log_critical(fmt, args...);
+	}
 }
