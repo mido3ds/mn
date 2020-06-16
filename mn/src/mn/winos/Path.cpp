@@ -7,6 +7,7 @@
 #include <Windows.h>
 #include <mbstring.h>
 #include <tchar.h>
+#include <Shlobj.h>
 
 #include "mn/Thread.h"
 #include "mn/OS.h"
@@ -494,6 +495,29 @@ namespace mn
 		mn_defer(mn::free(os_str));
 
 		GetTempPath(len, (TCHAR*)os_str.ptr);
+		return path_normalize(from_os_encoding(os_str, allocator));
+	}
+
+	Str
+	folder_config(Allocator allocator)
+	{
+		PWSTR config_str = nullptr;
+
+		if (SHGetKnownFolderPath(FOLDERID_LocalAppData, 0, NULL, &config_str) != S_OK)
+		{
+			assert(false && "No local config directory.");
+			return str_with_allocator(allocator);
+		}
+
+		auto len = wcslen(config_str);
+
+		auto os_str = alloc(len*(sizeof(WCHAR)+1), alignof(WCHAR));
+		mn_defer(mn::free(os_str));
+
+		// Sadly, SHGetKnownFolderPath allocates the memory for the config_str on its own, forcing me to do this.
+		::memcpy(os_str.ptr, config_str, len*(sizeof(WCHAR)+1));
+		CoTaskMemFree((LPVOID)config_str);
+
 		return path_normalize(from_os_encoding(os_str, allocator));
 	}
 }
