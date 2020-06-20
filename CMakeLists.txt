@@ -8,9 +8,12 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/$<CONFIG>")
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-option(MN_BUILD_EXAMPLES "Build example applications that showcase the mn library." ON)
-option(MN_BUILD_TESTS    "Build mn unit tests."                                     ON)
-option(MN_UNITY_BUILD    "Combine all mn source files into one jumbo build."        ON)
+option(MN_BUILD_EXAMPLES   "Build example applications that showcase the mn library." ON)
+option(MN_BUILD_TESTS      "Build mn unit tests."                                     ON)
+option(MN_UNITY_BUILD      "Combine all mn source files into one jumbo build."        ON)
+option(MN_LEAK             "Enables mn memory leak detection"                         OFF)
+option(MN_POOL_DOUBLE_FREE "Enables mn pool double free check"                        OFF)
+
 
 add_subdirectory(fmt-6.2.0 EXCLUDE_FROM_ALL)
 add_subdirectory(mn)

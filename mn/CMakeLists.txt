@@ -168,8 +168,8 @@ target_link_libraries(mn
 		"$<$<PLATFORM_ID:Linux>:pthread;rt;dl>"
 		"$<$<PLATFORM_ID:Apple>:pthread;dl>")
 
-if(MN_LEAK)
-	message(STATUS "Leak Detector enabled")
+if (MN_LEAK)
+	message(STATUS "feature: leak detector enabled")
 	target_compile_definitions(mn
 		PRIVATE
 			MN_LEAK=1
@@ -177,7 +177,15 @@ if(MN_LEAK)
 	if(UNIX)
 		target_link_options(mn PUBLIC -rdynamic)
 	endif(UNIX)
-endif(MN_LEAK)
+endif (MN_LEAK)
+
+if (MN_POOL_DOUBLE_FREE)
+	message(STATUS "feature: pool double free check enabled")
+	target_compile_definitions(mn
+		PRIVATE
+			MN_POOL_DOUBLE_FREE=1
+	)
+endif (MN_POOL_DOUBLE_FREE)
 
 # enable C++17
 # disable any compiler specifc extensions

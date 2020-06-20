@@ -1,5 +1,6 @@
 #include "mn/Pool.h"
 #include "mn/Memory.h"
+#include "mn/OS.h"
 
 namespace mn
 {
@@ -49,6 +50,24 @@ namespace mn
 	void
 	pool_put(Pool self, void* ptr)
 	{
+		#if DEBUG
+		auto arena = (memory::Arena*) self->arena;
+		assert(arena->owns(ptr) && "pool does not own this pointer, you can only call pool_put on pointers returned by this instance's pool_get");
+		#endif
+
+		#if MN_POOL_DOUBLE_FREE
+		{
+			auto it = self->head;
+			while(it)
+			{
+				if (it == ptr)
+					panic("pool double free found");
+				size_t* sptr = (size_t*)it;
+				it = (void*)*sptr;
+			}
+		}
+		#endif
+
 		size_t* sptr = (size_t*)ptr;
 		*sptr = (size_t)self->head;
 		self->head = ptr;

@@ -342,6 +342,11 @@ TEST_CASE("Pool general case")
 	pool_put(pool, ptr);
 	int* new_ptr = (int*)pool_get(pool);
 	CHECK(new_ptr == ptr);
+
+	int* new_ptr2 = (int*)pool_get(pool);
+	pool_put(pool, new_ptr2);
+
+	pool_put(pool, new_ptr);
 	pool_free(pool);
 }
 

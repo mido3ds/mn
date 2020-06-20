@@ -76,4 +76,17 @@ namespace mn::memory
 		this->total_mem = 0;
 		this->used_mem = 0;
 	}
+
+	bool
+	Arena::owns(void* ptr)
+	{
+		for (auto it = this->root; it != nullptr; it = it->next)
+		{
+			auto begin_ptr = (char*)it->mem.ptr;
+			auto end_ptr = begin_ptr + it->mem.size;
+			if (ptr >= begin_ptr && ptr < end_ptr)
+				return true;
+		}
+		return false;
+	}
 }

@@ -40,5 +40,8 @@ namespace mn::memory
 
 		MN_EXPORT void
 		free_all();
+
+		MN_EXPORT bool
+		owns(void* ptr);
 	};
 }
