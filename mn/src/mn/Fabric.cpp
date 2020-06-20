@@ -46,6 +46,23 @@ namespace mn
 	};
 	thread_local Worker LOCAL_WORKER = nullptr;
 
+	struct IFabric
+	{
+		Fabric_Settings settings;
+
+		Buf<Worker> workers;
+		Mutex_RW workers_mtx;
+
+		std::atomic<size_t> atomic_worker_next;
+		std::atomic<size_t> atomic_steal_next;
+
+		Buf<Worker> sleepy_side_workers;
+		Buf<Worker> ready_side_workers;
+
+		std::atomic<bool> atomic_sysmon_close;
+		Thread sysmon;
+	};
+
 	inline static size_t
 	_worker_steal_jobs(Worker self, Job* jobs, size_t jobs_count)
 	{
@@ -132,6 +149,8 @@ namespace mn
 		self->atomic_job_start_time_in_ms.store(0);
 		task_free(job);
 		memory::tmp()->free_all();
+		if (self->fabric && self->fabric->settings.after_each_job)
+			self->fabric->settings.after_each_job();
 	}
 
 	static void
@@ -240,25 +259,6 @@ namespace mn
 	}
 
 	// Fabric
-	struct IFabric
-	{
-		uint32_t coop_blocking_threshold;
-		uint32_t extr_blocking_threshold;
-		size_t put_aside_worker_count;
-
-		Buf<Worker> workers;
-		Mutex_RW workers_mtx;
-
-		std::atomic<size_t> atomic_worker_next;
-		std::atomic<size_t> atomic_steal_next;
-
-		Buf<Worker> sleepy_side_workers;
-		Buf<Worker> ready_side_workers;
-
-		std::atomic<bool> atomic_sysmon_close;
-		Thread sysmon;
-	};
-
 	struct Blocking_Worker
 	{
 		Worker worker;
@@ -279,7 +279,7 @@ namespace mn
 			buf_remove_if(self->sleepy_side_workers, [self](Worker worker) {
 				if (worker->atomic_state.load() == IWorker::STATE_PAUSE_ACKNOWLEDGE)
 				{
-					if (self->ready_side_workers.count < self->put_aside_worker_count)
+					if (self->ready_side_workers.count < self->settings.put_aside_worker_count)
 					{
 						buf_push(self->ready_side_workers, worker);
 					}
@@ -301,7 +301,7 @@ namespace mn
 				if(block_start_time != 0)
 				{
 					auto block_time = time_in_millis() - block_start_time;
-					if(block_time > self->coop_blocking_threshold)
+					if(block_time > self->settings.coop_blocking_threshold_in_ms)
 					{
 						buf_push(blocking_workers, Blocking_Worker{ self->workers[i], i });
 						continue;
@@ -430,35 +430,31 @@ namespace mn
 
 	// fabric
 	Fabric
-	fabric_new(size_t workers_count, uint32_t coop_blocking_threshold_in_ms, uint32_t external_blocking_threshold_in_ms, size_t put_aside_worker_count)
+	fabric_new(Fabric_Settings settings)
 	{
+		if (settings.workers_count == 0)
+			settings.workers_count = std::thread::hardware_concurrency();
+		if (settings.coop_blocking_threshold_in_ms == 0)
+			settings.coop_blocking_threshold_in_ms = DEFAULT_COOP_BLOCKING_THRESHOLD;
+		if (settings.external_blocking_threshold_in_ms == 0)
+			settings.external_blocking_threshold_in_ms = DEFAULT_EXTR_BLOCKING_THRESHOLD;
+		if (settings.put_aside_worker_count == 0)
+			settings.put_aside_worker_count = settings.workers_count / 2;
+
+		
 		auto self = alloc_zerod<IFabric>();
 
-		if (workers_count == 0)
-			workers_count = std::thread::hardware_concurrency();
-
-		self->coop_blocking_threshold = coop_blocking_threshold_in_ms;
-		if (self->coop_blocking_threshold == 0)
-			self->coop_blocking_threshold = DEFAULT_COOP_BLOCKING_THRESHOLD;
-
-		self->extr_blocking_threshold = external_blocking_threshold_in_ms;
-		if (self->extr_blocking_threshold == 0)
-			self->extr_blocking_threshold = DEFAULT_EXTR_BLOCKING_THRESHOLD;
-
-		self->put_aside_worker_count = put_aside_worker_count;
-		if(self->put_aside_worker_count == 0)
-			self->put_aside_worker_count = workers_count / 2;
-
-		self->workers = buf_with_count<Worker>(workers_count);
+		self->settings = settings;
+		self->workers = buf_with_count<Worker>(self->settings.workers_count);
 		self->workers_mtx = mutex_rw_new("fabric workers mutex");
 
 		self->atomic_worker_next = 0;
 		self->atomic_steal_next = 0;
 
-		for (size_t i = 0; i < workers_count; ++i)
+		for (size_t i = 0; i < self->settings.workers_count; ++i)
 			self->workers[i] = _worker_with_initial_state("fabric worker", IWorker::STATE_PAUSE_ACKNOWLEDGE, self);
 
-		for (size_t i = 0; i < workers_count; ++i)
+		for (size_t i = 0; i < self->settings.workers_count; ++i)
 			_worker_resume(self->workers[i]);
 
 		self->sleepy_side_workers = buf_new<Worker>();
@@ -520,6 +516,7 @@ namespace mn
 			_worker_free(worker);
 		buf_free(self->ready_side_workers);
 
+		task_free(self->settings.after_each_job);
 		free(self);
 	}
 

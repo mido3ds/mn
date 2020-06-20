@@ -48,7 +48,7 @@ serve_client_msg(mn::ipc::Sputnik client)
 int
 main()
 {
-	auto f = mn::fabric_new();
+	auto f = mn::fabric_new({});
 	mn_defer(mn::fabric_free(f));
 
 	auto server = mn::ipc::sputnik_new("sputnik");

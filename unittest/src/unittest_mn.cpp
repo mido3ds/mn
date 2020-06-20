@@ -693,13 +693,17 @@ TEST_CASE("Result error code")
 
 TEST_CASE("fabric simple creation")
 {
-	auto f = mn::fabric_new(3);
+	Fabric_Settings settings{};
+	settings.workers_count = 3;
+	auto f = mn::fabric_new(settings);
 	mn::fabric_free(f);
 }
 
 TEST_CASE("fabric simple function")
 {
-	Fabric f = fabric_new(3);
+	Fabric_Settings settings{};
+	settings.workers_count = 3;
+	Fabric f = fabric_new(settings);
 
 	int n = 0;
 
@@ -716,7 +720,9 @@ TEST_CASE("fabric simple function")
 
 TEST_CASE("unbuffered channel with multiple workers")
 {
-	Fabric f = fabric_new(3);
+	Fabric_Settings settings{};
+	settings.workers_count = 3;
+	Fabric f = fabric_new(settings);
 	Chan<size_t> c = chan_new<size_t>();
 	Waitgroup g = 0;
 
@@ -747,7 +753,9 @@ TEST_CASE("unbuffered channel with multiple workers")
 
 TEST_CASE("buffered channel")
 {
-	Fabric f = fabric_new(3);
+	Fabric_Settings settings{};
+	settings.workers_count = 3;
+	Fabric f = fabric_new(settings);
 	Chan<size_t> c = chan_new<size_t>(1000);
 	Waitgroup g = 0;
 
@@ -778,7 +786,9 @@ TEST_CASE("buffered channel")
 
 TEST_CASE("unbuffered channel from coroutine")
 {
-	Fabric f = fabric_new(3);
+	Fabric_Settings settings{};
+	settings.workers_count = 3;
+	Fabric f = fabric_new(settings);
 	Chan<size_t> c = chan_new<size_t>();
 	Waitgroup g = 0;
 
@@ -806,7 +816,9 @@ TEST_CASE("unbuffered channel from coroutine")
 
 TEST_CASE("buffered channel from coroutine")
 {
-	Fabric f = fabric_new(3);
+	Fabric_Settings settings{};
+	settings.workers_count = 3;
+	Fabric f = fabric_new(settings);
 	Chan<size_t> c = chan_new<size_t>(1000);
 	Waitgroup g = 0;
 
@@ -834,7 +846,9 @@ TEST_CASE("buffered channel from coroutine")
 
 TEST_CASE("coroutine launching coroutines")
 {
-	Fabric f = fabric_new(3);
+	Fabric_Settings settings{};
+	settings.workers_count = 3;
+	Fabric f = fabric_new(settings);
 	Chan<int> c = chan_new<int>(1000);
 	Waitgroup g = 0;
 
@@ -863,7 +877,7 @@ TEST_CASE("coroutine launching coroutines")
 
 TEST_CASE("stress")
 {
-	Fabric f = fabric_new(0);
+	Fabric f = fabric_new({});
 	Chan<size_t> c = chan_new<size_t>(100);
 	Waitgroup g = 0;
 

@@ -4,7 +4,7 @@
 
 int main()
 {
-	auto fabric = mn::fabric_new();
+	auto fabric = mn::fabric_new({});
 	auto single = mn::fabric_worker_next(fabric);
 
 	mn::Waitgroup wg = 1000;

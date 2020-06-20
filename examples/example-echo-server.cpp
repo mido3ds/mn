@@ -35,7 +35,7 @@ serve_client(mn::Socket client)
 int
 main()
 {
-	auto f = mn::fabric_new();
+	auto f = mn::fabric_new({});
 	mn_defer(mn::fabric_free(f));
 
 	auto socket = mn::socket_open(mn::SOCKET_FAMILY_IPV4, mn::SOCKET_TYPE_TCP);
