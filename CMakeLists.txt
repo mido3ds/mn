@@ -13,6 +13,7 @@ option(MN_BUILD_TESTS      "Build mn unit tests."                               
 option(MN_UNITY_BUILD      "Combine all mn source files into one jumbo build."        ON)
 option(MN_LEAK             "Enables mn memory leak detection"                         OFF)
 option(MN_POOL_DOUBLE_FREE "Enables mn pool double free check"                        OFF)
+option(MN_SHARED           "Forces mn to build as a shared library"                   OFF)
 
 
 add_subdirectory(fmt-6.2.0 EXCLUDE_FROM_ALL)

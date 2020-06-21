@@ -122,7 +122,11 @@ endif(MSVC)
 
 
 # add library target
-add_library(mn)
+if (MN_SHARED)
+	add_library(mn SHARED)
+else (MN_SHARED)
+	add_library(mn)
+endif (MN_SHARED)
 
 target_sources(mn
 	PRIVATE ${HEADER_FILES}
