@@ -14,12 +14,12 @@ function(mn_add_plugin)
 			${MAP_ARG_WINDOWS_FILES}
 		)
 		set(OS_DLL_SUFFIX "dll")
-	elseif(UNIX AND NOT APPLE)
+	elseif (UNIX AND NOT APPLE)
 		set(OS_SPECIFIC_FILES
 			${MAP_ARG_LINUX_FILES}
 		)
 		set(OS_DLL_SUFFIX "so")
-	else if (APPLE)
+	elseif (APPLE)
 		set(OS_SPECIFIC_FILES
 			${MAP_ARG_MACOS_FILES}
 		)
@@ -58,11 +58,6 @@ function(mn_add_plugin)
 	# define debug macro
 	target_compile_definitions(${MAP_ARG_NAME} PRIVATE "$<$<CONFIG:DEBUG>:DEBUG>")
 
-	target_compile_definitions(${MAP_ARG_NAME}
-		PUBLIC
-		${MAP_ARG_NAME}_PLUGIN="${MAP_ARG_NAME}$<$<CONFIG:DEBUG>:d>.${OS_DLL_SUFFIX}"
-	)
-
 	# generate exports header file
 	include(GenerateExportHeader)
 	if (NOT ${MAP_ARG_EXPORT_MACRO_NAME} STREQUAL "")
@@ -93,6 +88,11 @@ function(mn_add_plugin)
 		add_dependencies(${MAP_ARG_NAME}-plugin ${MAP_ARG_NAME})
 		target_include_directories(${MAP_ARG_NAME}-plugin
 			INTERFACE
+			${CMAKE_CURRENT_SOURCE_DIR}/${MAP_ARG_PLUGIN_INTERFACE}
+		)
+
+		target_include_directories(${MAP_ARG_NAME}
+			PUBLIC
 			${CMAKE_CURRENT_SOURCE_DIR}/${MAP_ARG_PLUGIN_INTERFACE}
 		)
 	endif()

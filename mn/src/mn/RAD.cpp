@@ -65,17 +65,35 @@ rad_register(RAD* self, const char* name, const char* filepath)
 	mn::allocator_push(mn::memory::clib());
 	mn_defer(mn::allocator_pop());
 
-	if (mn::path_is_file(filepath) == false)
+	auto os_filepath = mn::str_new();
+	#if OS_WINDOWS
+		if (mn::str_suffix(filepath, ".dll"))
+			os_filepath = mn::str_from_c(filepath);
+		else
+			os_filepath = mn::strf("{}.dll", filepath);
+	#elif OS_LINUX
+		if (mn::str_suffix(filepath, ".so"))
+			os_filepath = mn::str_from_c(filepath);
+		else
+			os_filepath = mn::strf("{}.so", filepath);
+	#elif OS_MACOS
+		if (mn::str_suffix(filepath, ".dylib"))
+			os_filepath = mn::str_from_c(filepath);
+		else
+			os_filepath = mn::strf("{}.dylib", filepath);
+	#endif
+
+	if (mn::path_is_file(os_filepath) == false)
 		return false;
 
 	// file name
-	auto loaded_filepath = mn::strf("{}.loaded-0", filepath);
+	auto loaded_filepath = mn::strf("{}.loaded-0", os_filepath);
 	if (mn::path_is_file(loaded_filepath))
 	{
 		if (mn::file_remove(loaded_filepath) == false)
 			return false;
 	}
-	if (mn::file_copy(filepath, loaded_filepath) == false)
+	if (mn::file_copy(os_filepath, loaded_filepath) == false)
 		return false;
 
 	auto library = mn::library_open(loaded_filepath);
@@ -90,11 +108,11 @@ rad_register(RAD* self, const char* name, const char* filepath)
 	}
 
 	RAD_Module mod{};
-	mod.original_file = mn::str_from_c(filepath);
+	mod.original_file = os_filepath;
 	mod.loaded_file = loaded_filepath;
 	mod.name = mn::str_from_c(name);
 	mod.library = library;
-	mod.last_write = mn::file_last_write_time(filepath);
+	mod.last_write = mn::file_last_write_time(os_filepath);
 	mod.api = load_func(nullptr, false);
 	mod.load_counter = 0;
 	{
