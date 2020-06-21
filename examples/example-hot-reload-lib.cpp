@@ -1,4 +1,4 @@
-#include "hot_reload_lib.h"
+#include "example-hot-reload-lib.h"
 
 #include <mn/Memory.h>
 #include <mn/IO.h>
@@ -22,7 +22,7 @@ namespace hot_reload_lib
 void*
 rad_api(void* old_api, bool reload)
 {
-	// first time call 
+	// first time call
 	if (old_api == nullptr)
 	{
 		mn::print("hot_reload_lib first load\n");

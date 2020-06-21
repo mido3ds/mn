@@ -78,25 +78,23 @@ target_link_libraries(mn_playground
 		MoustaphaSaad::mn
 )
 
-add_library(hot_reload_lib SHARED
-	hot_reload_lib.h
-	hot_reload_lib.cpp
+add_library(example-hot-reload-lib SHARED
+	example-hot-reload-lib.h
+	example-hot-reload-lib.cpp
 )
-target_link_libraries(hot_reload_lib
+target_link_libraries(example-hot-reload-lib
 	PRIVATE
 		MoustaphaSaad::mn
-		MoustaphaSaad::rad
 )
 # generate exports header file
 include(GenerateExportHeader)
-generate_export_header(hot_reload_lib
-	EXPORT_FILE_NAME ${CMAKE_CURRENT_SOURCE_DIR}/hot_reload_lib_exports.h
+generate_export_header(example-hot-reload-lib
+	EXPORT_FILE_NAME ${CMAKE_CURRENT_SOURCE_DIR}/example-hot-reload-lib-exports.h
 )
 
 
-add_executable(hot_reload_app hot_reload_app.cpp)
-target_link_libraries(hot_reload_app
+add_executable(example-hot-reload-app example-hot-reload-app.cpp)
+target_link_libraries(example-hot-reload-app
 	PRIVATE
 		MoustaphaSaad::mn
-		MoustaphaSaad::rad
 )

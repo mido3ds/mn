@@ -1,11 +1,11 @@
-#include "rad/RAD.h"
-#include <mn/Buf.h>
-#include <mn/Str.h>
-#include <mn/Library.h>
-#include <mn/Defer.h>
-#include <mn/Thread.h>
-#include <mn/Path.h>
-#include <mn/IO.h>
+#include "mn/RAD.h"
+#include "mn/Buf.h"
+#include "mn/Str.h"
+#include "mn/Library.h"
+#include "mn/Defer.h"
+#include "mn/Thread.h"
+#include "mn/Path.h"
+#include "mn/IO.h"
 
 typedef void* Load_Func(void*, bool);
 

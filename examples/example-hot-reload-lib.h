@@ -1,6 +1,6 @@
 #pragma once
 
-#include "hot_reload_lib_exports.h"
+#include "example-hot-reload-lib-exports.h"
 
 namespace hot_reload_lib
 {
@@ -9,14 +9,14 @@ namespace hot_reload_lib
 		int x;
 	};
 
-	HOT_RELOAD_LIB_EXPORT Foo*
+	EXAMPLE_HOT_RELOAD_LIB_EXPORT Foo*
 	foo_new();
 
-	HOT_RELOAD_LIB_EXPORT void
+	EXAMPLE_HOT_RELOAD_LIB_EXPORT void
 	foo_free(Foo* self);
 }
 
 #define HOT_RELOAD_LIB_NAME "hot_reload_lib"
 
-extern "C" HOT_RELOAD_LIB_EXPORT void*
+extern "C" EXAMPLE_HOT_RELOAD_LIB_EXPORT void*
 rad_api(void* old_api, bool reload);

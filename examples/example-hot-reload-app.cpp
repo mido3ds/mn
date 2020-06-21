@@ -2,10 +2,9 @@
 #include <mn/Defer.h>
 #include <mn/Thread.h>
 #include <mn/Path.h>
+#include <mn/RAD.h>
 
-#include <rad/RAD.h>
-
-#include "hot_reload_lib.h"
+#include "example-hot-reload-lib.h"
 
 int main(int argc, char** argv)
 {

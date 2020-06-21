@@ -46,6 +46,7 @@ set(HEADER_FILES
 	include/mn/Process.h
 	include/mn/Handle_Table.h
 	include/mn/Log.h
+	include/mn/RAD.h
 	include/utf8proc/utf8proc.h
 )
 
@@ -69,6 +70,7 @@ set(SOURCE_FILES
 	src/mn/Rune.cpp
 	src/mn/Context.cpp
 	src/mn/Fabric.cpp
+	src/mn/RAD.cpp
 	src/utf8proc/utf8proc.cpp
 )
 
