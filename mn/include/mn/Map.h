@@ -656,7 +656,7 @@ namespace mn
 	inline static Map<TKey, TValue, THash>
 	clone(const Map<TKey, TValue, THash>& other)
 	{
-		return clone(other);
+		return map_clone(other);
 	}
 
 	/**

@@ -30,7 +30,7 @@ namespace mn
 	callstack_capture(void** frames, size_t frames_count)
 	{
 		::memset(frames, 0, frames_count * sizeof(frames));
-		return CaptureStackBackTrace(1, frames_count, frames, NULL);
+		return CaptureStackBackTrace(1, (DWORD)frames_count, frames, NULL);
 	}
 
 	// callstack_print_to prints the captured callstack to the given stream

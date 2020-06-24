@@ -487,7 +487,7 @@ namespace mn
 	{
 		Chan<T> handle;
 
-		explicit Auto_Chan(size_t limit = 1)
+		explicit Auto_Chan(int32_t limit = 1)
 			: handle(chan_new<T>(limit))
 		{}
 
