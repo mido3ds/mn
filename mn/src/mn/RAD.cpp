@@ -170,35 +170,41 @@ rad_update(RAD* self)
 		if (mod.last_write < last_write)
 		{
 			mod.load_counter++;
-			
+
 			auto loaded_filepath = mn::strf("{}.loaded-{}", mod.original_file, mod.load_counter);
 			if (mn::path_is_file(loaded_filepath))
 			{
 				if (mn::file_remove(loaded_filepath) == false)
 				{
-					overall_result |= false;
+					overall_result &= false;
+					mn::log_error("failed to remove '{}'", loaded_filepath);
 					continue;
 				}
 			}
 
 			if (mn::file_copy(mod.original_file, loaded_filepath) == false)
 			{
-				overall_result |= false;
+				overall_result &= false;
+				mn::log_error("failed to copy '{}' into '{}'", mod.original_file, loaded_filepath);
 				continue;
 			}
 
 			auto library = mn::library_open(loaded_filepath);
 			if (library == nullptr)
 			{
-				overall_result |= false;
+				overall_result &= false;
+				mn::log_error("module '{}' failed to open", loaded_filepath);
+				mn::file_remove(loaded_filepath);
 				continue;
 			}
 
 			auto load_func = (Load_Func*)mn::library_proc(library, "rad_api");
 			if (load_func == nullptr)
 			{
+				overall_result &= false;
 				mn::library_close(library);
-				overall_result |= false;
+				mn::file_remove(loaded_filepath);
+				mn::log_error("module '{}' doesn't have rad_api function", loaded_filepath);
 				continue;
 			}
 
@@ -206,14 +212,18 @@ rad_update(RAD* self)
 			auto new_api = load_func(mod.api, true);
 			if (new_api == nullptr)
 			{
-				overall_result |= false;
+				overall_result &= false;
 				mn::library_close(library);
+				mn::file_remove(loaded_filepath);
+				mn::log_error("module '{}' reload returned null", loaded_filepath);
 				continue;
 			}
 
 			// now that we have reloaded the library we close the old one and remove its file
 			mn::library_close(mod.library);
-			mn::file_remove(mod.loaded_file);
+			mod.library = library;
+			if (mn::file_remove(mod.loaded_file) == false)
+				mn::log_error("failed to remove '{}'", mod.loaded_file);
 
 			// replace the loaded filename
 			mn::str_free(mod.loaded_file);
