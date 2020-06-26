@@ -6,6 +6,7 @@
 #include "mn/Thread.h"
 #include "mn/Path.h"
 #include "mn/IO.h"
+#include "mn/Log.h"
 
 typedef void* Load_Func(void*, bool);
 
@@ -23,10 +24,12 @@ struct RAD_Module
 inline static void
 destruct(RAD_Module& self)
 {
+	mn::library_close(self.library);
+	mn::file_remove(self.loaded_file);
+
 	mn::str_free(self.original_file);
 	mn::str_free(self.loaded_file);
 	mn::str_free(self.name);
-	mn::library_close(self.library);
 }
 
 struct RAD
@@ -130,6 +133,7 @@ rad_register(RAD* self, const char* name, const char* filepath)
 		}
 	}
 
+	mn::log_info("rad loaded '{}' into '{}", os_filepath, loaded_filepath);
 	return true;
 }
 
@@ -220,6 +224,7 @@ rad_update(RAD* self)
 
 			// replace the last_write time
 			mod.last_write = last_write;
+			mn::log_info("rad updated '{}' into '{}", mod.original_file, mod.loaded_file);
 		}
 	}
 	return true;
