@@ -9,9 +9,9 @@ namespace mn
 	library_open(const Str& filename)
 	{
 		if(filename.count == 0)
-			return dlopen(NULL, RTLD_NOW);
+			return dlopen(NULL, RTLD_LAZY);
 
-		return dlopen(filename.ptr, RTLD_NOW);
+		return dlopen(filename.ptr, RTLD_LAZY);
 	}
 
 	void
