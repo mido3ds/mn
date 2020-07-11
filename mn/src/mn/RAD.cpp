@@ -8,6 +8,8 @@
 #include "mn/IO.h"
 #include "mn/Log.h"
 
+RAD* rad_global = nullptr;
+
 typedef void* Load_Func(void*, bool);
 
 struct RAD_Module
@@ -140,9 +142,6 @@ rad_register(RAD* self, const char* name, const char* filepath)
 void*
 rad_ptr(RAD* self, const char* name)
 {
-	mn::allocator_push(mn::memory::clib());
-	mn_defer(mn::allocator_pop());
-
 	mn::mutex_lock(self->mtx);
 	mn_defer(mn::mutex_unlock(self->mtx));
 

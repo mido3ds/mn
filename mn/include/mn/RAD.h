@@ -13,6 +13,7 @@ extern "C" {
 // on dll unload `rad_api` function will be called with (pointer, false)
 
 struct RAD;
+MN_EXPORT extern struct RAD* rad_global;
 
 // rad_new creates a new RAD instance
 MN_EXPORT struct RAD*
