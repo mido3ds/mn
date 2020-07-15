@@ -87,6 +87,7 @@ rad_register(RAD* self, const char* name, const char* filepath)
 		else
 			os_filepath = mn::strf("{}.dylib", filepath);
 	#endif
+	mn_defer(mn::str_free(os_filepath));
 
 	if (mn::path_is_file(os_filepath) == false)
 		return false;
@@ -103,7 +104,30 @@ rad_register(RAD* self, const char* name, const char* filepath)
 
 	auto library = mn::library_open(loaded_filepath);
 	if (library == nullptr)
-		return false;
+	{
+		// try another guess
+		#if OS_LINUX
+		auto os_filepath2 = mn::strf("./{}", os_filepath);
+		auto loaded_filepath2 = mn::strf("./{}", loaded_filepath);
+		mn_defer({
+			mn::str_free(os_filepath2);
+			mn::str_free(loaded_filepath2);
+		});
+		library = mn::library_open(loaded_filepath2);
+		if (library == nullptr)
+			return false;
+		// success then replace the old strings
+		auto tmp = os_filepath;
+		os_filepath = os_filepath2;
+		os_filepath2 = tmp;
+
+		tmp = loaded_filepath;
+		loaded_filepath = loaded_filepath2;
+		loaded_filepath2 = tmp;
+		#else
+			return false;
+		#endif
+	}
 
 	auto load_func = (Load_Func*)mn::library_proc(library, "rad_api");
 	if (load_func == nullptr)
@@ -136,6 +160,7 @@ rad_register(RAD* self, const char* name, const char* filepath)
 	}
 
 	mn::log_info("rad loaded '{}' into '{}", os_filepath, loaded_filepath);
+	os_filepath = mn::str_new();
 	return true;
 }
 
