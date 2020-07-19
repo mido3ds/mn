@@ -21,6 +21,7 @@ namespace mn
 		bool operator==(const Entity& other) const { return id == other.id; }
 		bool operator!=(const Entity& other) const { return id != other.id; }
 	};
+	inline Entity null_entity{};
 
 	template<>
 	struct Hash<Entity>
@@ -31,6 +32,9 @@ namespace mn
 			return size_t(entity.id);
 		}
 	};
+
+	MN_EXPORT Entity
+	entity_new();
 
 	// backing pool storage
 	template<typename T>

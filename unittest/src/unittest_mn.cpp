@@ -1008,15 +1008,16 @@ destruct(Points& p)
 
 TEST_CASE("ref bag")
 {
+	auto e = entity_new();
 	auto bag = mn::ref_bag_new<Points>();
 	mn_defer(mn::ref_bag_free(bag));
 
-	auto p = mn::ref_bag_write(bag, {1});
+	auto p = mn::ref_bag_write(bag, e);
 
 	for(size_t i = 0; i < 10; ++i)
 		mn::buf_push(p->points, float(i));
 	
-	auto rp = mn::ref_bag_read(bag, {1});
+	auto rp = mn::ref_bag_read(bag, e);
 	CHECK(rp->points.count == 10);
 	for(size_t i = 0; i < 10; ++i)
 		CHECK(rp->points[i] == float(i));
@@ -1024,6 +1025,7 @@ TEST_CASE("ref bag")
 
 TEST_CASE("val bag")
 {
+	auto e = entity_new();
 	auto bag = mn::val_bag_new<Points>();
 	mn_defer(mn::val_bag_free(bag));
 
@@ -1031,9 +1033,9 @@ TEST_CASE("val bag")
 	for(size_t i = 0; i < 10; ++i)
 		mn::buf_push(p.points, float(i));
 	
-	mn::val_bag_set(bag, {1}, p);
+	mn::val_bag_set(bag, e, p);
 
-	auto rp = mn::val_bag_get(bag, {1});
+	auto rp = mn::val_bag_get(bag, e);
 	CHECK(rp.points.count == 10);
 	for(size_t i = 0; i < 10; ++i)
 		CHECK(rp.points[i] == float(i));
