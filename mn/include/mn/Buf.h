@@ -115,7 +115,7 @@ namespace mn
 	inline static void
 	buf_free(Buf<T>& self)
 	{
-		if(self.cap)
+		if(self.cap && self.allocator)
 			free_from(self.allocator, Block{ self.ptr, self.cap * sizeof(T) });
 		self.cap = 0;
 		self.count = 0;
@@ -240,6 +240,9 @@ namespace mn
 		if(self.count + added_size <= self.cap)
 			return;
 
+		if (self.allocator == nullptr)
+			self.allocator = allocator_top();
+
 		size_t next_cap = size_t(self.cap * 1.5f);
 		size_t accurate_cap = self.count + added_size;
 		size_t request_cap = next_cap > accurate_cap ? next_cap : accurate_cap;
@@ -299,6 +302,10 @@ namespace mn
 	{
 		if(self.cap == self.count || self.count == 0)
 			return;
+
+		if (self.allocator == nullptr)
+			self.allocator = allocator_top();
+
 		Block new_block = alloc_from(self.allocator, self.count * sizeof(T), alignof(T));
 		::memcpy(new_block.ptr, self.ptr, self.count * sizeof(T));
 		free_from(self.allocator, Block { self.ptr, self.cap * sizeof(T) });
