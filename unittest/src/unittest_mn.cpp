@@ -1012,7 +1012,6 @@ TEST_CASE("ref bag")
 	mn_defer(mn::ref_bag_free(bag));
 
 	auto p = mn::ref_bag_write(bag, {1});
-	p->points = mn::buf_new<float>();
 
 	for(size_t i = 0; i < 10; ++i)
 		mn::buf_push(p->points, float(i));
@@ -1021,4 +1020,21 @@ TEST_CASE("ref bag")
 	CHECK(rp->points.count == 10);
 	for(size_t i = 0; i < 10; ++i)
 		CHECK(rp->points[i] == float(i));
+}
+
+TEST_CASE("val bag")
+{
+	auto bag = mn::val_bag_new<Points>();
+	mn_defer(mn::val_bag_free(bag));
+
+	Points p{};
+	for(size_t i = 0; i < 10; ++i)
+		mn::buf_push(p.points, float(i));
+	
+	mn::val_bag_set(bag, {1}, p);
+
+	auto rp = mn::val_bag_get(bag, {1});
+	CHECK(rp.points.count == 10);
+	for(size_t i = 0; i < 10; ++i)
+		CHECK(rp.points[i] == float(i));
 }

@@ -276,4 +276,118 @@ namespace mn
 		}
 		self.version++;
 	}
+
+	// value bag
+	template<typename T>
+	struct Val_Component
+	{
+		Entity entity;
+		T component;
+	};
+
+	template<typename T>
+	struct Val_Bag
+	{
+		Buf<Val_Component<T>> components;
+		Map<Entity, size_t> table;
+		uint32_t version;
+	};
+
+	template<typename T>
+	inline static Val_Bag<T>
+	val_bag_new()
+	{
+		Val_Bag<T> self{};
+		self.components = buf_new<Val_Component<T>>();
+		self.table = map_new<Entity, size_t>();
+		self.version = 0;
+		return self;
+	}
+
+	template<typename T>
+	inline static void
+	val_bag_free(Val_Bag<T>& self)
+	{
+		for (auto& c: self.components)
+			destruct(c.component);
+		buf_free(self.components);
+		map_free(self.table);
+	}
+
+	template<typename T>
+	inline static void
+	destruct(Val_Bag<T>& self)
+	{
+		val_bag_free(self);
+	}
+
+	template<typename T>
+	inline static Val_Bag<T>
+	val_bag_clone(const Val_Bag<T>& self)
+	{
+		Val_Bag<T> other{};
+		other.components = clone(self.components);
+		other.table = map_clone(self.table);
+		other.version = self.version;
+		return other;
+	}
+
+	template<typename T>
+	inline static Val_Bag<T>
+	clone(const Val_Bag<T>& self)
+	{
+		return val_bag_clone(self);
+	}
+
+	template<typename T>
+	inline static T
+	val_bag_get(const Val_Bag<T>& self, Entity e)
+	{
+		if (auto it = map_lookup(self.table, e))
+			return self.components[it->value].component;
+		assert(false && "unreachable");
+		return T{};
+	}
+
+	template<typename T>
+	inline static void
+	val_bag_set(Val_Bag<T>& self, Entity e, const T& v)
+	{
+		if (auto it = map_lookup(self.table, e))
+		{
+			destruct(self.components[it->value].component);
+			self.components[it->value].component = v;
+		}
+		else
+		{
+			Val_Component<T> new_component{};
+			new_component.entity = e;
+			new_component.component = v;
+			auto ix = self.components.count;
+			buf_push(self.components, new_component);
+			map_insert(self.table, e, ix);
+		}
+		++self.version;
+	}
+
+	template<typename T>
+	inline static void
+	val_bag_remove(Val_Bag<T>& self, Entity e)
+	{
+		auto it = map_lookup(self.table, e);
+		if (it == nullptr)
+			return;
+
+		auto remove_ix = it->value;
+		destruct(self.components[remove_ix]);
+		buf_remove(self.components, remove_ix);
+		map_remove(self.table, e);
+
+		if (remove_ix < self.components.count)
+		{
+			auto replace_it = map_lookup(self.table, self.components[remove_ix]->entity);
+			replace_it->value = remove_ix;
+		}
+		self.version++;
+	}
 }
