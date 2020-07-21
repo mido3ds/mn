@@ -255,12 +255,13 @@ namespace mn::ipc
 		return ::unlink(self->name.ptr) == 0;
 	}
 
-	void
+	bool
 	sputnik_msg_write(Sputnik self, Block data)
 	{
 		uint64_t len = data.size;
-		sputnik_write(self, block_from(len));
-		sputnik_write(self, data);
+		auto res = sputnik_write(self, block_from(len));
+		res += sputnik_write(self, data);
+		return res == (data.size + sizeof(len));
 	}
 
 	Msg_Read_Return

@@ -106,7 +106,7 @@ namespace mn::ipc
 	// sputnik message protocol
 
 	// sputnik_msg_write writes a message unit to sputnik which is {len: 8 bytes, the message}
-	MN_EXPORT void
+	MN_EXPORT bool
 	sputnik_msg_write(Sputnik self, Block data);
 
 	struct Msg_Read_Return
