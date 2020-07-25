@@ -604,8 +604,31 @@ namespace mn
 	inline static T
 	clone(const T& value)
 	{
+		static_assert(sizeof(T) == 0, "no clone function found for this type");
 		return value;
 	}
+
+	#define TRIVIAL_CLONE(TYPE) \
+	inline static TYPE \
+	clone(TYPE v) \
+	{ \
+		return v; \
+	}
+
+	TRIVIAL_CLONE(char);
+	TRIVIAL_CLONE(bool);
+	TRIVIAL_CLONE(int8_t);
+	TRIVIAL_CLONE(int16_t);
+	TRIVIAL_CLONE(int32_t);
+	TRIVIAL_CLONE(int64_t);
+	TRIVIAL_CLONE(uint8_t);
+	TRIVIAL_CLONE(uint16_t);
+	TRIVIAL_CLONE(uint32_t);
+	TRIVIAL_CLONE(uint64_t);
+	TRIVIAL_CLONE(float);
+	TRIVIAL_CLONE(double);
+
+	#undef TRIVIAL_CLONE
 
 	/**
 	 * @brief      A Custom clone function which iterates over the buf and calls the clone function
@@ -640,6 +663,18 @@ namespace mn
 	clone(const Buf<T>& other)
 	{
 		return buf_clone(other);
+	}
+
+	// buf_memcpy_clone is used to memcpy the underlying memory of the buf, this is useful as a fast copy for
+	// trivially copyable types
+	template<typename T>
+	inline static Buf<T>
+	buf_memcpy_clone(const Buf<T>& other, Allocator allocator = allocator_top())
+	{
+		Buf<T> buf = buf_with_allocator<T>(allocator);
+		buf_resize(buf, other.count);
+		::memcpy(buf.ptr, other.ptr, buf.count * sizeof(T));
+		return buf;
 	}
 
 	template<typename T>

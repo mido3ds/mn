@@ -6,6 +6,7 @@
 #include "mn/Memory.h"
 #include "mn/Buf.h"
 #include "mn/Map.h"
+#include "mn/OS.h"
 
 #include <stdint.h>
 #include <atomic>
@@ -13,6 +14,61 @@
 
 namespace mn
 {
+	// ecs_component_hash is used to hash a component, this is used to check for an exact change in the ECS
+	template<typename T>
+	inline static size_t
+	ecs_component_hash(const T&)
+	{
+		mn::panic("no ecs_component_hash function were found for '{}'", typeid(T).name());
+		return 0;
+	}
+
+	#define TRIVIAL_HASH(TYPE) \
+	inline static size_t \
+	ecs_component_hash(const TYPE& v) \
+	{ \
+		Hash<TYPE> h{}; \
+		return h(v); \
+	}
+
+	TRIVIAL_HASH(char);
+	TRIVIAL_HASH(bool);
+	TRIVIAL_HASH(int8_t);
+	TRIVIAL_HASH(int16_t);
+	TRIVIAL_HASH(int32_t);
+	TRIVIAL_HASH(int64_t);
+	TRIVIAL_HASH(uint8_t);
+	TRIVIAL_HASH(uint16_t);
+	TRIVIAL_HASH(uint32_t);
+	TRIVIAL_HASH(uint64_t);
+	TRIVIAL_HASH(float);
+	TRIVIAL_HASH(double);
+
+	#undef TRIVIAL_HASH
+
+	template<typename T>
+	inline static Buf<T>
+	ecs_component_hash(const Buf<T>& arr)
+	{
+		size_t res = 0;
+		for (const auto& v: arr)
+			res = hash_mix(res, ecs_component_hash(v));
+		return res;
+	}
+
+	template<typename TKey, typename TValue, typename THash>
+	inline static Map<TKey, TValue, THash>
+	ecs_component_hash(const Map<TKey, TValue, THash>& table)
+	{
+		size_t res = 0;
+		for (const auto& [key, value]: table)
+		{
+			res = hash_mix(res, ecs_component_hash(key));
+			res = hash_mix(res, ecs_component_hash(value));
+		}
+		return res;
+	}
+
 	// entity
 	struct Entity
 	{
@@ -22,6 +78,12 @@ namespace mn
 		bool operator!=(const Entity& other) const { return id != other.id; }
 	};
 	inline Entity null_entity{};
+
+	inline static Entity
+	clone(const Entity& self)
+	{
+		return self;
+	}
 
 	template<>
 	struct Hash<Entity>
@@ -190,8 +252,8 @@ namespace mn
 	{
 		Ref_Bag<T> other{};
 		other.store = store_ref(self.store);
-		other.components = buf_clone(self.components);
-		other.table = map_clone(self.table);
+		other.components = buf_memcpy_clone(self.components);
+		other.table = map_memcpy_clone(self.table);
 		other.version = self.version;
 
 		for (auto c: other.components)
@@ -205,6 +267,16 @@ namespace mn
 	clone(const Ref_Bag<T>& self)
 	{
 		return ref_bag_clone(self);
+	}
+
+	template<typename T>
+	inline static size_t
+	ref_bag_hash(const Ref_Bag<T>& self)
+	{
+		size_t hash = 0;
+		for (auto ptr: self.components)
+			hash = mn::hash_mix(hash, ecs_component_hash(ptr->component));
+		return hash;
 	}
 
 	template<typename T>
@@ -290,6 +362,16 @@ namespace mn
 	};
 
 	template<typename T>
+	inline static Val_Component<T>
+	clone(const Val_Component<T>& self)
+	{
+		Val_Component<T> res{};
+		res.entity = self.entity;
+		res.component = clone(self.component);
+		return res;
+	}
+
+	template<typename T>
 	struct Val_Bag
 	{
 		Buf<Val_Component<T>> components;
@@ -330,8 +412,8 @@ namespace mn
 	val_bag_clone(const Val_Bag<T>& self)
 	{
 		Val_Bag<T> other{};
-		other.components = clone(self.components);
-		other.table = map_clone(self.table);
+		other.components = buf_clone(self.components);
+		other.table = map_memcpy_clone(self.table);
 		other.version = self.version;
 		return other;
 	}
@@ -341,6 +423,16 @@ namespace mn
 	clone(const Val_Bag<T>& self)
 	{
 		return val_bag_clone(self);
+	}
+
+	template<typename T>
+	inline static size_t
+	val_bag_hash(const Val_Bag<T>& self)
+	{
+		size_t hash = 0;
+		for (const auto& c: self.components)
+			hash = mn::hash_mix(hash, ecs_component_hash(c.component));
+		return hash;
 	}
 
 	template<typename T>

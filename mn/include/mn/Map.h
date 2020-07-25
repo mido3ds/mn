@@ -28,6 +28,16 @@ namespace mn
 		}
 	};
 
+	template<typename TKey, typename TValue>
+	inline static Key_Value<TKey, TValue>
+	clone(const Key_Value<TKey, TValue>& self)
+	{
+		Key_Value<TKey, TValue> res{};
+		res.key = clone(self.key);
+		res.value = clone(self.value);
+		return res;
+	}
+
 
 	//hash section
 
@@ -68,6 +78,7 @@ namespace mn
 		}\
 	}
 
+	TRIVIAL_HASH(bool);
 	TRIVIAL_HASH(char);
 	TRIVIAL_HASH(int8_t);
 	TRIVIAL_HASH(int16_t);
@@ -645,7 +656,7 @@ namespace mn
 	map_clone(const Map<TKey, TValue, THash>& other, Allocator allocator = allocator_top())
 	{
 		Map<TKey, TValue, THash> self{};
-		self.flags = buf_clone(other.flags, allocator);
+		self.flags = buf_memcpy_clone(other.flags, allocator);
 		self.values = buf_clone(other.values, allocator);
 		self.hasher = other.hasher;
 		self.count = other.count;
@@ -657,6 +668,20 @@ namespace mn
 	clone(const Map<TKey, TValue, THash>& other)
 	{
 		return map_clone(other);
+	}
+
+	// map_memcpy_clone is used with trivially copyable types (types a clone if produced by doing a byte by byte copy),
+	// which is fast variant of map_clone
+	template<typename TKey, typename TValue, typename THash = Hash<TKey>>
+	inline static Map<TKey, TValue, THash>
+	map_memcpy_clone(const Map<TKey, TValue, THash>& other, Allocator allocator = allocator_top())
+	{
+		Map<TKey, TValue, THash> self{};
+		self.flags = buf_memcpy_clone(other.flags, allocator);
+		self.values = buf_memcpy_clone(other.values, allocator);
+		self.hasher = other.hasher;
+		self.count = other.count;
+		return self;
 	}
 
 	/**
