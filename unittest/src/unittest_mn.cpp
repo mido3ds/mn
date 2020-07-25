@@ -1006,6 +1006,12 @@ destruct(Points& p)
 	mn::buf_free(p.points);
 }
 
+inline static Points
+clone(const Points& p)
+{
+	return Points{ mn::buf_memcpy_clone(p.points) };
+}
+
 TEST_CASE("ref bag")
 {
 	auto e = entity_new();
