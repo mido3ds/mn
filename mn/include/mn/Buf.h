@@ -615,18 +615,18 @@ namespace mn
 		return v; \
 	}
 
-	TRIVIAL_CLONE(char);
-	TRIVIAL_CLONE(bool);
-	TRIVIAL_CLONE(int8_t);
-	TRIVIAL_CLONE(int16_t);
-	TRIVIAL_CLONE(int32_t);
-	TRIVIAL_CLONE(int64_t);
-	TRIVIAL_CLONE(uint8_t);
-	TRIVIAL_CLONE(uint16_t);
-	TRIVIAL_CLONE(uint32_t);
-	TRIVIAL_CLONE(uint64_t);
-	TRIVIAL_CLONE(float);
-	TRIVIAL_CLONE(double);
+	TRIVIAL_CLONE(char)
+	TRIVIAL_CLONE(bool)
+	TRIVIAL_CLONE(int8_t)
+	TRIVIAL_CLONE(int16_t)
+	TRIVIAL_CLONE(int32_t)
+	TRIVIAL_CLONE(int64_t)
+	TRIVIAL_CLONE(uint8_t)
+	TRIVIAL_CLONE(uint16_t)
+	TRIVIAL_CLONE(uint32_t)
+	TRIVIAL_CLONE(uint64_t)
+	TRIVIAL_CLONE(float)
+	TRIVIAL_CLONE(double)
 
 	#undef TRIVIAL_CLONE
 
@@ -676,6 +676,27 @@ namespace mn
 		::memcpy(buf.ptr, other.ptr, buf.count * sizeof(T));
 		return buf;
 	}
+
+	#define TRIVIAL_MEMCPY_CLONE(TYPE) \
+	inline static Buf<TYPE> \
+	clone(const Buf<TYPE>& other) \
+	{ \
+		return buf_memcpy_clone(other); \
+	}
+
+	TRIVIAL_MEMCPY_CLONE(bool)
+	TRIVIAL_MEMCPY_CLONE(int8_t)
+	TRIVIAL_MEMCPY_CLONE(int16_t)
+	TRIVIAL_MEMCPY_CLONE(int32_t)
+	TRIVIAL_MEMCPY_CLONE(int64_t)
+	TRIVIAL_MEMCPY_CLONE(uint8_t)
+	TRIVIAL_MEMCPY_CLONE(uint16_t)
+	TRIVIAL_MEMCPY_CLONE(uint32_t)
+	TRIVIAL_MEMCPY_CLONE(uint64_t)
+	TRIVIAL_MEMCPY_CLONE(float)
+	TRIVIAL_MEMCPY_CLONE(double)
+
+	#undef TRIVIAL_MEMCPY_CLONE
 
 	template<typename T>
 	inline static Block
