@@ -47,31 +47,31 @@ namespace mn
 	}
 
 	inline static int64_t
-	stream_cursor_pos(Stream self)
+	stream_cursor_pos(IStream* self)
 	{
 		return self->cursor_operation(STREAM_CURSOR_GET, 0);
 	}
 
 	inline static int64_t
-	stream_cursor_move(Stream self, int64_t offset)
+	stream_cursor_move(IStream* self, int64_t offset)
 	{
 		return self->cursor_operation(STREAM_CURSOR_MOVE, offset);
 	}
 
 	inline static int64_t
-	stream_cursor_set(Stream self, int64_t abs)
+	stream_cursor_set(IStream* self, int64_t abs)
 	{
 		return self->cursor_operation(STREAM_CURSOR_SET, abs);
 	}
 
 	inline static int64_t
-	stream_cursor_to_start(Stream self)
+	stream_cursor_to_start(IStream* self)
 	{
 		return self->cursor_operation(STREAM_CURSOR_START, 0);
 	}
 
 	inline static int64_t
-	stream_cursor_to_end(Stream self)
+	stream_cursor_to_end(IStream* self)
 	{
 		return self->cursor_operation(STREAM_CURSOR_END, 0);
 	}
