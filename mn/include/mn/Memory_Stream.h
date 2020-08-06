@@ -33,7 +33,7 @@ namespace mn
 		size() override;
 
 		virtual int64_t
-		cursor_op(STREAM_CURSOR_OP op, int64_t arg) override
+		cursor_operation(STREAM_CURSOR_OP op, int64_t arg) override
 		{
 			switch (op)
 			{
