@@ -204,7 +204,7 @@ set_target_properties(mn PROPERTIES
 )
 
 # define debug macro
-target_compile_definitions(mn PRIVATE "$<$<CONFIG:DEBUG>:DEBUG>")
+target_compile_definitions(mn PUBLIC "$<$<CONFIG:DEBUG>:DEBUG>")
 
 # generate exports header file
 include(GenerateExportHeader)
