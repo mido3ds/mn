@@ -9,7 +9,7 @@ namespace mn
 	inline static void
 	log_debug(const char* fmt, TArgs&&... args)
 	{
-		#if DEBUG
+		#ifdef DEBUG
 		auto msg = mn::strf(fmt, args...);
 		log_debug_str(msg.ptr);
 		mn::str_free(msg);
