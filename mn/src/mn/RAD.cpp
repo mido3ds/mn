@@ -178,8 +178,6 @@ rad_ptr(RAD* self, const char* name)
 bool
 rad_update(RAD* self)
 {
-	mn_defer(mn::memory::tmp()->free_all());
-
 	mn::allocator_push(mn::memory::clib());
 	mn_defer(mn::allocator_pop());
 
@@ -193,6 +191,7 @@ rad_update(RAD* self)
 		auto last_write = mn::file_last_write_time(mod.original_file);
 		if (mod.last_write < last_write)
 		{
+			mn::log_info("module '{}' changed", mod.original_file);
 			mod.load_counter++;
 
 			auto loaded_filepath = mn::strf("{}.loaded-{}", mod.original_file, mod.load_counter);
@@ -261,5 +260,5 @@ rad_update(RAD* self)
 			mn::log_info("rad updated '{}' into '{}", mod.original_file, mod.loaded_file);
 		}
 	}
-	return true;
+	return overall_result;
 }

@@ -32,6 +32,24 @@ namespace mn::memory
 				::fprintf(stderr, "run in debug mode to get call stack info\n");
 			#endif
 
+			auto ptr = (char*)(it + 1);
+			size_t len = it->size > 128 ? 128 : it->size;
+
+			::fprintf(stderr, "content bytes[%zu]: {", len);
+			for (size_t i = 0; i < len; ++i)
+			{
+				if (i + 1 < len)
+					::fprintf(stderr, "%#02x, ", ptr[i]);
+				else
+					::fprintf(stderr, "%#02x", ptr[i]);
+			}
+			::fprintf(stderr, "}\n");
+
+			::fprintf(stderr, "content string[%zu]: '", len);
+			for (size_t i = 0; i < len; ++i)
+				::fprintf(stderr, "%c", ptr[i]);
+			::fprintf(stderr, "'\n\n");
+
 			++count;
 			size += it->size;
 			it = it->next;
