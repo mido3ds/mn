@@ -45,86 +45,12 @@ namespace mn
 		return &file;
 	}
 
-	struct Mutex_Stdout_Wrapper
-	{
-		Mutex mtx;
-
-		Mutex_Stdout_Wrapper()
-		{
-			allocator_push(memory::clib());
-				mtx = mutex_new("Stdout Mutex");
-			allocator_pop();
-		}
-
-		~Mutex_Stdout_Wrapper()
-		{
-			allocator_push(memory::clib());
-				mutex_free(mtx);
-			allocator_pop();
-		}
-	};
-
-	inline static Mutex
-	_mutex_stdout()
-	{
-		static Mutex_Stdout_Wrapper wrapper;
-		return wrapper.mtx;
-	}
-
 	inline static File
 	_file_stderr()
 	{
 		static IFile file{};
 		file.winos_handle = GetStdHandle(STD_ERROR_HANDLE);
 		return &file;
-	}
-
-	struct Mutex_Stderr_Wrapper
-	{
-		Mutex mtx;
-
-		Mutex_Stderr_Wrapper()
-		{
-			allocator_push(memory::clib());
-				mtx = mutex_new("Stderr Mutex");
-			allocator_pop();
-		}
-
-		~Mutex_Stderr_Wrapper()
-		{
-			allocator_push(memory::clib());
-				mutex_free(mtx);
-			allocator_pop();
-		}
-	};
-
-	inline static Mutex
-	_mutex_stderr()
-	{
-		static Mutex_Stderr_Wrapper wrapper;
-		return wrapper.mtx;
-	}
-
-	struct Mutex_Stdin_Wrapper
-	{
-		Mutex mtx;
-
-		Mutex_Stdin_Wrapper()
-		{
-			mtx = mutex_new("Stdin Mutex");
-		}
-
-		~Mutex_Stdin_Wrapper()
-		{
-			mutex_free(mtx);
-		}
-	};
-
-	inline static Mutex
-	_mutex_stdin()
-	{
-		static Mutex_Stdin_Wrapper wrapper;
-		return wrapper.mtx;
 	}
 
 	inline static File
@@ -162,15 +88,10 @@ namespace mn
 	IFile::read(Block data)
 	{
 		DWORD bytes_read = 0;
-		Mutex mtx = nullptr;
-		if(winos_handle == file_stdin()->winos_handle)
-			mtx = _mutex_stdin();
 
 		worker_block_ahead();
-		if(mtx) mutex_lock(mtx);
-			ReadFile(winos_handle, data.ptr, DWORD(data.size), &bytes_read, NULL);
-			worker_block_clear();
-		if(mtx) mutex_unlock(mtx);
+		ReadFile(winos_handle, data.ptr, DWORD(data.size), &bytes_read, NULL);
+		worker_block_clear();
 
 		return bytes_read;
 	}
@@ -180,17 +101,9 @@ namespace mn
 	{
 		DWORD bytes_written = 0;
 
-		Mutex mtx = nullptr;
-		if(winos_handle == file_stdout()->winos_handle)
-			mtx = _mutex_stdout();
-		else if(winos_handle == file_stderr()->winos_handle)
-			mtx = _mutex_stderr();
-
 		worker_block_ahead();
-		if (mtx) mutex_lock(mtx);
-			WriteFile(winos_handle, data.ptr, DWORD(data.size), &bytes_written, NULL);
-			worker_block_clear();
-		if (mtx) mutex_unlock(mtx);
+		WriteFile(winos_handle, data.ptr, DWORD(data.size), &bytes_written, NULL);
+		worker_block_clear();
 		return bytes_written;
 	}
 
