@@ -40,7 +40,7 @@ namespace mn
 		if(self->head != nullptr)
 		{
 			void* result = self->head;
-			self->head = (void*)(*(size_t*)self->head);
+			self->head = (void*)(*(uintptr_t*)self->head);
 			return result;
 		}
 
@@ -50,7 +50,7 @@ namespace mn
 	void
 	pool_put(Pool self, void* ptr)
 	{
-		#if DEBUG
+		#ifdef DEBUG
 		auto arena = (memory::Arena*) self->arena;
 		assert(arena->owns(ptr) && "pool does not own this pointer, you can only call pool_put on pointers returned by this instance's pool_get");
 		#endif
@@ -62,14 +62,14 @@ namespace mn
 			{
 				if (it == ptr)
 					panic("pool double free found");
-				size_t* sptr = (size_t*)it;
+				uintptr_t* sptr = (uintptr_t*)it;
 				it = (void*)*sptr;
 			}
 		}
 		#endif
 
-		size_t* sptr = (size_t*)ptr;
-		*sptr = (size_t)self->head;
+		uintptr_t* sptr = (uintptr_t*)ptr;
+		*sptr = (uintptr_t)self->head;
 		self->head = ptr;
 	}
 }
