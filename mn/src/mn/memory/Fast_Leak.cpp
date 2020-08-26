@@ -1,5 +1,6 @@
 #include "mn/memory/Fast_Leak.h"
 #include "mn/Context.h"
+#include "mn/OS.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -31,6 +32,9 @@ namespace mn::memory
 	Fast_Leak::alloc(size_t size, uint8_t)
 	{
 		Block res {::malloc(size), size};
+		if (res.ptr == nullptr)
+			mn::panic("system out of memory");
+
 		memory_profile_alloc(res.ptr, res.size);
 		if(res)
 		{

@@ -1,5 +1,6 @@
 #include "mn/memory/CLib.h"
 #include "mn/Context.h"
+#include "mn/OS.h"
 
 #include <stdlib.h>
 
@@ -10,7 +11,9 @@ namespace mn::memory
 	{
 		Block res{};
 		res.ptr = ::malloc(size);
-		res.size = res.ptr ? size : 0;
+		if (res.ptr == nullptr)
+			mn::panic("system out of memory");
+		res.size = size;
 		memory_profile_alloc(res.ptr, res.size);
 		return res;
 	}

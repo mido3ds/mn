@@ -3,6 +3,7 @@
 #include "mn/Debug.h"
 #include "mn/Context.h"
 #include "mn/File.h"
+#include "mn/OS.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -65,7 +66,7 @@ namespace mn::memory
 		Node* ptr = (Node*)::malloc(size + sizeof(Node));
 
 		if (ptr == nullptr)
-			return Block{};
+			mn::panic("system out of memory");
 
 		ptr->size = size;
 		ptr->prev = nullptr;
