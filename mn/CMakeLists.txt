@@ -47,6 +47,7 @@ set(HEADER_FILES
 	include/mn/Handle_Table.h
 	include/mn/Log.h
 	include/mn/RAD.h
+	include/mn/UUID.h
 	include/utf8proc/utf8proc.h
 )
 
@@ -87,6 +88,7 @@ if(WIN32)
 		src/mn/winos/Socket.cpp
 		src/mn/winos/Library.cpp
 		src/mn/winos/Process.cpp
+		src/mn/winos/UUID.cpp
 	)
 elseif(UNIX AND NOT APPLE)
 	set(SOURCE_FILES ${SOURCE_FILES}
@@ -99,6 +101,7 @@ elseif(UNIX AND NOT APPLE)
 		src/mn/linux/Socket.cpp
 		src/mn/linux/Library.cpp
 		src/mn/linux/Process.cpp
+		src/mn/linux/UUID.cpp
 	)
 elseif(APPLE)
 	set(SOURCE_FILES ${SOURCE_FILES}
@@ -111,6 +114,7 @@ elseif(APPLE)
 		src/mn/mac/Socket.cpp
 		src/mn/mac/Library.cpp
 		src/mn/mac/Process.cpp
+		src/mn/mac/UUID.cpp
 	)
 endif()
 
@@ -169,10 +173,17 @@ target_compile_options(mn
 		$<$<CXX_COMPILER_ID:GNU>:-Wall>
 		$<$<CXX_COMPILER_ID:Clang>:-Wall>)
 
+if (UNIX AND NOT APPLE)
+	find_package(PkgConfig REQUIRED)
+	pkg_search_module(UUID REQUIRED uuid)
+elseif(APPLE)
+	target_link_libraries(mn PRIVATE "-framework CoreFoundation")
+endif()
+
 target_link_libraries(mn
 	PRIVATE
 		"$<$<PLATFORM_ID:Windows>:dbghelp;ws2_32>"
-		"$<$<PLATFORM_ID:Linux>:pthread;rt;dl>"
+		"$<$<PLATFORM_ID:Linux>:pthread;rt;dl;uuid>"
 		"$<$<PLATFORM_ID:Apple>:pthread;dl>")
 
 if (MN_LEAK)

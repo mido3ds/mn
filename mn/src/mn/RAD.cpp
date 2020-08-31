@@ -7,6 +7,9 @@
 #include "mn/Path.h"
 #include "mn/IO.h"
 #include "mn/Log.h"
+#include "mn/UUID.h"
+
+#include <chrono>
 
 RAD* rad_global = nullptr;
 
@@ -38,6 +41,7 @@ struct RAD
 {
 	mn::Mutex mtx;
 	mn::Map<mn::Str, RAD_Module> modules;
+	mn::UUID uuid;
 };
 
 // API
@@ -50,6 +54,7 @@ rad_new()
 	auto self = mn::alloc<RAD>();
 	self->mtx = mn::mutex_new("Root Mutex");
 	self->modules = mn::map_new<mn::Str, RAD_Module>();
+	self->uuid = mn::uuid_generate();
 	return self;
 }
 
@@ -58,6 +63,12 @@ rad_free(RAD* self)
 {
 	mn::allocator_push(mn::memory::clib());
 	mn_defer(mn::allocator_pop());
+
+	for (const auto &module : self->modules)
+	{
+		if (mn::path_is_file(module.value.loaded_file))
+			mn::file_remove(module.value.loaded_file);
+	}
 
 	destruct(self->modules);
 	mn::mutex_free(self->mtx);
@@ -93,7 +104,8 @@ rad_register(RAD* self, const char* name, const char* filepath)
 		return false;
 
 	// file name
-	auto loaded_filepath = mn::strf("{}.loaded-0", os_filepath);
+	auto loaded_filepath = mn::strf("{}-{}.loaded-0", os_filepath, self->uuid);
+
 	if (mn::path_is_file(loaded_filepath))
 	{
 		if (mn::file_remove(loaded_filepath) == false)
@@ -194,7 +206,7 @@ rad_update(RAD* self)
 			mn::log_info("module '{}' changed", mod.original_file);
 			mod.load_counter++;
 
-			auto loaded_filepath = mn::strf("{}.loaded-{}", mod.original_file, mod.load_counter);
+			auto loaded_filepath = mn::strf("{}-{}.loaded-{}", mod.original_file, self->uuid, mod.load_counter);
 			if (mn::path_is_file(loaded_filepath))
 			{
 				if (mn::file_remove(loaded_filepath) == false)
