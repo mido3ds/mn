@@ -23,6 +23,7 @@ forge/generated/*
 !projects/**/Makefile
 compile_commands.json
 **/Exports.h
+examples/example-hot-reload-lib-exports.h
 
 # User-specific files
 *.suo
