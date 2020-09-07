@@ -15,6 +15,7 @@ namespace mn
 	{
 		Debugger_Callstack()
 		{
+			SymSetOptions(SYMOPT_UNDNAME | SYMOPT_LOAD_LINES | SYMOPT_DEFERRED_LOADS);
 			SymInitialize(GetCurrentProcess(), NULL, true);
 		}
 
@@ -65,7 +66,7 @@ namespace mn
 				IMAGEHLP_LINE64 line{};
 				line.SizeOfStruct = sizeof(line);
 				DWORD dis = 0;
-				BOOL line_found = SymGetLineFromAddr64(process_handle, symbol->Address, &dis, &line);
+				BOOL line_found = SymGetLineFromAddr64(process_handle, (DWORD64)frames[i], &dis, &line);
 
 				mn::print_to(
 					out,
@@ -73,14 +74,14 @@ namespace mn
 					frames_count - i - 1,
 					symbol->Name,
 					line_found ? line.FileName : "<NO_FILE_FOUND>",
-					line_found ? line.LineNumber + 1 : 0UL
+					line_found ? line.LineNumber : 0UL
 				);
 			}
 			else
 			{
 				IMAGEHLP_LINE64 line;
 				DWORD dis = 0;
-				BOOL line_found = SymGetLineFromAddr64(process_handle, symbol->Address, &dis, &line);
+				BOOL line_found = SymGetLineFromAddr64(process_handle, (DWORD64)frames[i], &dis, &line);
 
 				mn::print_to(
 					out,
@@ -88,7 +89,7 @@ namespace mn
 					frames_count - i - 1,
 					symbol->Name,
 					line_found ? line.FileName : "<NO_FILE_FOUND>",
-					line_found ? line.LineNumber + 1 : 0UL
+					line_found ? line.LineNumber : 0UL
 				);
 			}
 		}
