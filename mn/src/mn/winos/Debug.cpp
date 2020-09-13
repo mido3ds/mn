@@ -1,5 +1,6 @@
 #include "mn/Debug.h"
 #include "mn/IO.h"
+#include "mn/RAD.h"
 
 #include <string.h>
 
@@ -41,7 +42,19 @@ namespace mn
 		#if DEBUG
 		static Debugger_Callstack _d;
 
-		auto process_handle = GetCurrentProcess();
+		// gather all the loaded libraries first
+		Buf<void*> libs{};
+		buf_push(libs, GetCurrentProcess());
+		DWORD bytes_needed = 0;
+		if (EnumProcessModules(libs[0], NULL, 0, &bytes_needed))
+		{
+			buf_resize(libs, bytes_needed/sizeof(HMODULE) + libs.count);
+			if (EnumProcessModules(libs[0], (HMODULE*)(libs.ptr + 1), bytes_needed, NULL) == FALSE)
+			{
+				// reset it back to 1 we have failed
+				buf_resize(libs, 1);
+			}
+		}
 
 		constexpr size_t MAX_NAME_LEN = 256;
 		// allocate a buffer for the symbol info
@@ -61,38 +74,31 @@ namespace mn
 			if (frames[i] == nullptr)
 				break;
 
-			if (SymFromAddr(process_handle, (DWORD64)(frames[i]), NULL, symbol))
+			bool symbol_found = false;
+			bool line_found = false;
+			IMAGEHLP_LINE64 line{};
+			line.SizeOfStruct = sizeof(line);
+			DWORD dis = 0;
+			for (auto lib: libs)
 			{
-				IMAGEHLP_LINE64 line{};
-				line.SizeOfStruct = sizeof(line);
-				DWORD dis = 0;
-				BOOL line_found = SymGetLineFromAddr64(process_handle, (DWORD64)frames[i], &dis, &line);
-
-				mn::print_to(
-					out,
-					"[{}]: {}, {}:{}\n",
-					frames_count - i - 1,
-					symbol->Name,
-					line_found ? line.FileName : "<NO_FILE_FOUND>",
-					line_found ? line.LineNumber : 0UL
-				);
+				if (SymFromAddr(lib, (DWORD64)(frames[i]), NULL, symbol))
+				{
+					symbol_found = true;
+					line_found = SymGetLineFromAddr64(lib, (DWORD64)(frames[i]), &dis, &line);
+					break;
+				}
 			}
-			else
-			{
-				IMAGEHLP_LINE64 line;
-				DWORD dis = 0;
-				BOOL line_found = SymGetLineFromAddr64(process_handle, (DWORD64)frames[i], &dis, &line);
 
-				mn::print_to(
-					out,
-					"[{}]: {}, {}:{}\n",
-					frames_count - i - 1,
-					symbol->Name,
-					line_found ? line.FileName : "<NO_FILE_FOUND>",
-					line_found ? line.LineNumber : 0UL
-				);
-			}
+			mn::print_to(
+				out,
+				"[{}]: {}, {}:{}\n",
+				frames_count - i - 1,
+				symbol_found ? symbol->Name : "UNKNOWN_SYMBOL",
+				line_found ? line.FileName : "<NO_FILE_FOUND>",
+				line_found ? line.LineNumber : 0UL
+			);
 		}
+		buf_free(libs);
 		#endif
 	}
 }

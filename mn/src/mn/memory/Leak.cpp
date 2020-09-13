@@ -14,50 +14,13 @@ namespace mn::memory
 	{
 		this->head = nullptr;
 		this->mtx = _leak_allocator_mutex();
+		this->report_on_destruct = true;
 	}
 
 	Leak::~Leak()
 	{
-		if (this->head == nullptr)
-			return;
-
-		size_t count = 0;
-		size_t size = 0;
-		auto it = head;
-		while (it)
-		{
-			::fprintf(stderr, "Leak size: %zu, call stack:\n", it->size);
-			#if DEBUG
-				callstack_print_to(it->callstack, Leak::CALLSTACK_MAX_FRAMES, file_stderr());
-			#else
-				::fprintf(stderr, "run in debug mode to get call stack info\n");
-			#endif
-
-			auto ptr = (char*)(it + 1);
-			size_t len = it->size > 128 ? 128 : it->size;
-
-			::fprintf(stderr, "content bytes[%zu]: {", len);
-			for (size_t i = 0; i < len; ++i)
-			{
-				if (i + 1 < len)
-					::fprintf(stderr, "%#02x, ", ptr[i]);
-				else
-					::fprintf(stderr, "%#02x", ptr[i]);
-			}
-			::fprintf(stderr, "}\n");
-
-			::fprintf(stderr, "content string[%zu]: '", len);
-			for (size_t i = 0; i < len; ++i)
-				::fprintf(stderr, "%c", ptr[i]);
-			::fprintf(stderr, "'\n\n");
-
-			++count;
-			size += it->size;
-			it = it->next;
-		}
-		::fprintf(stderr, "Leaks count: %zu, Leaks size(bytes): %zu\n", count, size);
-		::fprintf(stderr, "Press any key to continue...\n");
-		::getchar();
+		if (this->report_on_destruct)
+			report(false);
 	}
 
 	Block
@@ -104,6 +67,50 @@ namespace mn::memory
 			memory_profile_free(block.ptr, block.size);
 			::free(ptr);
 		}
+	}
+
+	void
+	Leak::report(bool report_on_destruct_)
+	{
+		this->report_on_destruct = report_on_destruct_;
+		if (this->head == nullptr)
+			return;
+
+		size_t count = 0;
+		size_t size = 0;
+		auto it = head;
+		while (it)
+		{
+			::fprintf(stderr, "Leak size: %zu, call stack:\n", it->size);
+			#if DEBUG
+				callstack_print_to(it->callstack, Leak::CALLSTACK_MAX_FRAMES, file_stderr());
+			#else
+				::fprintf(stderr, "run in debug mode to get call stack info\n");
+			#endif
+
+			auto ptr = (char*)(it + 1);
+			size_t len = it->size > 128 ? 128 : it->size;
+
+			::fprintf(stderr, "content bytes[%zu]: {", len);
+			for (size_t i = 0; i < len; ++i)
+			{
+				if (i + 1 < len)
+					::fprintf(stderr, "%#02x, ", ptr[i]);
+				else
+					::fprintf(stderr, "%#02x", ptr[i]);
+			}
+			::fprintf(stderr, "}\n");
+
+			::fprintf(stderr, "content string[%zu]: '", len);
+			for (size_t i = 0; i < len; ++i)
+				::fprintf(stderr, "%c", ptr[i]);
+			::fprintf(stderr, "'\n\n");
+
+			++count;
+			size += it->size;
+			it = it->next;
+		}
+		::fprintf(stderr, "Leaks count: %zu, Leaks size(bytes): %zu\n", count, size);
 	}
 
 	Leak*

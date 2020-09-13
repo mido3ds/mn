@@ -24,6 +24,7 @@ namespace mn::memory
 
 		Node* head;
 		Mutex mtx;
+		bool report_on_destruct;
 
 		MN_EXPORT
 		Leak();
@@ -36,6 +37,9 @@ namespace mn::memory
 
 		MN_EXPORT void
 		free(Block block) override;
+
+		MN_EXPORT void
+		report(bool report_on_destruct);
 	};
 
 	MN_EXPORT Leak*
