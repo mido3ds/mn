@@ -68,6 +68,8 @@ _mn_simd_check()
 		res.sse4a_supportted = cpuinfo[2] & (1 << 6) || false;
 		res.sse5_supportted = cpuinfo[2] & (1 << 11) || false;
 	}
+
+	return res;
 }
 
 mn_simd_support
