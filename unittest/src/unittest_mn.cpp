@@ -23,6 +23,7 @@
 #include <mn/Handle_Table.h>
 #include <mn/ECS.h>
 #include <mn/UUID.h>
+#include <mn/SIMD.h>
 
 #include <chrono>
 #include <iostream>
@@ -1062,4 +1063,17 @@ TEST_CASE("uuid uniqueness")
 			mn::map_insert(ids, id, size_t(1));
 	}
 	CHECK(ids.count == 1000000);
+}
+
+TEST_CASE("report simd")
+{
+	auto simd = mn_simd_support_check();
+	mn::print("sse: {}\n", simd.sse_supportted);
+	mn::print("sse2: {}\n", simd.sse2_supportted);
+	mn::print("sse3: {}\n", simd.sse3_supportted);
+	mn::print("sse4.1: {}\n", simd.sse4_1_supportted);
+	mn::print("sse4.2: {}\n", simd.sse4_2_supportted);
+	mn::print("sse4a: {}\n", simd.sse4a_supportted);
+	mn::print("sse5: {}\n", simd.sse5_supportted);
+	mn::print("avx: {}\n", simd.avx_supportted);
 }
