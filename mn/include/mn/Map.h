@@ -424,7 +424,7 @@ namespace mn
 
 	template<typename T, typename THash = Hash<T>>
 	inline static _Hash_Search_Result
-	_set_find_slot_for_insert(const Buf<Hash_Slot>& slots, const Buf<T>& values, const T& key, size_t* external_hash)
+	_set_find_slot_for_insert(const Buf<Hash_Slot>& _slots, const Buf<T>& values, const T& key, size_t* external_hash)
 	{
 		_Hash_Search_Result res{};
 		if (external_hash)
@@ -432,7 +432,7 @@ namespace mn
 		else
 			res.hash = THash()(key);
 
-		auto cap = slots.count;
+		auto cap = _slots.count;
 		if (cap == 0) return res;
 
 		auto index = res.hash % cap;
@@ -441,7 +441,7 @@ namespace mn
 		// linear probing
 		while(true)
 		{
-			auto slot = slots[ix];
+			auto slot = _slots[ix];
 			auto slot_hash = slot.hash;
 			auto slot_index = hash_slot_index(slot);
 			auto slot_flags = hash_slot_flags(slot);
