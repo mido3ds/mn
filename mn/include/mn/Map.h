@@ -435,8 +435,11 @@ namespace mn
 		auto cap = _slots.count;
 		if (cap == 0) return res;
 
-		auto index = res.hash % cap;
+		auto index = res.hash & (cap - 1);
 		auto ix = index;
+
+		size_t first_deleted_slot_index = 0;
+		bool found_first_deleted_slot = false;
 
 		// linear probing
 		while(true)
@@ -445,21 +448,51 @@ namespace mn
 			auto slot_hash = slot.hash;
 			auto slot_index = hash_slot_index(slot);
 			auto slot_flags = hash_slot_flags(slot);
-
-			// this is an empty spot or deleted spot then we can use it
-			if (slot_flags == HASH_FLAGS::HASH_EMPTY ||
-				slot_flags == HASH_FLAGS::HASH_DELETED)
+			switch (slot_flags)
 			{
+			// this position is not empty but if it's the same value then we return it
+			case HASH_FLAGS::HASH_USED:
+			{
+				if (slot_hash == res.hash && values[slot_index] == key)
+				{
+					res.index = ix;
+					return res;
+				}
 				break;
 			}
-
-			// this position is not empty but if it's the same value then we return it
-			if (slot_hash == res.hash && values[slot_index] == key)
+			// this is an empty slot then we can use it
+			case HASH_FLAGS::HASH_EMPTY:
+			{
+				// we didn't find the key, so check the first deleted slot if we found one then
+				// reuse it
+				if (found_first_deleted_slot)
+				{
+					res.index = first_deleted_slot_index;
+				}
+				// we didn't find the key, so use the first empty slot
+				else
+				{
+					res.index = ix;
+				}
+				return res;
 				break;
+			}
+			// this is a deleted slot we'll remember it just in case we wanted to resuse it
+			case HASH_FLAGS::HASH_DELETED:
+			{
+				if (found_first_deleted_slot == false)
+				{
+					first_deleted_slot_index = ix;
+					found_first_deleted_slot = true;
+				}
+				break;
+			}
+			default: assert(false && "unreachable"); return _Hash_Search_Result{};
+			}
 
 			// the position is not empty and the key is not the same
 			++ix;
-			ix %= cap;
+			ix &= (cap - 1);
 
 			// if we went full circle then we just return the cap to signal no index has been found
 			if (ix == index)
@@ -483,7 +516,7 @@ namespace mn
 		auto cap = self._slots.count;
 		if (cap == 0) return res;
 
-		auto index = res.hash % cap;
+		auto index = res.hash & (cap - 1);
 		auto ix = index;
 
 		// linear probing
@@ -511,7 +544,7 @@ namespace mn
 
 			// the position is not used or the key is not the same
 			++ix;
-			ix %= cap;
+			ix &= (cap - 1);
 
 			// if we went full circle then we just return the cap to signal no index has been found
 			if (ix == index)
