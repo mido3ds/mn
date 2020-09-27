@@ -624,7 +624,7 @@ namespace mn
 	}
 
 	template<typename T, typename THash = Hash<T>>
-	inline static T*
+	inline static const T*
 	set_insert(Set<T, THash>& self, const T& key)
 	{
 		_set_maintain_space_complexity(self);
@@ -655,6 +655,7 @@ namespace mn
 		case HASH_FLAGS::HASH_USED:
 		{
 			auto index = hash_slot_index(slot);
+			self.values[index] = key;
 			return &self.values[index];
 		}
 		default:
