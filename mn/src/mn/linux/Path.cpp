@@ -13,6 +13,7 @@
 #include <errno.h>
 #include <dirent.h>
 #include <linux/limits.h>
+#include <libgen.h>
 
 #include <assert.h>
 
@@ -224,7 +225,7 @@ namespace mn
 		int fd_src = ::open(src, O_RDONLY);
 		if(fd_src < 0)
 			return false;
-		
+
 		int fd_dst = ::open(dst, O_WRONLY | O_CREAT | O_EXCL, 0666);
 		if(fd_dst < 0)
 			goto FAILURE;
@@ -265,6 +266,16 @@ namespace mn
 	file_move(const char* src, const char* dst)
 	{
 		return ::rename(src, dst) == 0;
+	}
+
+	Str
+	file_name(const Str& path, Allocator allocator)
+	{
+		Str path_copy = str_clone(path);
+		mn_defer(str_free(path_copy));
+
+		char* filename = ::basename(path_copy.ptr);
+		return str_from_c(filename, allocator);
 	}
 
 	Str
@@ -404,7 +415,7 @@ namespace mn
 		os_str = secure_getenv("HOME");
 		if (os_str && ::strlen(os_str) > 0)
 			return path_join(mn::str_with_allocator(allocator), os_str, ".config");
-		
+
 		return str_from_c("~/.config", allocator);
 	}
 }
