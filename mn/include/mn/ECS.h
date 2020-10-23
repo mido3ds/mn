@@ -14,61 +14,6 @@
 
 namespace mn
 {
-	// ecs_component_hash is used to hash a component, this is used to check for an exact change in the ECS
-	template<typename T>
-	inline static size_t
-	ecs_component_hash(const T&)
-	{
-		mn::panic("no ecs_component_hash function were found for '{}'", typeid(T).name());
-		return 0;
-	}
-
-	#define TRIVIAL_HASH(TYPE) \
-	inline static size_t \
-	ecs_component_hash(const TYPE& v) \
-	{ \
-		Hash<TYPE> h{}; \
-		return h(v); \
-	}
-
-	TRIVIAL_HASH(char);
-	TRIVIAL_HASH(bool);
-	TRIVIAL_HASH(int8_t);
-	TRIVIAL_HASH(int16_t);
-	TRIVIAL_HASH(int32_t);
-	TRIVIAL_HASH(int64_t);
-	TRIVIAL_HASH(uint8_t);
-	TRIVIAL_HASH(uint16_t);
-	TRIVIAL_HASH(uint32_t);
-	TRIVIAL_HASH(uint64_t);
-	TRIVIAL_HASH(float);
-	TRIVIAL_HASH(double);
-
-	#undef TRIVIAL_HASH
-
-	template<typename T>
-	inline static Buf<T>
-	ecs_component_hash(const Buf<T>& arr)
-	{
-		size_t res = 0;
-		for (const auto& v: arr)
-			res = hash_mix(res, ecs_component_hash(v));
-		return res;
-	}
-
-	template<typename TKey, typename TValue, typename THash>
-	inline static Map<TKey, TValue, THash>
-	ecs_component_hash(const Map<TKey, TValue, THash>& table)
-	{
-		size_t res = 0;
-		for (const auto& [key, value]: table)
-		{
-			res = hash_mix(res, ecs_component_hash(key));
-			res = hash_mix(res, ecs_component_hash(value));
-		}
-		return res;
-	}
-
 	// entity
 	struct Entity
 	{
@@ -270,16 +215,6 @@ namespace mn
 	}
 
 	template<typename T>
-	inline static size_t
-	ref_bag_hash(const Ref_Bag<T>& self)
-	{
-		size_t hash = 0;
-		for (auto ptr: self.components)
-			hash = mn::hash_mix(hash, ecs_component_hash(ptr->component));
-		return hash;
-	}
-
-	template<typename T>
 	inline static const T*
 	ref_bag_read(const Ref_Bag<T>& self, Entity e)
 	{
@@ -292,7 +227,7 @@ namespace mn
 	inline static bool
 	ref_bag_has(const Ref_Bag<T>& self, Entity e)
 	{
-		return ref_bag_get(self, e) != nullptr;
+		return ref_bag_read(self, e) != nullptr;
 	}
 
 	template<typename T>
@@ -322,7 +257,7 @@ namespace mn
 			auto new_ptr = store_component_new(self.store);
 			::memset(&new_ptr->component, 0, sizeof(new_ptr->component));
 			new_ptr->entity = e;
-			
+
 			auto ix = self.components.count;
 			buf_push(self.components, new_ptr);
 			map_insert(self.table, e, ix);
@@ -423,16 +358,6 @@ namespace mn
 	clone(const Val_Bag<T>& self)
 	{
 		return val_bag_clone(self);
-	}
-
-	template<typename T>
-	inline static size_t
-	val_bag_hash(const Val_Bag<T>& self)
-	{
-		size_t hash = 0;
-		for (const auto& c: self.components)
-			hash = mn::hash_mix(hash, ecs_component_hash(c.component));
-		return hash;
 	}
 
 	template<typename T>
