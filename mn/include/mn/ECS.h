@@ -11,6 +11,7 @@
 #include <stdint.h>
 #include <atomic>
 #include <assert.h>
+#include <type_traits>
 
 namespace mn
 {
@@ -41,7 +42,7 @@ namespace mn
 	};
 
 	MN_EXPORT Entity
-	entity_new();
+	_entity_new();
 
 	// backing pool storage
 	template<typename T>
@@ -288,127 +289,345 @@ namespace mn
 		self.version++;
 	}
 
-	// value bag
-	template<typename T>
-	struct Val_Component
+	struct Tag_Bag
 	{
-		Entity entity;
-		T component;
+		Set<Entity> table;
 	};
 
-	template<typename T>
-	inline static Val_Component<T>
-	clone(const Val_Component<T>& self)
+	inline static Tag_Bag
+	tag_bag_new()
 	{
-		Val_Component<T> res{};
-		res.entity = self.entity;
-		res.component = clone(self.component);
-		return res;
+		return Tag_Bag{};
 	}
 
-	template<typename T>
-	struct Val_Bag
-	{
-		Buf<Val_Component<T>> components;
-		Map<Entity, size_t> table;
-		uint32_t version;
-	};
-
-	template<typename T>
-	inline static Val_Bag<T>
-	val_bag_new()
-	{
-		Val_Bag<T> self{};
-		self.components = buf_new<Val_Component<T>>();
-		self.table = map_new<Entity, size_t>();
-		self.version = 0;
-		return self;
-	}
-
-	template<typename T>
 	inline static void
-	val_bag_free(Val_Bag<T>& self)
+	tag_bag_free(Tag_Bag& self)
 	{
-		for (auto& c: self.components)
-			destruct(c.component);
-		buf_free(self.components);
-		map_free(self.table);
+		set_free(self.table);
 	}
 
-	template<typename T>
 	inline static void
-	destruct(Val_Bag<T>& self)
+	destruct(Tag_Bag& self)
 	{
-		val_bag_free(self);
+		tag_bag_free(self);
 	}
 
-	template<typename T>
-	inline static Val_Bag<T>
-	val_bag_clone(const Val_Bag<T>& self)
+	inline static Tag_Bag
+	tag_bag_clone(const Tag_Bag& self)
 	{
-		Val_Bag<T> other{};
-		other.components = buf_clone(self.components);
-		other.table = map_memcpy_clone(self.table);
-		other.version = self.version;
+		Tag_Bag other{};
+		other.table = set_memcpy_clone(self.table);
 		return other;
 	}
 
-	template<typename T>
-	inline static Val_Bag<T>
-	clone(const Val_Bag<T>& self)
+	inline static Tag_Bag
+	clone(const Tag_Bag& self)
 	{
-		return val_bag_clone(self);
+		return tag_bag_clone(self);
 	}
 
-	template<typename T>
-	inline static T
-	val_bag_get(const Val_Bag<T>& self, Entity e)
+	inline static bool
+	tag_bag_has(const Tag_Bag& self, Entity e)
 	{
-		if (auto it = map_lookup(self.table, e))
-			return self.components[it->value].component;
-		assert(false && "unreachable");
-		return T{};
+		return set_lookup(self.table, e) != nullptr;
+	}
+
+	inline static void
+	tag_bag_add(Tag_Bag& self, Entity e)
+	{
+		set_insert(self.table, e);
+	}
+
+	inline static void
+	tag_bag_remove(Tag_Bag& self, Entity e)
+	{
+		set_remove(self.table, e);
+	}
+
+
+	template<typename T>
+	inline static size_t
+	typehash()
+	{
+		static const size_t _hash = typeid(T).hash_code();
+		return _hash;
+	}
+
+	struct Abstract_World_Table
+	{
+		virtual ~Abstract_World_Table() = default;
+		virtual const char* _name() const = 0;
+		virtual const void* _read(Entity e) const = 0;
+		virtual void* _write(Entity e) = 0;
+		virtual void _remove(Entity e) = 0;
+		virtual const Map<Entity, size_t>* _entities() const = 0;
+	};
+
+	template<typename T>
+	struct World_Table final: Abstract_World_Table
+	{
+		Str name;
+		Ref_Bag<T> bag;
+
+		World_Table(Str _name)
+			: name(_name)
+		{
+			bag = ref_bag_new<T>();
+		}
+
+		~World_Table() override
+		{
+			str_free(name);
+			ref_bag_free(bag);
+		}
+
+		const char*
+		_name() const override
+		{
+			return name.ptr;
+		}
+
+		const void*
+		_read(Entity e) const override
+		{
+			return ref_bag_read(bag, e);
+		}
+
+		void*
+		_write(Entity e) override
+		{
+			return ref_bag_write(bag, e);
+		}
+
+		void
+		_remove(Entity e) override
+		{
+			return ref_bag_remove(bag, e);
+		}
+
+		const Map<Entity, size_t>*
+		_entities() const override
+		{
+			return &bag.table;
+		}
+	};
+
+	struct World
+	{
+		Set<Entity> alive_entities;
+		Map<size_t, Abstract_World_Table*> tables;
+		Map<size_t, Tag_Bag> tags;
+
+		Entity
+		entity_new()
+		{
+			auto e = _entity_new();
+			set_insert(alive_entities, e);
+			return e;
+		}
+
+		void
+		entity_free(Entity e)
+		{
+			assert(set_lookup(alive_entities, e) && "invalid entity");
+			set_remove(alive_entities, e);
+			for (auto [_, table]: tables)
+				table->_remove(e);
+			for (auto& [_, bag]: tags)
+				tag_bag_remove(bag, e);
+		}
+
+		template<typename T>
+		const T*
+		read(Entity e) const
+		{
+			static_assert(std::is_empty_v<T> == false, "empty structs should be tags");
+			assert(set_lookup(alive_entities, e) && "invalid entity");
+			return (const T*)_read(typehash<T>(), e);
+		}
+
+		const void*
+		_read(size_t type_hash, Entity e) const
+		{
+			auto table = map_lookup(tables, type_hash);
+			return table->value->_read(e);
+		}
+
+		template<typename T>
+		T*
+		write(Entity e)
+		{
+			static_assert(std::is_empty_v<T> == false, "empty structs should be tags");
+			assert(set_lookup(alive_entities, e) && "invalid entity");
+			return (T*)_write(typehash<T>(), e);
+		}
+
+		void*
+		_write(size_t type_hash, Entity e)
+		{
+			auto table = map_lookup(tables, type_hash);
+			return table->value->_write(e);
+		}
+
+		template<typename T>
+		void
+		remove(Entity e)
+		{
+			static_assert(std::is_empty_v<T> == false, "empty structs should be tags");
+			assert(set_lookup(alive_entities, e) && "invalid entity");
+			_remove(typehash<T>(), e);
+		}
+
+		void
+		_remove(size_t type_hash, Entity e)
+		{
+			auto table = map_lookup(tables, type_hash);
+			return table->value->_remove(e);
+		}
+
+		template<typename T>
+		Buf<Entity>
+		list() const
+		{
+			auto res = buf_with_allocator<Entity>(memory::tmp());
+			if constexpr (std::is_empty_v<T>)
+			{
+				auto t = typehash<T>();
+				auto it = map_lookup(tags, t);
+				buf_reserve(res, it->value.table.count);
+				for (auto e: it->value.table)
+					buf_push(res, e);
+			}
+			else
+			{
+				auto t = typehash<T>();
+				auto it = map_lookup(tables, t);
+				auto entities = it->value->_entities();
+				buf_reserve(res, entities->count);
+				for (auto [e, _]: *entities)
+					buf_push(res, e);
+			}
+			return res;
+		}
+
+		template<typename T>
+		bool
+		tag_has(Entity e) const
+		{
+			static_assert(std::is_empty_v<T>);
+			assert(set_lookup(alive_entities, e) && "invalid entity");
+
+			auto t = typehash<T>();
+			auto b = map_lookup(tags, t);
+			return tag_bag_has(b->value, e);
+		}
+
+		template<typename T>
+		void
+		tag_add(Entity e)
+		{
+			static_assert(std::is_empty_v<T>);
+			assert(set_lookup(alive_entities, e) && "invalid entity");
+
+			auto t = typehash<T>();
+			auto b = map_lookup(tags, t);
+			tag_bag_add(b->value, e);
+		}
+
+		template<typename T>
+		void
+		tag_remove(Entity e)
+		{
+			static_assert(std::is_empty_v<T>);
+			assert(set_lookup(alive_entities, e) && "invalid entity");
+
+			auto t = typehash<T>();
+			auto b = map_lookup(tags, t);
+			tag_bag_remove(b->value, e);
+		}
+	};
+
+	struct World_Schema
+	{
+		Map<size_t, Abstract_World_Table*> tables;
+		Map<size_t, Tag_Bag> tags;
+	};
+
+	inline static World_Schema*
+	world_schema_new()
+	{
+		return alloc_zerod<World_Schema>();
+	}
+
+	inline static void
+	world_schema_free(World_Schema* self)
+	{
+		for(auto [_, table]: self->tables)
+			free_destruct(table);
+		map_free(self->tables);
+		for (auto [_, b]: self->tags)
+			tag_bag_free(b);
+		map_free(self->tags);
+		free(self);
+	}
+
+	inline static void
+	destruct(World_Schema* self)
+	{
+		world_schema_free(self);
 	}
 
 	template<typename T>
 	inline static void
-	val_bag_set(Val_Bag<T>& self, Entity e, const T& v)
+	world_schema_create_table(World_Schema* self, const char* name)
 	{
-		if (auto it = map_lookup(self.table, e))
+		auto t = typehash<T>();
+		if (map_lookup(self->tables, t))
+			panic("world_create_table('{}') failed because type already exists", name);
+
+		if constexpr (std::is_empty_v<T> == false)
 		{
-			destruct(self.components[it->value].component);
-			self.components[it->value].component = v;
+			auto table = alloc_construct<World_Table<T>>(str_from_c(name));
+			map_insert(self->tables, t, (Abstract_World_Table*)table);
 		}
 		else
 		{
-			Val_Component<T> new_component{};
-			new_component.entity = e;
-			new_component.component = v;
-			auto ix = self.components.count;
-			buf_push(self.components, new_component);
-			map_insert(self.table, e, ix);
+			map_insert(self->tags, t, tag_bag_new());
 		}
-		++self.version;
+	}
+	#define mn_world_schema_create_table(w, ...) mn::world_schema_create_table<__VA_ARGS__>(w, #__VA_ARGS__)
+
+
+
+	inline static World*
+	world_new(World_Schema* schema)
+	{
+		auto self = alloc_zerod<World>();
+		self->tables = schema->tables;
+		schema->tables = map_new<size_t, Abstract_World_Table*>();
+
+		self->tags = schema->tags;
+		schema->tags = map_new<size_t, Tag_Bag>();
+
+		return self;
 	}
 
-	template<typename T>
 	inline static void
-	val_bag_remove(Val_Bag<T>& self, Entity e)
+	world_free(World* world)
 	{
-		auto it = map_lookup(self.table, e);
-		if (it == nullptr)
-			return;
+		set_free(world->alive_entities);
+		for(auto [_, table]: world->tables)
+			free_destruct(table);
+		map_free(world->tables);
+		for (auto [_, b]: world->tags)
+			tag_bag_free(b);
+		map_free(world->tags);
+		free(world);
+	}
 
-		auto remove_ix = it->value;
-		destruct(self.components[remove_ix]);
-		buf_remove(self.components, remove_ix);
-		map_remove(self.table, e);
-
-		if (remove_ix < self.components.count)
-		{
-			auto replace_it = map_lookup(self.table, self.components[remove_ix]->entity);
-			replace_it->value = remove_ix;
-		}
-		self.version++;
+	inline static void
+	destruct(World* self)
+	{
+		world_free(self);
 	}
 }

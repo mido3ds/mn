@@ -3,7 +3,7 @@
 namespace mn
 {
 	Entity
-	entity_new()
+	_entity_new()
 	{
 		static std::atomic<uint32_t> id = 0;
 		return Entity{id.fetch_add(1) + 1};
