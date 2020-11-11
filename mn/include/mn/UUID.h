@@ -23,6 +23,8 @@ namespace mn
 		uint8_t bytes[16];
 	};
 
+	inline UUID null_uuid{};
+
 	inline static bool
 	operator==(const UUID &a, const UUID &b)
 	{
