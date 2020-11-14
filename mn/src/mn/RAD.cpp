@@ -244,7 +244,9 @@ rad_update(RAD* self)
 			}
 
 			// now call the new reload functions
+			mn::allocator_pop();
 			auto new_api = load_func(mod.api, true);
+			mn::allocator_push(mn::memory::clib());
 			if (new_api == nullptr)
 			{
 				overall_result &= false;

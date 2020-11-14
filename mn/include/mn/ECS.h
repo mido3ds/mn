@@ -361,6 +361,7 @@ namespace mn
 		virtual void* _write(Entity e) = 0;
 		virtual void _remove(Entity e) = 0;
 		virtual const Map<Entity, size_t>* _entities() const = 0;
+		virtual void _reload(Abstract_World_Table* old_table) = 0;
 	};
 
 	template<typename T>
@@ -409,6 +410,15 @@ namespace mn
 		_entities() const override
 		{
 			return &bag.table;
+		}
+
+		void
+		_reload(Abstract_World_Table* table)
+		{
+			auto old_table = (World_Table<T>*)table;
+
+			ref_bag_free(bag);
+			bag = clone(old_table->bag);
 		}
 	};
 
@@ -629,5 +639,60 @@ namespace mn
 	destruct(World* self)
 	{
 		world_free(self);
+	}
+
+	inline static void
+	world_hot_reload(World* world, World_Schema* schema)
+	{
+		for (auto [hash, table]: schema->tables)
+		{
+			if (auto it = map_lookup(world->tables, hash))
+			{
+				table->_reload(it->value);
+				free_destruct(it->value);
+				map_insert(world->tables, hash, table);
+			}
+			else
+			{
+				map_insert(world->tables, hash, table);
+			}
+		}
+
+		for (auto [hash, _]: schema->tags)
+			if (map_lookup(world->tags, hash) == nullptr)
+				map_insert(world->tags, hash, tag_bag_new());
+
+		auto to_be_removed = buf_new<size_t>();
+
+		for (auto [hash, _]: world->tables)
+		{
+			if (map_lookup(schema->tables, hash) == nullptr)
+				buf_push(to_be_removed, hash);
+		}
+		for (auto hash: to_be_removed)
+		{
+			auto it = map_lookup(world->tables, hash);
+			free_destruct(it->value);
+			map_remove(world->tables, hash);
+		}
+
+		buf_clear(to_be_removed);
+
+		for (auto [hash, _]: world->tags)
+		{
+			if (map_lookup(schema->tags, hash) == nullptr)
+				buf_push(to_be_removed, hash);
+		}
+		for (auto hash: to_be_removed)
+		{
+			auto it = map_lookup(world->tags, hash);
+			tag_bag_free(it->value);
+			map_remove(world->tags, hash);
+		}
+
+		buf_free(to_be_removed);
+
+		map_free(schema->tables);
+		schema->tables = map_new<size_t, Abstract_World_Table*>();
 	}
 }
