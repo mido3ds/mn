@@ -422,6 +422,18 @@ namespace mn
 		}
 	};
 
+	template<typename T>
+	struct Type_Wrapper
+	{
+		using type = T;
+	};
+
+	template<typename ... TArgs, typename TFunc>
+	inline static void
+	types_foreach(TFunc&& f)
+	{
+		(f(Type_Wrapper<TArgs>{}), ...);
+	}
 	struct World
 	{
 		Set<Entity> alive_entities;
@@ -495,28 +507,83 @@ namespace mn
 			return table->value->_remove(e);
 		}
 
-		template<typename T>
-		Buf<Entity>
+		template<typename ... TArgs>
+		mn::Buf<Entity>
 		list() const
 		{
-			auto res = buf_with_allocator<Entity>(memory::tmp());
-			if constexpr (std::is_empty_v<T>)
+			size_t minimum_type_hash = 0;
+			size_t minimum_entity_count = SIZE_MAX;
+			bool minimum_is_empty = false;
+
+			// find the minimum number of entities
+			types_foreach<TArgs...>([&](auto t){
+				using type = typename decltype(t)::type;
+				auto type_hash = typehash<type>();
+
+				if constexpr (std::is_empty_v<type>)
+				{
+					auto it = mn::map_lookup(tags, type_hash);
+					auto entities_count = it->value.table.count;
+					if (entities_count < minimum_entity_count)
+					{
+						minimum_entity_count = entities_count;
+						minimum_type_hash = type_hash;
+						minimum_is_empty = true;
+					}
+				}
+				else
+				{
+					auto it = mn::map_lookup(tables, type_hash);
+					auto& entities = *it->value->_entities();
+					if (entities.count < minimum_entity_count)
+					{
+						minimum_entity_count = entities.count;
+						minimum_type_hash = type_hash;
+						minimum_is_empty = false;
+					}
+				}
+			});
+
+			auto res = mn::buf_with_allocator<Entity>(mn::memory::tmp());
+			mn::buf_reserve(res, minimum_entity_count);
+
+			if (minimum_is_empty)
 			{
-				auto t = typehash<T>();
-				auto it = map_lookup(tags, t);
-				buf_reserve(res, it->value.table.count);
+				auto it = mn::map_lookup(tags, minimum_type_hash);
+				mn::buf_reserve(res, it->value.table.count);
 				for (auto e: it->value.table)
-					buf_push(res, e);
+					mn::buf_push(res, e);
 			}
 			else
 			{
-				auto t = typehash<T>();
-				auto it = map_lookup(tables, t);
+				auto it = mn::map_lookup(tables, minimum_type_hash);
 				auto entities = it->value->_entities();
-				buf_reserve(res, entities->count);
 				for (auto [e, _]: *entities)
-					buf_push(res, e);
+					mn::buf_push(res, e);
 			}
+
+			types_foreach<TArgs...>([&](auto t){
+				using type = typename decltype(t)::type;
+				auto type_hash = typehash<type>();
+				if (type_hash == minimum_type_hash)
+					return;
+
+				if constexpr (std::is_empty_v<type>)
+				{
+					auto it = mn::map_lookup(tags, type_hash);
+					mn::buf_remove_if(res, [&](auto e){
+						return tag_bag_has(it->value, e) == false;
+					});
+				}
+				else
+				{
+					auto it = mn::map_lookup(tables, type_hash);
+					mn::buf_remove_if(res, [&](auto e){
+						return it->value->_read(e) == nullptr;
+					});
+				}
+			});
+
 			return res;
 		}
 
