@@ -672,7 +672,7 @@ main()
 			mn::print("{}\n", word);
 		}
 		// free all the tmp memory
-		mn::memory::tmp()->free_all();
+		mn::memory::tmp()->clear_all();
 	}
 
 	return 0;
@@ -756,7 +756,7 @@ main()
 				mn::map_insert(freq, clone(word), size_t(1));
 		}
 		// free all the tmp memory
-		mn::memory::tmp()->free_all();
+		mn::memory::tmp()->clear_all();
 	}
 
 	for (auto it = mn::map_begin(freq); it != mn::map_end(freq); it = mn::map_next(freq, it))

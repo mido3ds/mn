@@ -22,7 +22,7 @@ main()
 			mn::print("{}\n", word);
 		}
 		// free all the tmp memory
-		mn::memory::tmp()->free_all();
+		mn::memory::tmp()->clear_all();
 	}
 
 	return 0;

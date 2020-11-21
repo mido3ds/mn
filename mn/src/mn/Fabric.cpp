@@ -148,7 +148,7 @@ namespace mn
 		job();
 		self->atomic_job_start_time_in_ms.store(0);
 		task_free(job);
-		memory::tmp()->free_all();
+		memory::tmp()->clear_all();
 		if (self->fabric && self->fabric->settings.after_each_job)
 			self->fabric->settings.after_each_job();
 	}

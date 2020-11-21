@@ -128,7 +128,7 @@ main(int argc, char **argv)
 		else if (mn::path_is_file(path) && is_header(path))
 			mn::buf_push(headers, mn::str_from_c(path.ptr));
 	}
-	mn::memory::tmp()->free_all();
+	mn::memory::tmp()->clear_all();
 
 	auto docs = mn::buf_new<Doc_Element>();
 	mn_defer(destruct(docs));

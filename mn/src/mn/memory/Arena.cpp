@@ -13,6 +13,9 @@ namespace mn::memory
 		this->total_mem = 0;
 		this->used_mem = 0;
 		this->highwater_mem = 0;
+		this->clear_all_readjust_threshold = 4ULL * 1024ULL * 1024ULL;
+		this->clear_all_current_highwater = 0;
+		this->clear_all_previous_highwater = 0;
 	}
 
 	Arena::~Arena()
@@ -29,6 +32,7 @@ namespace mn::memory
 		this->root->alloc_head += size;
 		this->used_mem += size;
 		this->highwater_mem = this->highwater_mem > this->used_mem ? this->highwater_mem : this->used_mem;
+		this->clear_all_current_highwater = this->clear_all_current_highwater > this->used_mem ? this->clear_all_current_highwater : this->used_mem;
 
 		return Block{ ptr, size };
 	}
@@ -75,6 +79,32 @@ namespace mn::memory
 		this->root = nullptr;
 		this->total_mem = 0;
 		this->used_mem = 0;
+	}
+
+	void
+	Arena::clear_all()
+	{
+		size_t delta = 0;
+		if (this->clear_all_current_highwater > this->clear_all_previous_highwater)
+			delta = this->clear_all_current_highwater - this->clear_all_previous_highwater;
+		else
+			delta = this->clear_all_previous_highwater - this->clear_all_current_highwater;
+
+		bool readjust = delta >= this->clear_all_readjust_threshold;
+
+		if ((this->root && this->root->next != nullptr) || readjust)
+		{
+			this->free_all();
+			this->grow(this->clear_all_current_highwater);
+			this->clear_all_previous_highwater = this->clear_all_current_highwater;
+			this->clear_all_current_highwater = 0;
+		}
+		else if (this->root && this->root->next == nullptr)
+		{
+			this->root->alloc_head = (uint8_t*)this->root->mem.ptr;
+			this->used_mem = 0;
+			this->clear_all_current_highwater = 0;
+		}
 	}
 
 	bool

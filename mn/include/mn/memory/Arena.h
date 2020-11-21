@@ -22,6 +22,11 @@ namespace mn::memory
 		Interface* meta;
 		Node* root;
 		size_t block_size, total_mem, used_mem, highwater_mem;
+		// determines the threshold amount of temporary memory between the current and previous highwater
+		// that will trigger a readjust (free/realloc), default value is 4MB
+		size_t clear_all_readjust_threshold;
+		size_t clear_all_current_highwater;
+		size_t clear_all_previous_highwater;
 
 		MN_EXPORT
 		Arena(size_t block_size, Interface* meta = clib());
@@ -40,6 +45,9 @@ namespace mn::memory
 
 		MN_EXPORT void
 		free_all();
+
+		MN_EXPORT void
+		clear_all();
 
 		MN_EXPORT bool
 		owns(void* ptr);

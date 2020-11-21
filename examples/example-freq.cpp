@@ -28,7 +28,7 @@ main()
 				mn::map_insert(freq, clone(word), size_t(1));
 		}
 		// free all the tmp memory
-		mn::memory::tmp()->free_all();
+		mn::memory::tmp()->clear_all();
 	}
 
 	for (const auto& [key, value]: freq)
