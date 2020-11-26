@@ -158,7 +158,6 @@ namespace mn
 		Store<T>* store;
 		Buf<Ref_Component<T>*> components;
 		Map<Entity, size_t> table;
-		uint32_t version;
 	};
 
 	template<typename T>
@@ -169,7 +168,6 @@ namespace mn
 		self.store = store_new<T>();
 		self.components = buf_new<Ref_Component<T>*>();
 		self.table = map_new<Entity, size_t>();
-		self.version = 0;
 		return self;
 	}
 
@@ -200,7 +198,6 @@ namespace mn
 		other.store = store_ref(self.store);
 		other.components = buf_memcpy_clone(self.components);
 		other.table = map_memcpy_clone(self.table);
-		other.version = self.version;
 
 		for (auto c: other.components)
 			store_component_ref(c);
@@ -264,7 +261,6 @@ namespace mn
 			map_insert(self.table, e, ix);
 			res = &new_ptr->component;
 		}
-		self.version++;
 		return res;
 	}
 
@@ -286,7 +282,16 @@ namespace mn
 			auto replace_it = map_lookup(self.table, self.components[remove_ix]->entity);
 			replace_it->value = remove_ix;
 		}
-		self.version++;
+	}
+
+	template<typename T>
+	inline static void
+	ref_bag_clear(Ref_Bag<T>& self)
+	{
+		for (auto c: self.components)
+			store_component_unref(self.store, c);
+		buf_clear(self.components);
+		map_clear(self.table);
 	}
 
 	struct Tag_Bag
@@ -344,6 +349,12 @@ namespace mn
 		set_remove(self.table, e);
 	}
 
+	inline static void
+	tag_bag_clear(Tag_Bag& self)
+	{
+		set_clear(self.table);
+	}
+
 
 	template<typename T>
 	inline static size_t
@@ -360,6 +371,7 @@ namespace mn
 		virtual const void* _read(Entity e) const = 0;
 		virtual void* _write(Entity e) = 0;
 		virtual void _remove(Entity e) = 0;
+		virtual void _clear() = 0;
 		virtual const Map<Entity, size_t>* _entities() const = 0;
 		virtual void _reload(Abstract_World_Table* old_table) = 0;
 	};
@@ -404,6 +416,12 @@ namespace mn
 		_remove(Entity e) override
 		{
 			return ref_bag_remove(bag, e);
+		}
+
+		void
+		_clear() override
+		{
+			ref_bag_clear(bag);
 		}
 
 		const Map<Entity, size_t>*
@@ -505,6 +523,23 @@ namespace mn
 		{
 			auto table = map_lookup(tables, type_hash);
 			return table->value->_remove(e);
+		}
+
+		template<typename T>
+		void
+		clear()
+		{
+			if constexpr(std::is_empty_v<T>)
+			{
+				auto t = typehash<T>();
+				auto b = map_lookup(tags, t);
+				tag_bag_clear(b->value);
+			}
+			else
+			{
+				auot table = map_lookup(tables, typehash<T>());
+				table->value->_clear();
+			}
 		}
 
 		template<typename ... TArgs>
