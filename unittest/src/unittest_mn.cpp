@@ -21,7 +21,6 @@
 #include <mn/Fabric.h>
 #include <mn/Block_Stream.h>
 #include <mn/Handle_Table.h>
-#include <mn/ECS.h>
 #include <mn/UUID.h>
 #include <mn/SIMD.h>
 #include <mn/Json.h>
@@ -1033,40 +1032,6 @@ TEST_CASE("zero init map")
 	CHECK(mn::map_lookup(table, 1)->value == true);
 	mn::map_free(table);
 
-}
-
-struct Points
-{
-	mn::Buf<float> points;
-};
-
-inline static void
-destruct(Points& p)
-{
-	mn::buf_free(p.points);
-}
-
-inline static Points
-clone(const Points& p)
-{
-	return Points{ mn::buf_memcpy_clone(p.points) };
-}
-
-TEST_CASE("ref bag")
-{
-	auto e = _entity_new();
-	auto bag = mn::ref_bag_new<Points>();
-	mn_defer(mn::ref_bag_free(bag));
-
-	auto p = mn::ref_bag_write(bag, e);
-
-	for(size_t i = 0; i < 10; ++i)
-		mn::buf_push(p->points, float(i));
-	
-	auto rp = mn::ref_bag_read(bag, e);
-	CHECK(rp->points.count == 10);
-	for(size_t i = 0; i < 10; ++i)
-		CHECK(rp->points[i] == float(i));
 }
 
 TEST_CASE("uuid uniqueness")
