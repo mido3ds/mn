@@ -74,7 +74,6 @@ set(SOURCE_FILES
 	src/mn/Context.cpp
 	src/mn/Fabric.cpp
 	src/mn/RAD.cpp
-	src/mn/ECS.cpp
 	src/mn/SIMD.cpp
 	src/mn/Json.cpp
 	src/utf8proc/utf8proc.cpp
