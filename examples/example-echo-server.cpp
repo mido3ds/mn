@@ -18,7 +18,14 @@ serve_client(mn::Socket client)
 	do
 	{
 		mn::str_resize(data, 1024);
-		read_bytes = mn::socket_read(client, mn::block_from(data), mn::INFINITE_TIMEOUT);
+		auto [read_bytes_count, err] = mn::socket_read(client, mn::block_from(data), mn::INFINITE_TIMEOUT);
+		if (err)
+		{
+			mn::print("client disconnected");
+			break;
+		}
+		read_bytes = read_bytes_count;
+
 		if(read_bytes > 0)
 		{
 			mn::str_resize(data, read_bytes);

@@ -2,6 +2,7 @@
 
 #include "mn/Stream.h"
 #include "mn/Str.h"
+#include "mn/Result.h"
 
 namespace mn
 {
@@ -16,6 +17,24 @@ namespace mn
 	{
 		SOCKET_TYPE_TCP,
 		SOCKET_TYPE_UDP
+	};
+
+	enum MN_SOCKET_ERROR
+	{
+		// no error
+		MN_SOCKET_ERROR_OK,
+		// something went wrong, but we don't check for it specifically for now
+		// note: this is sort of catch all category for all unhandled errors, any kind
+		// of errors except the ones listed below
+		MN_SOCKET_ERROR_GENERIC_ERROR,
+		// failed to allocate memory buffer
+		MN_SOCKET_ERROR_OUT_OF_MEMORY,
+		// internal mn error
+		MN_SOCKET_ERROR_INTERNAL_ERROR,
+		// function failed due to timeout
+		MN_SOCKET_ERROR_TIMEOUT,
+		// function faild becuase of failure to send/recv from socket
+		MN_SOCKET_ERROR_CONNECTION_CLOSED,
 	};
 
 	typedef struct ISocket* Socket;
@@ -84,7 +103,7 @@ namespace mn
 	MN_EXPORT void
 	socket_disconnect(Socket self);
 
-	MN_EXPORT size_t
+	MN_EXPORT Result<size_t, MN_SOCKET_ERROR>
 	socket_read(Socket self, Block data, Timeout timeout);
 
 	MN_EXPORT size_t

@@ -66,6 +66,28 @@ namespace mn
 		}
 	}
 
+	inline static MN_SOCKET_ERROR
+	_socket_error_from_os(int error)
+	{
+		switch(error)
+		{
+		case WSAENETDOWN:
+		case WSAECONNABORTED:
+		case WSAECONNRESET:
+		case WSAEDISCON:
+		case WSAENETRESET:
+		case WSAESHUTDOWN:
+			return MN_SOCKET_ERROR_CONNECTION_CLOSED;
+		case WSAEFAULT:
+		case WSAEINVAL:
+			return MN_SOCKET_ERROR_INTERNAL_ERROR;
+		case WSAENOBUFS:
+			return MN_SOCKET_ERROR_OUT_OF_MEMORY;
+		default:
+			return MN_SOCKET_ERROR_GENERIC_ERROR;
+		}
+	}
+
 
 	// API
 	void
@@ -77,7 +99,8 @@ namespace mn
 	size_t
 	ISocket::read(Block data)
 	{
-		return socket_read(this, data, INFINITE_TIMEOUT);
+		auto [read_bytes, _] = socket_read(this, data, INFINITE_TIMEOUT);
+		return read_bytes;
 	}
 
 	size_t
@@ -219,7 +242,7 @@ namespace mn
 		::shutdown(self->handle, SD_SEND);
 	}
 
-	size_t
+	Result<size_t, MN_SOCKET_ERROR>
 	socket_read(Socket self, Block data, Timeout timeout)
 	{
 		pollfd pfd_read{};
@@ -240,12 +263,13 @@ namespace mn
 		else
 			milliseconds = INT(timeout.milliseconds);
 
-		DWORD recieved_bytes = 0;
 		worker_block_ahead();
-		int ready = WSAPoll(&pfd_read, 1, milliseconds);
+		mn_defer(worker_block_clear());
+		int ready = ::WSAPoll(&pfd_read, 1, milliseconds);
 		if (ready > 0)
 		{
-			::WSARecv(
+			DWORD recieved_bytes = 0;
+			auto res = ::WSARecv(
 				self->handle,
 				&data_buf,
 				1,
@@ -254,10 +278,23 @@ namespace mn
 				NULL,
 				NULL
 			);
+			if (res == SOCKET_ERROR)
+			{
+				return _socket_error_from_os(WSAGetLastError());
+			}
+			else
+			{
+				return recieved_bytes;
+			}
 		}
-		worker_block_clear();
-
-		return recieved_bytes;
+		else if (ready == SOCKET_ERROR)
+		{
+			return _socket_error_from_os(WSAGetLastError());
+		}
+		else
+		{
+			return MN_SOCKET_ERROR_TIMEOUT;
+		}
 	}
 
 	size_t
