@@ -37,10 +37,10 @@ namespace mn
 		{
 		case SOCKET_FAMILY_IPV4:
 			return AF_INET;
-			break;
 		case SOCKET_FAMILY_IPV6:
 			return AF_INET6;
-			break;
+		case SOCKET_FAMILY_UNSPEC:
+			return AF_UNSPEC;
 		default:
 			assert(false && "unreachable");
 			return 0;
@@ -128,17 +128,21 @@ namespace mn
 		hints.ai_family = _socket_family_to_os(self->family);
 		_socket_type_to_os(self->type, hints.ai_socktype, hints.ai_protocol);
 
+		worker_block_ahead();
+		mn_defer(worker_block_clear());
 		int res = ::getaddrinfo(address.ptr, port.ptr, &hints, &info);
 		if (res != 0)
 			return false;
+		mn_defer(::freeaddrinfo(info));
 
-		worker_block_ahead();
-		res = ::connect(self->handle, info->ai_addr, int(info->ai_addrlen));
-		worker_block_clear();
-		if (res == SOCKET_ERROR)
-			return false;
+		for(auto it = info; it; it = it->ai_next)
+		{
+			res = ::connect(self->handle, it->ai_addr, int(it->ai_addrlen));
+			if (res != SOCKET_ERROR)
+				return true;
+		}
 
-		return true;
+		return false;
 	}
 
 	bool
