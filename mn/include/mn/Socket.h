@@ -37,6 +37,27 @@ namespace mn
 		MN_SOCKET_ERROR_CONNECTION_CLOSED,
 	};
 
+	inline static const char*
+	mn_socket_error_message(MN_SOCKET_ERROR e)
+	{
+		switch(e)
+		{
+		case MN_SOCKET_ERROR_OK:
+			return "no error";
+		case MN_SOCKET_ERROR_GENERIC_ERROR:
+			return "something went wrong, this is a general error message";
+		case MN_SOCKET_ERROR_OUT_OF_MEMORY:
+			return "failed to allocate memory buffer";
+		case MN_SOCKET_ERROR_INTERNAL_ERROR:
+			return "internal mn error";
+		case MN_SOCKET_ERROR_TIMEOUT:
+			return "error due to timeout";
+		default:
+			assert(false && "unreachable");
+			return "something went wrong, this shouldn't happen!!!!!!";
+		}
+	}
+
 	typedef struct ISocket* Socket;
 	struct ISocket final: IStream
 	{
