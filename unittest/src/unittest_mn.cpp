@@ -594,7 +594,7 @@ TEST_CASE("Task")
 	task_free(inc);
 }
 
-struct V2 
+struct V2
 {
 	int x, y;
 };
@@ -778,7 +778,7 @@ TEST_CASE("unbuffered channel with multiple workers")
 			sum += num;
 		waitgroup_done(g);
 	};
-	
+
 	for(size_t i = 0; i < 3; ++i)
 	{
 		waitgroup_add(g, 1);
@@ -1048,6 +1048,71 @@ TEST_CASE("uuid uniqueness")
 			mn::map_insert(ids, id, size_t(1));
 	}
 	CHECK(ids.count == 1000000);
+}
+
+TEST_CASE("uuid parsing")
+{
+	SUBCASE("Case 01")
+	{
+		auto id = mn::uuid_generate();
+		auto variant = uuid_variant(id);
+		auto version = uuid_version(id);
+		auto id_str = mn::str_tmpf("{}", id);
+		auto [id2, err] = mn::uuid_parse(id_str);
+		CHECK(err == false);
+		CHECK(id == id2);
+		auto id2_str = mn::str_tmpf("{}", id2);
+		CHECK(id2_str == id_str);
+	}
+
+	SUBCASE("Case 02")
+	{
+		auto [id, err] = mn::uuid_parse("this is not a uuid");
+		CHECK(err == true);
+	}
+
+	SUBCASE("Case 03")
+	{
+		auto [id, err] = mn::uuid_parse("62013B88-FA54-4008-8D42-F9CA4889e0B5");
+		CHECK(err == false);
+	}
+
+	SUBCASE("Case 04")
+	{
+		auto [id, err] = mn::uuid_parse("62013BX88-FA54-4008-8D42-F9CA4889e0B5");
+		CHECK(err == true);
+	}
+
+	SUBCASE("Case 05")
+	{
+		auto [id, err] = mn::uuid_parse("{62013B88-FA54-4008-8D42-F9CA4889e0B5}");
+		CHECK(err == false);
+	}
+
+	SUBCASE("Case 06")
+	{
+		auto [id, err] = mn::uuid_parse("62013B88,FA54-4008-8D42-F9CA4889e0B5");
+		CHECK(err == true);
+	}
+
+	SUBCASE("Case 07")
+	{
+		auto [id, err] = mn::uuid_parse("62013B88-FA54-4008-8D42-F9CA4889e0B5AA");
+		CHECK(err == true);
+	}
+
+	SUBCASE("Case 08")
+	{
+		auto nil_str = mn::str_tmpf("{}", mn::null_uuid);
+		CHECK(nil_str == "00000000-0000-0000-0000-000000000000");
+	}
+
+	SUBCASE("Case 09")
+	{
+		auto [id, err] = mn::uuid_parse("00000000-0000-0000-0000-000000000000");
+		CHECK(err == false);
+		CHECK(id == mn::null_uuid);
+	}
 }
 
 TEST_CASE("report simd")
