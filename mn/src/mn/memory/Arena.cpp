@@ -40,7 +40,6 @@ namespace mn::memory
 	void
 	Arena::free(Block block)
 	{
-		this->used_mem -= block.size;
 	}
 
 	void
