@@ -764,4 +764,136 @@ namespace mn
 			}
 		}
 	}
+
+	// channel stream
+	void
+	IChan_Stream::dispose()
+	{
+		if (this->atomic_arc.fetch_sub(1) == 1)
+		{
+			chan_stream_close(this);
+
+			mutex_free(this->mtx);
+			cond_var_free(this->read_cv);
+			cond_var_free(this->write_cv);
+			free(this);
+		}
+	}
+
+	size_t
+	IChan_Stream::read(Block data_out)
+	{
+		chan_stream_ref(this);
+		mn_defer(chan_stream_unref(this));
+
+		mutex_lock(this->mtx);
+		if (this->data_blob.size == 0)
+		{
+			if (chan_stream_closed(this))
+			{
+				mn::mutex_unlock(this->mtx);
+				return 0;
+			}
+
+			cond_var_wait(this->read_cv, this->mtx, [this]{
+				return this->data_blob.size > 0 || chan_stream_closed(this);
+			});
+		}
+
+		auto read_size = data_out.size;
+		if (this->data_blob.size < read_size)
+			read_size = this->data_blob.size;
+
+		::memcpy(data_out.ptr, this->data_blob.ptr, read_size);
+		auto ptr = (char*)this->data_blob.ptr;
+		ptr += read_size;
+		this->data_blob.ptr = ptr;
+		this->data_blob.size -= read_size;
+		bool ready_to_write = this->data_blob.size == 0;
+
+		mutex_unlock(this->mtx);
+
+		if (ready_to_write)
+			cond_var_notify(this->write_cv);
+
+		return read_size;
+	}
+
+	size_t
+	IChan_Stream::write(Block data_in)
+	{
+		chan_stream_ref(this);
+		mn_defer(chan_stream_unref(this));
+
+		// wait until there's available space
+		mutex_lock(this->mtx);
+		if (this->data_blob.size > 0)
+		{
+			cond_var_wait(this->write_cv, this->mtx, [this] {
+				return this->data_blob.size == 0 || chan_stream_closed(this);
+			});
+		}
+
+		if (chan_stream_closed(this))
+			panic("cannot write in a closed Chan_Stream");
+
+		// get the data
+		this->data_blob = data_in;
+
+		// notify the read
+		cond_var_notify(this->read_cv);
+		cond_var_wait(this->write_cv, this->mtx, [this] {
+			return this->data_blob.size == 0 || chan_stream_closed(this);
+		});
+		auto res = data_in.size - this->data_blob.size;
+		mutex_unlock(this->mtx);
+
+		return res;
+	}
+
+	Chan_Stream
+	chan_stream_new()
+	{
+		auto self = alloc_construct<IChan_Stream>();
+		self->mtx = mutex_new("chan stream mutex");
+		self->read_cv = cond_var_new();
+		self->write_cv = cond_var_new();
+		self->atomic_arc = 1;
+		return self;
+	}
+
+	void
+	chan_stream_free(Chan_Stream self)
+	{
+		if (self == nullptr)
+			return;
+		chan_stream_unref(self);
+	}
+
+	Chan_Stream
+	chan_stream_ref(Chan_Stream self)
+	{
+		self->atomic_arc.fetch_add(1);
+		return self;
+	}
+
+	void
+	chan_stream_unref(Chan_Stream self)
+	{
+		self->dispose();
+	}
+
+	void
+	chan_stream_close(Chan_Stream self)
+	{
+		self->atomic_closed.store(true);
+		cond_var_notify_all(self->read_cv);
+		cond_var_notify_all(self->write_cv);
+	}
+
+	bool
+	chan_stream_closed(Chan_Stream self)
+	{
+		return self->atomic_closed.load();
+	}
 }

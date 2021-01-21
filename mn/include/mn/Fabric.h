@@ -7,6 +7,7 @@
 #include "mn/Thread.h"
 #include "mn/Defer.h"
 #include "mn/OS.h"
+#include "mn/Stream.h"
 
 #include <atomic>
 #include <chrono>
@@ -196,6 +197,117 @@ namespace mn
 
 	MN_EXPORT void
 	waitgroup_wait(Waitgroup& self);
+
+	typedef struct IChan_Stream* Chan_Stream;
+	struct IChan_Stream final: IStream
+	{
+		Block data_blob;
+		Mutex mtx;
+		Cond_Var read_cv;
+		Cond_Var write_cv;
+		std::atomic<int32_t> atomic_arc;
+		std::atomic<bool> atomic_closed;
+
+		MN_EXPORT void
+		dispose() override;
+
+		MN_EXPORT size_t
+		read(Block data_out) override;
+
+		MN_EXPORT size_t
+		write(Block data_in) override;
+
+		int64_t
+		size() override
+		{
+			return 0;
+		};
+
+		int64_t
+		cursor_operation(STREAM_CURSOR_OP, int64_t) override
+		{
+			assert(false && "Chan_Stream doesn't support cursor operations");
+			return STREAM_CURSOR_ERROR;
+		}
+	};
+
+	MN_EXPORT Chan_Stream
+	chan_stream_new();
+
+	MN_EXPORT void
+	chan_stream_free(Chan_Stream self);
+
+	MN_EXPORT Chan_Stream
+	chan_stream_ref(Chan_Stream self);
+
+	MN_EXPORT void
+	chan_stream_unref(Chan_Stream self);
+
+	MN_EXPORT void
+	chan_stream_close(Chan_Stream self);
+
+	MN_EXPORT bool
+	chan_stream_closed(Chan_Stream self);
+
+	struct Auto_Chan_Stream
+	{
+		Chan_Stream handle;
+
+		Auto_Chan_Stream()
+			: handle(chan_stream_new())
+		{}
+
+		explicit Auto_Chan_Stream(Chan_Stream s)
+			: handle(chan_stream_ref(s))
+		{}
+
+		Auto_Chan_Stream(const Auto_Chan_Stream& other)
+			: handle(chan_stream_ref(other.handle))
+		{}
+
+		Auto_Chan_Stream(Auto_Chan_Stream&& other)
+			: handle(other.handle)
+		{
+			other.handle = nullptr;
+		}
+
+		Auto_Chan_Stream&
+		operator=(const Auto_Chan_Stream& other)
+		{
+			if (handle) chan_stream_free(handle);
+			handle = chan_stream_ref(other.handle);
+			return *this;
+		}
+
+		Auto_Chan_Stream&
+		operator=(Auto_Chan_Stream&& other)
+		{
+			if (handle) chan_stream_free(handle);
+			handle = other.handle;
+			other.handle = nullptr;
+			return *this;
+		}
+
+		~Auto_Chan_Stream()
+		{
+			if (handle)
+				chan_stream_free(handle);
+		}
+
+		operator Chan_Stream() const { return handle; }
+	};
+
+	template<typename TFunc, typename ... TArgs>
+	inline static Auto_Chan_Stream
+	lazy_stream(Fabric f, TFunc&& func, mn::Stream stream_in, TArgs&& ... args)
+	{
+		Auto_Chan_Stream res;
+		mn::go(f, [=]{
+			func(stream_in, res, args...);
+			chan_stream_close(res);
+		});
+		return res;
+	}
 
 
 	// Channel
