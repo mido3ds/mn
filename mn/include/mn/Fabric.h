@@ -59,7 +59,7 @@ namespace mn
 	{
 		worker_block_ahead();
 		while(fn() == false)
-			_yield();
+			thread_sleep(1);
 		worker_block_clear();
 	}
 
@@ -81,7 +81,7 @@ namespace mn
 				if (std::chrono::duration_cast<std::chrono::milliseconds>(t - start).count() >= timeout.milliseconds)
 					break;
 			}
-			_yield();
+			thread_sleep(1);
 		}
 		worker_block_clear();
 	}
