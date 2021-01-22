@@ -59,7 +59,7 @@ namespace mn
 	{
 		worker_block_ahead();
 		while(fn() == false)
-			mn::thread_sleep(0);
+			_yield();
 		worker_block_clear();
 	}
 
@@ -81,7 +81,7 @@ namespace mn
 				if (std::chrono::duration_cast<std::chrono::milliseconds>(t - start).count() >= timeout.milliseconds)
 					break;
 			}
-			mn::thread_sleep(0);
+			_yield();
 		}
 		worker_block_clear();
 	}
@@ -92,6 +92,7 @@ namespace mn
 
 	struct Fabric_Settings
 	{
+		const char* name;
 		size_t workers_count;
 		size_t put_aside_worker_count;
 		uint32_t coop_blocking_threshold_in_ms;

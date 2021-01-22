@@ -49,6 +49,9 @@ namespace mn
 	struct IFabric
 	{
 		Fabric_Settings settings;
+		Str thread_name;
+		Str sysmon_name;
+		Str mutex_name;
 
 		Buf<Worker> workers;
 		Mutex_RW workers_mtx;
@@ -432,6 +435,9 @@ namespace mn
 	Fabric
 	fabric_new(Fabric_Settings settings)
 	{
+		if (settings.name == nullptr)
+			settings.name = "fabric";
+
 		if (settings.workers_count == 0)
 			settings.workers_count = std::thread::hardware_concurrency();
 		if (settings.coop_blocking_threshold_in_ms == 0)
@@ -441,18 +447,21 @@ namespace mn
 		if (settings.put_aside_worker_count == 0)
 			settings.put_aside_worker_count = settings.workers_count / 2;
 
-		
+
 		auto self = alloc_zerod<IFabric>();
+		self->thread_name = strf("{} worker thread", settings.name);
+		self->mutex_name = strf("{} workers mutex", settings.name);
+		self->sysmon_name = strf("{} sysmon thread", settings.name);
 
 		self->settings = settings;
 		self->workers = buf_with_count<Worker>(self->settings.workers_count);
-		self->workers_mtx = mutex_rw_new("fabric workers mutex");
+		self->workers_mtx = mutex_rw_new(self->mutex_name.ptr);
 
 		self->atomic_worker_next = 0;
 		self->atomic_steal_next = 0;
 
 		for (size_t i = 0; i < self->settings.workers_count; ++i)
-			self->workers[i] = _worker_with_initial_state("fabric worker", IWorker::STATE_PAUSE_ACKNOWLEDGE, self);
+			self->workers[i] = _worker_with_initial_state(self->thread_name.ptr, IWorker::STATE_PAUSE_ACKNOWLEDGE, self);
 
 		for (size_t i = 0; i < self->settings.workers_count; ++i)
 			_worker_resume(self->workers[i]);
@@ -462,7 +471,7 @@ namespace mn
 
 		self->atomic_sysmon_close.store(false);
 
-		self->sysmon = thread_new(_sysmon_main, self, "fabric sysmon thread");
+		self->sysmon = thread_new(_sysmon_main, self, self->sysmon_name.ptr);
 
 		return self;
 	}
@@ -517,6 +526,9 @@ namespace mn
 		buf_free(self->ready_side_workers);
 
 		task_free(self->settings.after_each_job);
+		str_free(self->thread_name);
+		str_free(self->mutex_name);
+		str_free(self->sysmon_name);
 		free(self);
 	}
 
@@ -554,7 +566,7 @@ namespace mn
 	}
 
 	inline static void
-	_multi_threaded_compute(Fabric self, Compute_Dims global, Compute_Dims local, mn::Task<void(Compute_Args)> fn)
+	_multi_threaded_compute(Fabric self, Compute_Dims global, Compute_Dims local, Task<void(Compute_Args)> fn)
 	{
 		std::atomic<size_t> available_concurrent_workers = self->workers.count;
 		Waitgroup wg = 0;
@@ -596,11 +608,11 @@ namespace mn
 			}
 		}
 		waitgroup_wait(wg);
-		mn::task_free(fn);
+		task_free(fn);
 	}
 
 	inline static void
-	_single_threaded_compute(Compute_Dims global, Compute_Dims local, mn::Task<void(Compute_Args)> fn)
+	_single_threaded_compute(Compute_Dims global, Compute_Dims local, Task<void(Compute_Args)> fn)
 	{
 		for (uint32_t global_z = 0; global_z < global.z; ++global_z)
 		{
@@ -632,11 +644,11 @@ namespace mn
 				}
 			}
 		}
-		mn::task_free(fn);
+		task_free(fn);
 	}
 
 	void
-	fabric_compute(Fabric self, Compute_Dims global, Compute_Dims local, mn::Task<void(Compute_Args)> fn)
+	fabric_compute(Fabric self, Compute_Dims global, Compute_Dims local, Task<void(Compute_Args)> fn)
 	{
 		if (self == nullptr)
 			_single_threaded_compute(global, local, fn);
@@ -645,7 +657,7 @@ namespace mn
 	}
 
 	inline static void
-	_multi_threaded_compute_sized(Fabric self, Compute_Dims global, Compute_Dims size, Compute_Dims local, mn::Task<void(Compute_Args)> fn)
+	_multi_threaded_compute_sized(Fabric self, Compute_Dims global, Compute_Dims size, Compute_Dims local, Task<void(Compute_Args)> fn)
 	{
 		std::atomic<size_t> available_concurrent_workers = self->workers.count;
 		Waitgroup wg = 0;
@@ -689,11 +701,11 @@ namespace mn
 			}
 		}
 		waitgroup_wait(wg);
-		mn::task_free(fn);
+		task_free(fn);
 	}
 
 	inline static void
-	_single_threaded_compute_sized(Compute_Dims global, Compute_Dims size, Compute_Dims local, mn::Task<void(Compute_Args)> fn)
+	_single_threaded_compute_sized(Compute_Dims global, Compute_Dims size, Compute_Dims local, Task<void(Compute_Args)> fn)
 	{
 		for (uint32_t global_z = 0; global_z < global.z; ++global_z)
 		{
@@ -727,11 +739,11 @@ namespace mn
 				}
 			}
 		}
-		mn::task_free(fn);
+		task_free(fn);
 	}
 
 	void
-	fabric_compute_sized(Fabric self, Compute_Dims size, Compute_Dims local, mn::Task<void(Compute_Args)> fn)
+	fabric_compute_sized(Fabric self, Compute_Dims size, Compute_Dims local, Task<void(Compute_Args)> fn)
 	{
 		Compute_Dims global{
 			1 + ((size.x - 1) / local.x),
@@ -791,7 +803,7 @@ namespace mn
 		{
 			if (chan_stream_closed(this))
 			{
-				mn::mutex_unlock(this->mtx);
+				mutex_unlock(this->mtx);
 				return 0;
 			}
 
@@ -873,6 +885,9 @@ namespace mn
 	Chan_Stream
 	chan_stream_ref(Chan_Stream self)
 	{
+		if (self == nullptr)
+			return nullptr;
+
 		self->atomic_arc.fetch_add(1);
 		return self;
 	}
@@ -880,12 +895,18 @@ namespace mn
 	void
 	chan_stream_unref(Chan_Stream self)
 	{
+		if (self == nullptr)
+			return;
+
 		self->dispose();
 	}
 
 	void
 	chan_stream_close(Chan_Stream self)
 	{
+		if (self == nullptr)
+			return;
+
 		self->atomic_closed.store(true);
 		cond_var_notify_all(self->read_cv);
 		cond_var_notify_all(self->write_cv);
@@ -894,6 +915,9 @@ namespace mn
 	bool
 	chan_stream_closed(Chan_Stream self)
 	{
+		if (self == nullptr)
+			return true;
+
 		return self->atomic_closed.load();
 	}
 }

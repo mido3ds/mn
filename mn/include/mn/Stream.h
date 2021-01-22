@@ -75,4 +75,48 @@ namespace mn
 	{
 		return self->cursor_operation(STREAM_CURSOR_END, 0);
 	}
+
+	inline static size_t
+	stream_copy(IStream* dst, IStream* src)
+	{
+		size_t res = 0;
+		char _buf[1024];
+		auto buf = block_from(_buf);
+		while(true)
+		{
+			auto read_size = src->read(buf);
+			if (read_size == 0)
+				break;
+
+			auto ptr = (char*)buf.ptr;
+			auto size = read_size;
+			while (size > 0)
+			{
+				auto write_size = dst->write(Block{ptr, size});
+				if (write_size == 0)
+					return res;
+				size -= write_size;
+				ptr += write_size;
+				res += write_size;
+			}
+		}
+		return res;
+	}
+
+	inline static Str
+	stream_sink(IStream* src, Allocator allocator = allocator_top())
+	{
+		auto res = str_new();
+		char _buf[1024];
+		auto buf = block_from(_buf);
+		while(true)
+		{
+			auto read_size = src->read(buf);
+			if (read_size == 0)
+				break;
+
+			str_block_push(res, Block{buf.ptr, read_size});
+		}
+		return res;
+	}
 }
