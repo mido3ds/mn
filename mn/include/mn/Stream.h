@@ -2,6 +2,7 @@
 
 #include "mn/Exports.h"
 #include "mn/Base.h"
+#include "mn/Str.h"
 
 #include <stdint.h>
 
@@ -99,6 +100,25 @@ namespace mn
 				ptr += write_size;
 				res += write_size;
 			}
+		}
+		return res;
+	}
+
+	inline static size_t
+	stream_copy(Block dst, IStream* src)
+	{
+		size_t res = 0;
+		auto ptr = (char*)dst.ptr;
+		auto size = dst.size;
+		while(size > 0)
+		{
+			auto read_size = src->read(Block{ptr, size});
+			if (read_size == 0)
+				break;
+
+			ptr += read_size;
+			size -= read_size;
+			res += read_size;
 		}
 		return res;
 	}

@@ -907,7 +907,9 @@ namespace mn
 		if (self == nullptr)
 			return;
 
+		mutex_lock(self->mtx);
 		self->atomic_closed.store(true);
+		mutex_unlock(self->mtx);
 		cond_var_notify_all(self->read_cv);
 		cond_var_notify_all(self->write_cv);
 	}

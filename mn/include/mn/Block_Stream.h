@@ -18,18 +18,29 @@ namespace mn
 		Block data;
 		int64_t cursor;
 
-		virtual void dispose() override{}
+		void
+		dispose() override
+		{}
 
-		virtual size_t
+		size_t
 		read(Block data) override
 		{
 			return block_stream_read(*this, data);
 		}
 
-		virtual size_t write(Block data) override { return 0; }
-		virtual int64_t size() override { return data.size; }
+		size_t
+		write(Block data) override
+		{
+			return 0;
+		}
 
-		virtual int64_t
+		int64_t
+		size() override
+		{
+			return data.size;
+		}
+
+		int64_t
 		cursor_operation(STREAM_CURSOR_OP op, int64_t arg) override
 		{
 			switch (op)
