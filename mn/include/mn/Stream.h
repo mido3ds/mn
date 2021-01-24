@@ -123,6 +123,25 @@ namespace mn
 		return res;
 	}
 
+	inline static size_t
+	stream_copy(IStream* dst, Block src)
+	{
+		size_t res = 0;
+		auto ptr = (char*)src.ptr;
+		auto size = src.size;
+		while(size > 0)
+		{
+			auto write_size = dst->write(Block{ptr, size});
+			if (write_size == 0)
+				break;
+
+			ptr += write_size;
+			size -= write_size;
+			res += write_size;
+		}
+		return res;
+	}
+
 	inline static Str
 	stream_sink(IStream* src, Allocator allocator = allocator_top())
 	{
