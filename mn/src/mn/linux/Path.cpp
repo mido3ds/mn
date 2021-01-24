@@ -402,7 +402,16 @@ namespace mn
 	Str
 	folder_tmp(Allocator allocator)
 	{
-		return str_from_c(secure_getenv("TMPDIR"), allocator);
+		if (auto p = secure_getenv("TMPDIR"))
+			return str_from_c(p, allocator);
+		else if (auto p = secure_getenv("TMP"))
+			return str_from_c(p, allocator);
+		else if (auto p = secure_getenv("TEMP"))
+			return str_from_c(p, allocator);
+		else if (auto p = secure_getenv("TEMPDIR"))
+			return str_from_c(p, allocator);
+		else
+			return str_from_c("/tmp", allocator);
 	}
 
 	Str
