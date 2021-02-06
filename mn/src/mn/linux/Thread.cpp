@@ -11,7 +11,14 @@
 #include <unistd.h>
 #include <sys/types.h>
 
+#if MN_WAITGROUP_FUTEX
+#include <sys/time.h>
+#include <linux/futex.h>
+#include <sys/syscall.h>
+#endif
+
 #include <assert.h>
+#include <emmintrin.h>
 #include <chrono>
 
 namespace mn
@@ -607,4 +614,79 @@ namespace mn
 	{
 		pthread_cond_broadcast(&self->cv);
 	}
+
+	// Waitgroup
+#if MN_WAITGROUP_FUTEX
+	void
+	waitgroup_wait(Waitgroup& self)
+	{
+		auto val = self.load();
+		if (val == 0)
+			return;
+
+		worker_block_ahead();
+
+		while(true)
+		{
+			auto val = self.load();
+			if (val == 0)
+				break;
+
+			auto res = syscall(SYS_futex, (int32_t*)&self, FUTEX_WAIT, val, NULL, NULL, 0);
+			if (res == -1)
+			{
+				auto e = errno;
+				if (e != EAGAIN)
+					panic("futex error: {}", e);
+			}
+			else if (res == 0)
+			{
+				// real wakeup
+				return;
+			}
+			else
+			{
+				panic("unreachable");
+			}
+		}
+
+		worker_block_clear();
+	}
+
+	void
+	waitgroup_wake(Waitgroup& self)
+	{
+		syscall(SYS_futex, (int32_t*)&self, FUTEX_WAKE, INT_MAX, NULL, NULL, 0);
+	}
+#else
+	void
+	waitgroup_wait(Waitgroup& self)
+	{
+		worker_block_ahead();
+
+		constexpr int SPIN_LIMIT = 128;
+		int spin_count = 0;
+
+		while(self.load() > 0)
+		{
+			if (spin_count < SPIN_LIMIT)
+			{
+				++spin_count;
+				_mm_pause();
+			}
+			else
+			{
+				thread_sleep(1);
+			}
+		}
+
+		worker_block_clear();
+	}
+
+	void
+	waitgroup_wake(Waitgroup& self)
+	{
+		// do nothing
+	}
+#endif
 }

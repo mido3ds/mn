@@ -11,7 +11,7 @@
 #include <Windows.h>
 
 #include <assert.h>
-
+#include <emmintrin.h>
 #include <chrono>
 
 namespace mn
@@ -644,4 +644,56 @@ namespace mn
 	{
 		WakeAllConditionVariable(&self->cv);
 	}
+
+	// Waitgroup
+#if MN_WAITGROUP_FUTEX
+	void
+	waitgroup_wait(Waitgroup& self)
+	{
+		auto v = self.load();
+		if (v == 0)
+			return;
+
+		worker_block_ahead();
+		[[maybe_unused]] auto res = WaitOnAddress(&self, &v, sizeof(self), INFINITE);
+		assert(res == TRUE);
+		worker_block_clear();
+	}
+
+	void
+	waitgroup_wake(Waitgroup& self)
+	{
+		WakeByAddressAll(&self);
+	}
+#else
+	void
+	waitgroup_wait(Waitgroup& self)
+	{
+		worker_block_ahead();
+
+		constexpr int SPIN_LIMIT = 128;
+		int spin_count = 0;
+
+		while(self.load() > 0)
+		{
+			if (spin_count < SPIN_LIMIT)
+			{
+				++spin_count;
+				_mm_pause();
+			}
+			else
+			{
+				thread_sleep(1);
+			}
+		}
+
+		worker_block_clear();
+	}
+
+	void
+	waitgroup_wake(Waitgroup& self)
+	{
+		// do nothing
+	}
+#endif
 }

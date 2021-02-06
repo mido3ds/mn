@@ -10,6 +10,7 @@
 #include <pthread.h>
 #include <unistd.h>
 #include <sys/types.h>
+#include <emmintrin.h>
 
 #include <assert.h>
 #include <chrono>
@@ -606,5 +607,36 @@ namespace mn
 	cond_var_notify_all(Cond_Var self)
 	{
 		pthread_cond_broadcast(&self->cv);
+	}
+
+	// Waitgroup
+	void
+	waitgroup_wait(Waitgroup& self)
+	{
+		worker_block_ahead();
+
+		constexpr int SPIN_LIMIT = 128;
+		int spin_count = 0;
+
+		while(self.load() > 0)
+		{
+			if (spin_count < SPIN_LIMIT)
+			{
+				++spin_count;
+				_mm_pause();
+			}
+			else
+			{
+				thread_sleep(1);
+			}
+		}
+
+		worker_block_clear();
+	}
+
+	void
+	waitgroup_wake(Waitgroup& self)
+	{
+		// do nothing
 	}
 }
