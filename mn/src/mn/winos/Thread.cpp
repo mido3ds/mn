@@ -20,6 +20,7 @@ namespace mn
 	{
 		const char* name;
 		CRITICAL_SECTION cs;
+		void* profile_user_data;
 	};
 
 	struct Leak_Allocator_Mutex
@@ -370,9 +371,21 @@ namespace mn
 	Mutex
 	mutex_new(const char* name)
 	{
-		Mutex self = alloc<IMutex>();
+		auto user_data_size = _mutex_user_data_size();
+		auto size = sizeof(IMutex) + user_data_size;
+
+		auto block = alloc(size, alignof(IMutex));
+		auto self = (Mutex)block.ptr;
+		if (user_data_size == 0)
+			self->profile_user_data = nullptr;
+		else
+			self->profile_user_data = (char*)block.ptr + sizeof(IMutex);
+
 		self->name = name;
 		InitializeCriticalSectionAndSpinCount(&self->cs, 1<<14);
+
+		_mutex_new(self, self->profile_user_data, self->name);
+
 		return self;
 	}
 
@@ -385,11 +398,14 @@ namespace mn
 			return;
 		}
 
+		auto call_after_lock = _mutex_before_lock(self, self->profile_user_data);
 		worker_block_ahead();
 		_deadlock_detector_mutex_block(self);
 		EnterCriticalSection(&self->cs);
 		_deadlock_detector_mutex_set_exclusive_owner(self);
 		worker_block_clear();
+		if (call_after_lock)
+			_mutex_after_lock(self, self->profile_user_data);
 	}
 
 	void
@@ -397,13 +413,18 @@ namespace mn
 	{
 		_deadlock_detector_mutex_unset_owner(self);
 		LeaveCriticalSection(&self->cs);
+		_mutex_after_unlock(self, self->profile_user_data);
 	}
 
 	void
 	mutex_free(Mutex self)
 	{
+		_mutex_free(self, self->profile_user_data);
 		DeleteCriticalSection(&self->cs);
-		free(self);
+		size_t size = 0;
+		if (self->profile_user_data)
+			size = _mutex_user_data_size();
+		free(Block{ self, sizeof(*self) + size });
 	}
 
 
@@ -490,6 +511,9 @@ namespace mn
 	_thread_start(LPVOID user_data)
 	{
 		Thread self = (Thread)user_data;
+
+		_thread_new(self, self->name);
+
 		if(self->func)
 			self->func(self->user_data);
 		return 0;

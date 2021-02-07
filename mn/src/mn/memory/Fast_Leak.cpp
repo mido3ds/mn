@@ -33,7 +33,7 @@ namespace mn::memory
 		if (res.ptr == nullptr)
 			mn::panic("system out of memory");
 
-		memory_profile_alloc(res.ptr, res.size);
+		_memory_profile_alloc(res.ptr, res.size);
 		if(res)
 		{
 			atomic_count.fetch_add(1);
@@ -51,7 +51,7 @@ namespace mn::memory
 			atomic_count.fetch_sub(1);
 			atomic_size.fetch_sub(block.size);
 		}
-		memory_profile_free(block.ptr, block.size);
+		_memory_profile_free(block.ptr, block.size);
 		::free(block.ptr);
 	}
 

@@ -12,8 +12,10 @@
 
 namespace mn
 {
-	static Memory_Profile_Interface MEMORY_PROFILE;
+	static Memory_Profile_Interface MEMORY;
 	static Log_Interface LOG;
+	static Thread_Profile_Interface THREAD;
+	thread_local bool PROFILING_DISABLED = false;
 
 	struct Context_Wrapper
 	{
@@ -129,23 +131,29 @@ namespace mn
 	Memory_Profile_Interface
 	memory_profile_interface_set(Memory_Profile_Interface self)
 	{
-		auto res = MEMORY_PROFILE;
-		MEMORY_PROFILE = self;
+		auto res = MEMORY;
+		MEMORY = self;
 		return res;
 	}
 
 	void
-	memory_profile_alloc(void* ptr, size_t size)
+	_memory_profile_alloc(void* ptr, size_t size)
 	{
-		if(MEMORY_PROFILE.profile_alloc)
-			MEMORY_PROFILE.profile_alloc(MEMORY_PROFILE.self, ptr, size);
+		if (PROFILING_DISABLED)
+			return;
+
+		if(MEMORY.profile_alloc)
+			MEMORY.profile_alloc(MEMORY.self, ptr, size);
 	}
 
 	void
-	memory_profile_free(void* ptr, size_t size)
+	_memory_profile_free(void* ptr, size_t size)
 	{
-		if(MEMORY_PROFILE.profile_free)
-			MEMORY_PROFILE.profile_free(MEMORY_PROFILE.self, ptr, size);
+		if (PROFILING_DISABLED)
+			return;
+
+		if(MEMORY.profile_free)
+			MEMORY.profile_free(MEMORY.self, ptr, size);
 	}
 
 	Log_Interface
@@ -157,7 +165,7 @@ namespace mn
 	}
 
 	void
-	log_debug_str(const char* msg)
+	_log_debug_str(const char* msg)
 	{
 		if (LOG.debug)
 			LOG.debug(LOG.self, msg);
@@ -166,7 +174,7 @@ namespace mn
 	}
 
 	void
-	log_info_str(const char* msg)
+	_log_info_str(const char* msg)
 	{
 		if (LOG.info)
 			LOG.info(LOG.self, msg);
@@ -175,7 +183,7 @@ namespace mn
 	}
 
 	void
-	log_warning_str(const char* msg)
+	_log_warning_str(const char* msg)
 	{
 		if (LOG.warning)
 			LOG.warning(LOG.self, msg);
@@ -184,7 +192,7 @@ namespace mn
 	}
 
 	void
-	log_error_str(const char* msg)
+	_log_error_str(const char* msg)
 	{
 		if (LOG.error)
 			LOG.error(LOG.self, msg);
@@ -193,11 +201,95 @@ namespace mn
 	}
 
 	void
-	log_critical_str(const char* msg)
+	_log_critical_str(const char* msg)
 	{
 		if (LOG.critical)
 			LOG.critical(LOG.self, msg);
 		else
 			mn::printerr("[critical]: {}\n", msg);
+	}
+
+	Thread_Profile_Interface
+	thread_profile_interface_set(Thread_Profile_Interface self)
+	{
+		auto res = THREAD;
+		THREAD = self;
+		return res;
+	}
+
+	void
+	_thread_new(Thread handle, const char* name)
+	{
+		if (PROFILING_DISABLED)
+			return;
+
+		if (THREAD.thread_new)
+			THREAD.thread_new(handle, name);
+	}
+
+	size_t
+	_mutex_user_data_size()
+	{
+		if (PROFILING_DISABLED)
+			return 0;
+
+		return THREAD.per_mutex_user_data_size;
+	}
+
+	void
+	_mutex_new(Mutex handle, void* user_data, const char* name)
+	{
+		if (PROFILING_DISABLED)
+			return;
+
+		if (THREAD.mutex_new)
+			THREAD.mutex_new(handle, user_data, name);
+	}
+
+	void
+	_mutex_free(Mutex handle, void* user_data)
+	{
+		if (PROFILING_DISABLED)
+			return;
+
+		if (THREAD.mutex_free)
+			THREAD.mutex_free(handle, user_data);
+	}
+
+	bool
+	_mutex_before_lock(Mutex handle, void* user_data)
+	{
+		if (PROFILING_DISABLED)
+			return false;
+
+		if (THREAD.mutex_before_lock)
+			return THREAD.mutex_before_lock(handle, user_data);
+		return false;
+	}
+
+	void
+	_mutex_after_lock(Mutex handle, void* user_data)
+	{
+		if (PROFILING_DISABLED)
+			return;
+
+		if (THREAD.mutex_after_lock)
+			THREAD.mutex_after_lock(handle, user_data);
+	}
+
+	void
+	_mutex_after_unlock(Mutex handle, void* user_data)
+	{
+		if (PROFILING_DISABLED)
+			return;
+
+		if (THREAD.mutex_after_unlock)
+			THREAD.mutex_after_unlock(handle, user_data);
+	}
+
+	void
+	_disable_profiling_for_this_thread()
+	{
+		PROFILING_DISABLED = true;
 	}
 }

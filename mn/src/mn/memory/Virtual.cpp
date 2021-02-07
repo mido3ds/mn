@@ -8,14 +8,14 @@ namespace mn::memory
 	Virtual::alloc(size_t size, uint8_t)
 	{
 		Block res = virtual_alloc(nullptr, size);
-		memory_profile_alloc(res.ptr, res.size);
+		_memory_profile_alloc(res.ptr, res.size);
 		return res;
 	}
 
 	void
 	Virtual::free(Block block)
 	{
-		memory_profile_free(block.ptr, block.size);
+		_memory_profile_free(block.ptr, block.size);
 		virtual_free(block);
 	}
 

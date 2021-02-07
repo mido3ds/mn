@@ -14,14 +14,14 @@ namespace mn::memory
 		if (res.ptr == nullptr)
 			mn::panic("system out of memory");
 		res.size = size;
-		memory_profile_alloc(res.ptr, res.size);
+		_memory_profile_alloc(res.ptr, res.size);
 		return res;
 	}
 
 	void
 	CLib::free(Block block)
 	{
-		memory_profile_free(block.ptr, block.size);
+		_memory_profile_free(block.ptr, block.size);
 		::free(block.ptr);
 	}
 

@@ -89,10 +89,10 @@ namespace mn
 	memory_profile_interface_set(Memory_Profile_Interface self);
 
 	MN_EXPORT void
-	memory_profile_alloc(void* ptr, size_t size);
+	_memory_profile_alloc(void* ptr, size_t size);
 
 	MN_EXPORT void
-	memory_profile_free(void* ptr, size_t size);
+	_memory_profile_free(void* ptr, size_t size);
 
 	// Log Wrapper
 	struct Log_Interface
@@ -109,17 +109,78 @@ namespace mn
 	log_interface_set(Log_Interface self);
 
 	MN_EXPORT void
-	log_debug_str(const char* msg);
+	_log_debug_str(const char* msg);
 
 	MN_EXPORT void
-	log_info_str(const char* msg);
+	_log_info_str(const char* msg);
 
 	MN_EXPORT void
-	log_warning_str(const char* msg);
+	_log_warning_str(const char* msg);
 
 	MN_EXPORT void
-	log_error_str(const char* msg);
+	_log_error_str(const char* msg);
 
 	MN_EXPORT void
-	log_critical_str(const char* msg);
+	_log_critical_str(const char* msg);
+
+	// Thread Profiling Wrapper
+	typedef struct IThread* Thread;
+	typedef struct IMutex* Mutex;
+	typedef struct IMutex_RW* Mutex_RW;
+
+	struct Thread_Profile_Interface
+	{
+		// Thread hooks functions
+
+		// this function is called for each thread new call with the thread handle and name
+		// it's also called from the given thread
+		void (*thread_new)(Thread handle, const char* name);
+
+		// Mutex hooks functions
+		size_t per_mutex_user_data_size;
+		void (*mutex_new)(Mutex handle, void* user_data, const char* name);
+		void (*mutex_free)(Mutex handle, void* user_data);
+		bool (*mutex_before_lock)(Mutex handle, void* user_data);
+		void (*mutex_after_lock)(Mutex handle, void* user_data);
+		void (*mutex_after_unlock)(Mutex handle, void* user_data);
+
+		// Mutex RW hooks functions
+		size_t per_mutex_rw_user_data_size;
+		void (*mutex_rw_new)(Mutex_RW handle, void* user_data, const char* name);
+		void (*mutex_rw_free)(Mutex_RW handle, void* user_data);
+		void (*mutex_before_read_lock)(Mutex_RW handle, void* user_data);
+		void (*mutex_after_read_lock)(Mutex_RW handle, void* user_data);
+		void (*mutex_before_write_lock)(Mutex_RW handle, void* user_data);
+		void (*mutex_after_write_lock)(Mutex_RW handle, void* user_data);
+		void (*mutex_before_read_unlock)(Mutex_RW handle, void* user_data);
+		void (*mutex_after_write_unlock)(Mutex_RW handle, void* user_data);
+	};
+
+	// used to setup the global threading profiling interface
+	MN_EXPORT Thread_Profile_Interface
+	thread_profile_interface_set(Thread_Profile_Interface self);
+
+	MN_EXPORT void
+	_thread_new(Thread handle, const char* name);
+
+	MN_EXPORT size_t
+	_mutex_user_data_size();
+
+	MN_EXPORT void
+	_mutex_new(Mutex handle, void* user_data, const char* name);
+
+	MN_EXPORT void
+	_mutex_free(Mutex handle, void* user_data);
+
+	MN_EXPORT bool
+	_mutex_before_lock(Mutex handle, void* user_data);
+
+	MN_EXPORT void
+	_mutex_after_lock(Mutex handle, void* user_data);
+
+	MN_EXPORT void
+	_mutex_after_unlock(Mutex handle, void* user_data);
+
+	MN_EXPORT void
+	_disable_profiling_for_this_thread();
 }

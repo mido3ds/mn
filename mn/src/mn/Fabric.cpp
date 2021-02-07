@@ -212,6 +212,8 @@ namespace mn
 	static void
 	_sysmon_main(void* fabric)
 	{
+		_disable_profiling_for_this_thread();
+
 		auto self = (Fabric)fabric;
 
 		auto blocking_workers = buf_with_capacity<Blocking_Worker>(self->workers.count);

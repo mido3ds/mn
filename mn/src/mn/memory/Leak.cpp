@@ -42,7 +42,7 @@ namespace mn::memory
 
 		callstack_capture(ptr->callstack, Leak::CALLSTACK_MAX_FRAMES);
 		auto res = Block{ ptr + 1, size };
-		memory_profile_alloc(res.ptr, res.size);
+		_memory_profile_alloc(res.ptr, res.size);
 		return res;
 	}
 
@@ -64,7 +64,7 @@ namespace mn::memory
 				ptr->next->prev = ptr->prev;
 			mutex_unlock(this->mtx);
 
-			memory_profile_free(block.ptr, block.size);
+			_memory_profile_free(block.ptr, block.size);
 			::free(ptr);
 		}
 	}

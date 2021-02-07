@@ -46,6 +46,7 @@ namespace mn
 	{
 		pthread_mutex_t handle;
 		const char* name;
+		void* profile_user_data;
 	};
 
 	// Deadlock detector
@@ -372,10 +373,22 @@ namespace mn
 	Mutex
 	mutex_new(const char* name)
 	{
-		Mutex self = alloc<IMutex>();
+		auto user_data_size = _mutex_user_data_size();
+		auto size = sizeof(IMutex) + user_data_size;
+
+		auto block = alloc(size, alignof(IMutex));
+		auto self = (Mutex)block.ptr;
+		if (user_data_size == 0)
+			self->profile_user_data = nullptr;
+		else
+			self->profile_user_data = (char*)block.ptr + sizeof(IMutex);
+
 		self->name = name;
 		[[maybe_unused]] int result = pthread_mutex_init(&self->handle, NULL);
 		assert(result == 0);
+
+		_mutex_new(self, self->profile_user_data, self->name);
+
 		return self;
 	}
 
@@ -388,12 +401,15 @@ namespace mn
 			return;
 		}
 
+		auto call_after_lock = _mutex_before_lock(self, self->profile_user_data);
 		worker_block_ahead();
 		_deadlock_detector_mutex_block(self);
 		[[maybe_unused]] int result = pthread_mutex_lock(&self->handle);
 		assert(result == 0);
 		_deadlock_detector_mutex_set_exclusive_owner(self);
 		worker_block_clear();
+		if (call_after_lock)
+			_mutex_after_lock(self, self->profile_user_data);
 	}
 
 	void
@@ -402,14 +418,19 @@ namespace mn
 		_deadlock_detector_mutex_unset_owner(self);
 		[[maybe_unused]] int result = pthread_mutex_unlock(&self->handle);
 		assert(result == 0);
+		_mutex_after_unlock(self, self->profile_user_data);
 	}
 
 	void
 	mutex_free(Mutex self)
 	{
+		_mutex_free(self, self->profile_user_data);
 		[[maybe_unused]] int result = pthread_mutex_destroy(&self->handle);
 		assert(result == 0);
-		free(self);
+		size_t size = 0;
+		if (self->profile_user_data)
+			size = _mutex_user_data_size();
+		free(Block{ self, sizeof(*self) + size });
 	}
 
 
@@ -496,6 +517,9 @@ namespace mn
 	_thread_start(void* user_data)
 	{
 		Thread self = (Thread)user_data;
+
+		_thread_new(self, self->name);
+
 		if(self->func)
 			self->func(self->user_data);
 		return 0;
