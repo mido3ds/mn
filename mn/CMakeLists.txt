@@ -208,20 +208,20 @@ if (MN_POOL_DOUBLE_FREE)
 	)
 endif (MN_POOL_DOUBLE_FREE)
 
-target_compile_definitions(mn
-	PRIVATE
-		-DMN_DEADLOCK==$<BOOL:${MN_DEADLOCK}>
-)
 if (MN_DEADLOCK)
 	message(STATUS "feature: deadlock check enabled")
-endif (MN_DEADLOCK)
-
-if (MN_WAITGROUP_FUTEX)
-	message(STATUS "feature: waitgroup futex implementation")
 	target_compile_definitions(mn
 		PRIVATE
-			-DMN_WAITGROUP_FUTEX=1
+			-DMN_DEADLOCK=1
 	)
+endif (MN_DEADLOCK)
+
+target_compile_definitions(mn
+	PRIVATE
+		-DMN_WAITGROUP_FUTEX=$<BOOL:${MN_WAITGROUP_FUTEX}>
+)
+if (MN_WAITGROUP_FUTEX)
+	message(STATUS "feature: waitgroup futex implementation")
 	target_link_libraries(mn
 		PRIVATE
 		"$<$<PLATFORM_ID:Windows>:Synchronization>"
