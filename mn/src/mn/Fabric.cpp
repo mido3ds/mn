@@ -247,6 +247,8 @@ namespace mn
 				return true;
 			});
 
+			bool slept_on_cond_var = false;
+
 			{
 				mutex_lock(self->mtx);
 				mn_defer(mutex_unlock(self->mtx));
@@ -254,7 +256,8 @@ namespace mn
 				if (self->atomic_available_jobs.load() == 0 &&
 					self->sleepy_side_workers.count == 0)
 				{
-					cond_var_wait_timeout(self->cv, self->mtx, timeslice, [&]{
+					slept_on_cond_var = true;
+					cond_var_wait(self->cv, self->mtx, [&]{
 						return self->atomic_available_jobs.load() > 0 ||
 							self->is_running == false ||
 							self->sleepy_side_workers.count > 0;
@@ -264,6 +267,10 @@ namespace mn
 				if (self->is_running == false)
 					return;
 			}
+
+			// SYSMON rest station, sysmon needs to sleep for some time, he does a lot of work, he deserves it
+			if (slept_on_cond_var == false)
+				thread_sleep(timeslice);
 
 			// get the max/min jobs
 			size_t busiest_worker = 0;
@@ -364,7 +371,7 @@ namespace mn
 				if (job_start_time != 0)
 				{
 					auto job_run_time = time_in_millis() - job_start_time;
-					if(job_run_time > DEFAULT_EXTR_BLOCKING_THRESHOLD)
+					if(job_run_time > self->settings.external_blocking_threshold_in_ms)
 					{
 						buf_push(blocking_workers, Blocking_Worker{ self->workers[i], i });
 						continue;
