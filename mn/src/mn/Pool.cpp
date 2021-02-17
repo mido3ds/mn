@@ -30,6 +30,8 @@ namespace mn
 	void
 	pool_free(Pool self)
 	{
+		if (self == nullptr)
+			return;
 		allocator_free(self->arena);
 		free_from(self->meta_allocator, self);
 	}
