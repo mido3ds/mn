@@ -13,7 +13,8 @@ int main(int argc, char** argv)
 
 	mn::print("Hello, World!\n");
 
-	auto rad = rad_new();
+	RAD_Settings settings{};
+	auto rad = rad_new(settings);
 	mn_defer(rad_free(rad));
 
 	// load
