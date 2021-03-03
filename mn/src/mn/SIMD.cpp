@@ -62,7 +62,7 @@ _mn_simd_check()
 	// Get the number of valid extended IDs
 	__cpuid(cpuinfo, 0x80000000);
 	int numExtendedIds = cpuinfo[0];
-	if (numExtendedIds >= 0x80000001)
+	if (numExtendedIds >= (int)0x80000001)
 	{
 		__cpuid(cpuinfo, 0x80000001);
 		res.sse4a_supportted = cpuinfo[2] & (1 << 6) || false;

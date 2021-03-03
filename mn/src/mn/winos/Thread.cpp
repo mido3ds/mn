@@ -91,7 +91,7 @@ namespace mn
 		Mutex_Ownership self{};
 		self.kind = Mutex_Ownership::KIND_EXCLUSIVE;
 		self.exclusive.id = thread_id;
-		self.exclusive.callstack_count = callstack_capture(self.exclusive.callstack, 20);
+		self.exclusive.callstack_count = (int)callstack_capture(self.exclusive.callstack, 20);
 		return self;
 	}
 
@@ -132,7 +132,7 @@ namespace mn
 	{
 		Mutex_Thread_Owner owner{};
 		owner.id = thread_id;
-		owner.callstack_count = callstack_capture(owner.callstack, 20);
+		owner.callstack_count = (int)callstack_capture(owner.callstack, 20);
 		map_insert(self.shared, thread_id, owner);
 	}
 
@@ -258,7 +258,7 @@ namespace mn
 	}
 
 	inline static void
-	_deadlock_detector_mutex_block(void* mtx)
+	_deadlock_detector_mutex_block([[maybe_unused]] void* mtx)
 	{
 		#ifdef MN_DEADLOCK
 		auto self = _deadlock_detector();
@@ -302,7 +302,7 @@ namespace mn
 	}
 
 	inline static void
-	_deadlock_detector_mutex_set_exclusive_owner(void* mtx)
+	_deadlock_detector_mutex_set_exclusive_owner([[maybe_unused]] void* mtx)
 	{
 		#ifdef MN_DEADLOCK
 		auto self = _deadlock_detector();
@@ -322,7 +322,7 @@ namespace mn
 	}
 
 	inline static void
-	_deadlock_detector_mutex_set_shared_owner(void* mtx)
+	_deadlock_detector_mutex_set_shared_owner([[maybe_unused]] void* mtx)
 	{
 		#ifdef MN_DEADLOCK
 		auto self = _deadlock_detector();
@@ -346,7 +346,7 @@ namespace mn
 	}
 
 	inline static void
-	_deadlock_detector_mutex_unset_owner(void* mtx)
+	_deadlock_detector_mutex_unset_owner([[maybe_unused]] void* mtx)
 	{
 		#ifdef MN_DEADLOCK
 		auto self = _deadlock_detector();

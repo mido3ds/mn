@@ -837,14 +837,14 @@ namespace mn
 	inline static Key_Value<const TKey, TValue>*
 	map_lookup(Map<TKey, TValue, THash>& self, const TKey& key)
 	{
-		return (Key_Value<const TKey, TValue>*)set_lookup(self, Key_Value<TKey, TValue>{key});
+		return (Key_Value<const TKey, TValue>*)set_lookup(self, Key_Value<TKey, TValue>{key, {}});
 	}
 
 	template<typename TKey, typename TValue, typename THash = Hash<TKey>>
 	inline static bool
 	map_remove(Map<TKey, TValue, THash>& self, const TKey& key)
 	{
-		return set_remove(self, Key_Value<TKey, TValue>{key});
+		return set_remove(self, Key_Value<TKey, TValue>{key, {}});
 	}
 
 	template<typename TKey, typename TValue, typename THash = Hash<TKey>>

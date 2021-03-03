@@ -37,7 +37,7 @@ namespace mn
 
 	// callstack_print_to prints the captured callstack to the given stream
 	void
-	callstack_print_to(void** frames, size_t frames_count, mn::Stream out)
+	callstack_print_to([[maybe_unused]] void** frames, [[maybe_unused]] size_t frames_count, [[maybe_unused]] mn::Stream out)
 	{
 		#if DEBUG
 		static Debugger_Callstack _d;

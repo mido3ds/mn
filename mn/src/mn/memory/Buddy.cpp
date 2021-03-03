@@ -77,13 +77,13 @@ namespace mn::memory
 	inline static uint8_t*
 	ptr_for_node(Buddy* self, size_t index, size_t bucket)
 	{
-		return self->base_ptr + ((index - (1 << bucket) + 1) << (self->max_alloc_log2 - bucket));
+		return self->base_ptr + ((index - ((size_t)1 << bucket) + (size_t)1) << (self->max_alloc_log2 - bucket));
 	}
 
 	inline static size_t
 	node_for_ptr(Buddy* self, uint8_t* ptr, size_t bucket)
 	{
-		return ((ptr - self->base_ptr) >> (self->max_alloc_log2 - bucket)) + (1 << bucket) - 1;
+		return ((ptr - self->base_ptr) >> (self->max_alloc_log2 - bucket)) + ((size_t)1 << bucket) - (size_t)1;
 	}
 
 	inline static bool

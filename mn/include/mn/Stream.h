@@ -145,7 +145,7 @@ namespace mn
 	inline static Str
 	stream_sink(IStream* src, Allocator allocator = allocator_top())
 	{
-		auto res = str_new();
+		auto res = str_with_allocator(allocator);
 		char _buf[1024];
 		auto buf = block_from(_buf);
 		while(true)

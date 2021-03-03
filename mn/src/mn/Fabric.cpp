@@ -134,7 +134,7 @@ namespace mn
 			}
 		}
 
-		auto old_state = self->atomic_state.exchange(IWorker::STATE_STOP_ACKNOWLEDGED);
+		[[maybe_unused]] auto old_state = self->atomic_state.exchange(IWorker::STATE_STOP_ACKNOWLEDGED);
 		assert(old_state == IWorker::STATE_STOP_REQUEST);
 		LOCAL_WORKER = nullptr;
 	}
@@ -191,7 +191,7 @@ namespace mn
 	inline static void
 	_worker_free(Worker self)
 	{
-		auto state = self->atomic_state.load();
+		[[maybe_unused]] auto state = self->atomic_state.load();
 		assert(state == IWorker::STATE_STOP_REQUEST ||
 			   state == IWorker::STATE_STOP_ACKNOWLEDGED);
 

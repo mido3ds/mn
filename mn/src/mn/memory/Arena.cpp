@@ -38,7 +38,7 @@ namespace mn::memory
 	}
 
 	void
-	Arena::free(Block block)
+	Arena::free(Block)
 	{
 	}
 

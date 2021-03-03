@@ -107,9 +107,7 @@ namespace mn::json
 		// 0x80 because all the keywords in json is ascii not utf-8
 		// if you have utf-8 runes then you'll have to provide a utf-8 is letter function
 		// in the else branch
-		if (c < 0x80)
-			return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z');
-		return false;
+		return (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z');
 	}
 
 	inline static bool
@@ -323,23 +321,23 @@ namespace mn::json
 	inline static Value
 	_parser_parse_value(Parser &self)
 	{
-		if (auto tkn = _parser_eat_kind(self, Token::KIND_NULL))
+		if (auto null_tkn = _parser_eat_kind(self, Token::KIND_NULL))
 		{
 			return Value{};
 		}
-		else if (auto tkn = _parser_eat_kind(self, Token::KIND_BOOL))
+		else if (auto bool_tkn = _parser_eat_kind(self, Token::KIND_BOOL))
 		{
-			return value_bool_new(tkn.val_bool);
+			return value_bool_new(bool_tkn.val_bool);
 		}
-		else if (auto tkn = _parser_eat_kind(self, Token::KIND_NUMBER))
+		else if (auto number_tkn = _parser_eat_kind(self, Token::KIND_NUMBER))
 		{
-			return value_number_new(tkn.val_num);
+			return value_number_new((float)number_tkn.val_num);
 		}
-		else if (auto tkn = _parser_eat_kind(self, Token::KIND_STRING))
+		else if (auto string_tkn = _parser_eat_kind(self, Token::KIND_STRING))
 		{
-			return value_string_new(str_from_substr(tkn.begin, tkn.end));
+			return value_string_new(str_from_substr(string_tkn.begin, string_tkn.end));
 		}
-		else if (auto tkn = _parser_eat_kind(self, Token::KIND_OPEN_BRACKET))
+		else if (auto bracket_tkn = _parser_eat_kind(self, Token::KIND_OPEN_BRACKET))
 		{
 			auto array = value_array_new();
 			while (_parser_look_kind(self, Token::KIND_CLOSE_BRACKET) == false)
@@ -360,7 +358,7 @@ namespace mn::json
 			_parser_eat_must(self, Token::KIND_CLOSE_BRACKET);
 			return array;
 		}
-		else if (auto tkn = _parser_eat_kind(self, Token::KIND_OPEN_CURLY))
+		else if (auto open_curly_tkn = _parser_eat_kind(self, Token::KIND_OPEN_CURLY))
 		{
 			auto object = value_object_new();
 
@@ -395,13 +393,13 @@ namespace mn::json
 			_parser_eat_must(self, Token::KIND_CLOSE_CURLY);
 			return object;
 		}
-		else if (auto tkn = _parser_eat(self))
+		else if (auto unknown_tkn = _parser_eat(self))
 		{
 			self.err = Err{
 				"unidentified token '{:.{}s}' of kind '{}'",
-				tkn.begin,
-				tkn.end - tkn.begin,
-				_json_token_kind_str(tkn.kind)
+				unknown_tkn.begin,
+				unknown_tkn.end - unknown_tkn.begin,
+				_json_token_kind_str(unknown_tkn.kind)
 			};
 		}
 

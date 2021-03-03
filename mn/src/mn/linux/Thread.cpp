@@ -265,7 +265,7 @@ namespace mn
 	}
 
 	inline static void
-	_deadlock_detector_mutex_block(void* mtx)
+	_deadlock_detector_mutex_block([[maybe_unused]] void* mtx)
 	{
 		#ifdef MN_DEADLOCK
 		auto self = _deadlock_detector();
@@ -309,7 +309,7 @@ namespace mn
 	}
 
 	inline static void
-	_deadlock_detector_mutex_set_exclusive_owner(void* mtx)
+	_deadlock_detector_mutex_set_exclusive_owner([[maybe_unused]] void* mtx)
 	{
 		#ifdef MN_DEADLOCK
 		auto self = _deadlock_detector();
@@ -329,7 +329,7 @@ namespace mn
 	}
 
 	inline static void
-	_deadlock_detector_mutex_set_shared_owner(void* mtx)
+	_deadlock_detector_mutex_set_shared_owner([[maybe_unused]] void* mtx)
 	{
 		#ifdef MN_DEADLOCK
 		auto self = _deadlock_detector();
@@ -353,7 +353,7 @@ namespace mn
 	}
 
 	inline static void
-	_deadlock_detector_mutex_unset_owner(void* mtx)
+	_deadlock_detector_mutex_unset_owner([[maybe_unused]] void* mtx)
 	{
 		#ifdef MN_DEADLOCK
 		auto self = _deadlock_detector();
@@ -707,7 +707,7 @@ namespace mn
 	{
 		auto self = alloc<IWaitgroup>();
 		self->count = 0;
-		auto res = pthread_mutex_init(&self->mtx, NULL);
+		[[maybe_unused]] auto res = pthread_mutex_init(&self->mtx, NULL);
 		assert(res == 0);
 		res = pthread_cond_init(&self->cv, NULL);
 		assert(res == 0);
@@ -717,7 +717,7 @@ namespace mn
 	void
 	waitgroup_free(Waitgroup self)
 	{
-		auto res = pthread_mutex_destroy(&self->mtx);
+		[[maybe_unused]] auto res = pthread_mutex_destroy(&self->mtx);
 		assert(res == 0);
 		res = pthread_cond_destroy(&self->cv);
 		assert(res == 0);

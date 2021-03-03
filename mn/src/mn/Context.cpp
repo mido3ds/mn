@@ -30,7 +30,7 @@ namespace mn
 		{
 			#if DEBUG
 				fprintf(stderr, "Temp Allocator %p: %zu bytes used at exit, %zu bytes highwater mark\n",
-					self._allocator_tmp, self._allocator_tmp->used_mem, self._allocator_tmp->highwater_mem);
+					(void*)self._allocator_tmp, self._allocator_tmp->used_mem, self._allocator_tmp->highwater_mem);
 			#endif
 
 			context_free(&self);
