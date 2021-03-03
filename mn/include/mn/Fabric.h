@@ -78,7 +78,7 @@ namespace mn
 			else if (timeout != INFINITE_TIMEOUT)
 			{
 				auto t = std::chrono::steady_clock::now();
-				if (std::chrono::duration_cast<std::chrono::milliseconds>(t - start).count() >= timeout.milliseconds)
+				if ((uint64_t)std::chrono::duration_cast<std::chrono::milliseconds>(t - start).count() >= timeout.milliseconds)
 					break;
 			}
 			thread_sleep(1);

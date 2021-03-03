@@ -49,7 +49,7 @@ namespace mn::ipc
 		if(macos_handle == -1)
 			return nullptr;
 
-		return Mutex(macos_handle);
+		return Mutex((intptr_t)macos_handle);
 	}
 
 	void

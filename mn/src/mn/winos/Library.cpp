@@ -37,6 +37,6 @@ namespace mn
 	void*
 	library_proc(Library self, const Str& proc_name)
 	{
-		return GetProcAddress((HMODULE)self, proc_name.ptr);
+		return (void*)GetProcAddress((HMODULE)self, proc_name.ptr);
 	}
 }

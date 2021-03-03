@@ -33,7 +33,7 @@ namespace mn
 			{}
 
 			template<typename G>
-			Model(Allocator allocator, G&& f)
+			Model(Allocator, G&& f)
 				:fn(std::forward<G>(f))
 			{}
 
