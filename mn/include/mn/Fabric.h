@@ -143,7 +143,7 @@ namespace mn
 
 	struct Compute_Dims
 	{
-		int x, y, z;
+		size_t x, y, z;
 	};
 
 	struct Compute_Args

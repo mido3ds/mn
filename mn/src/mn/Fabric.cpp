@@ -617,23 +617,20 @@ namespace mn
 	inline static void
 	_multi_threaded_compute(Fabric self, Compute_Dims global, Compute_Dims local, Task<void(Compute_Args)> fn)
 	{
-		assert(global.x >= 0 && global.y >= 0 && global.z >= 0);
-		assert(local.x >= 0 && local.y >= 0 && local.z >= 0);
-
 		Auto_Waitgroup wg;
-		for (int z = 0; z < global.z; ++z)
+		for (size_t z = 0; z < global.z; ++z)
 		{
-			for (int y = 0; y < global.y; ++y)
+			for (size_t y = 0; y < global.y; ++y)
 			{
-				for (int x = 0; x < global.x; ++x)
+				for (size_t x = 0; x < global.x; ++x)
 				{
 					wg.add(1);
 					fabric_do(self, [global_x = x, global_y = y, global_z = z, global, local, &wg, &fn] {
-						for (int z = 0; z < local.z; ++z)
+						for (size_t z = 0; z < local.z; ++z)
 						{
-							for (int y = 0; y < local.y; ++y)
+							for (size_t y = 0; y < local.y; ++y)
 							{
-								for (int x = 0; x < local.x; ++x)
+								for (size_t x = 0; x < local.x; ++x)
 								{
 									Compute_Args args;
 									args.workgroup_size = local;
@@ -662,20 +659,17 @@ namespace mn
 	inline static void
 	_single_threaded_compute(Compute_Dims global, Compute_Dims local, Task<void(Compute_Args)> fn)
 	{
-		assert(global.x >= 0 && global.y >= 0 && global.z >= 0);
-		assert(local.x >= 0 && local.y >= 0 && local.z >= 0);
-
-		for (int global_z = 0; global_z < global.z; ++global_z)
+		for (size_t global_z = 0; global_z < global.z; ++global_z)
 		{
-			for (int global_y = 0; global_y < global.y; ++global_y)
+			for (size_t global_y = 0; global_y < global.y; ++global_y)
 			{
-				for (int global_x = 0; global_x < global.x; ++global_x)
+				for (size_t global_x = 0; global_x < global.x; ++global_x)
 				{
-					for (int local_z = 0; local_z < local.z; ++local_z)
+					for (size_t local_z = 0; local_z < local.z; ++local_z)
 					{
-						for (int local_y = 0; local_y < local.y; ++local_y)
+						for (size_t local_y = 0; local_y < local.y; ++local_y)
 						{
-							for (int local_x = 0; local_x < local.x; ++local_x)
+							for (size_t local_x = 0; local_x < local.x; ++local_x)
 							{
 								Compute_Args args;
 								args.workgroup_size = local;
@@ -710,23 +704,20 @@ namespace mn
 	inline static void
 	_multi_threaded_compute_sized(Fabric self, Compute_Dims global, Compute_Dims size, Compute_Dims local, Task<void(Compute_Args)> fn)
 	{
-		assert(global.x >= 0 && global.y >= 0 && global.z >= 0);
-		assert(local.x >= 0 && local.y >= 0 && local.z >= 0);
-
 		Auto_Waitgroup wg;
-		for (int z = 0; z < global.z; ++z)
+		for (size_t z = 0; z < global.z; ++z)
 		{
-			for (int y = 0; y < global.y; ++y)
+			for (size_t y = 0; y < global.y; ++y)
 			{
-				for (int x = 0; x < global.x; ++x)
+				for (size_t x = 0; x < global.x; ++x)
 				{
 					wg.add(1);
 					fabric_do(self, [global_x = x, global_y = y, global_z = z, global, size, local, &wg, &fn] {
-						for (int z = 0; z < local.z; ++z)
+						for (size_t z = 0; z < local.z; ++z)
 						{
-							for (int y = 0; y < local.y; ++y)
+							for (size_t y = 0; y < local.y; ++y)
 							{
-								for (int x = 0; x < local.x; ++x)
+								for (size_t x = 0; x < local.x; ++x)
 								{
 									Compute_Args args;
 									args.workgroup_size = local;
@@ -757,20 +748,17 @@ namespace mn
 	inline static void
 	_single_threaded_compute_sized(Compute_Dims global, Compute_Dims size, Compute_Dims local, Task<void(Compute_Args)> fn)
 	{
-		assert(global.x >= 0 && global.y >= 0 && global.z >= 0);
-		assert(local.x >= 0 && local.y >= 0 && local.z >= 0);
-
-		for (int global_z = 0; global_z < global.z; ++global_z)
+		for (size_t global_z = 0; global_z < global.z; ++global_z)
 		{
-			for (int global_y = 0; global_y < global.y; ++global_y)
+			for (size_t global_y = 0; global_y < global.y; ++global_y)
 			{
-				for (int global_x = 0; global_x < global.x; ++global_x)
+				for (size_t global_x = 0; global_x < global.x; ++global_x)
 				{
-					for (int local_z = 0; local_z < local.z; ++local_z)
+					for (size_t local_z = 0; local_z < local.z; ++local_z)
 					{
-						for (int local_y = 0; local_y < local.y; ++local_y)
+						for (size_t local_y = 0; local_y < local.y; ++local_y)
 						{
-							for (int local_x = 0; local_x < local.x; ++local_x)
+							for (size_t local_x = 0; local_x < local.x; ++local_x)
 							{
 								Compute_Args args;
 								args.workgroup_size = local;
