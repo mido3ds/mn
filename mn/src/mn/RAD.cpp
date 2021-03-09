@@ -26,17 +26,6 @@ struct RAD_Module
 	int load_counter;
 };
 
-inline static void
-destruct(RAD_Module& self)
-{
-	mn::library_close(self.library);
-	mn::file_remove(self.loaded_file);
-
-	mn::str_free(self.original_file);
-	mn::str_free(self.loaded_file);
-	mn::str_free(self.name);
-}
-
 struct RAD
 {
 	mn::Mutex mtx;
@@ -44,6 +33,18 @@ struct RAD
 	mn::UUID uuid;
 	RAD_Settings settings;
 };
+
+inline static void
+_rad_module_free(RAD* rad, RAD_Module& module)
+{
+	mn::library_close(module.library);
+	if (rad->settings.disable_hot_reload == false)
+		mn::file_remove(module.loaded_file);
+
+	mn::str_free(module.original_file);
+	mn::str_free(module.loaded_file);
+	mn::str_free(module.name);
+}
 
 // API
 RAD*
@@ -66,13 +67,10 @@ rad_free(RAD* self)
 	mn::allocator_push(mn::memory::clib());
 	mn_defer(mn::allocator_pop());
 
-	for (const auto &module : self->modules)
-	{
-		if (mn::path_is_file(module.value.loaded_file))
-			mn::file_remove(module.value.loaded_file);
-	}
+	for (auto& [name, module]: self->modules)
+		_rad_module_free(self, module);
 
-	destruct(self->modules);
+	mn::map_free(self->modules);
 	mn::mutex_free(self->mtx);
 	mn::free(self);
 }
@@ -157,26 +155,26 @@ rad_register(RAD* self, const char* name, const char* filepath)
 		return false;
 	}
 
-	RAD_Module mod{};
-	mod.original_file = os_filepath;
-	mod.loaded_file = loaded_filepath;
-	mod.name = mn::str_from_c(name);
-	mod.library = library;
-	mod.last_write = mn::file_last_write_time(os_filepath);
-	mod.api = load_func(nullptr, false);
-	mod.load_counter = 0;
+	RAD_Module module{};
+	module.original_file = os_filepath;
+	module.loaded_file = loaded_filepath;
+	module.name = mn::str_from_c(name);
+	module.library = library;
+	module.last_write = mn::file_last_write_time(os_filepath);
+	module.api = load_func(nullptr, false);
+	module.load_counter = 0;
 	{
 		mn::mutex_lock(self->mtx);
 		mn_defer(mn::mutex_unlock(self->mtx));
 
-		if (auto it = mn::map_lookup(self->modules, mn::str_lit(name)))
+		if (auto it = mn::map_lookup(self->modules, module.name))
 		{
-			destruct(it->value);
-			it->value = mod;
+			_rad_module_free(self, it->value);
+			it->value = module;
 		}
 		else
 		{
-			mn::map_insert(self->modules, mn::str_from_c(name), mod);
+			mn::map_insert(self->modules, module.name, module);
 		}
 	}
 
