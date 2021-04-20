@@ -208,6 +208,24 @@ namespace mn
 		return res;
 	}
 
+	Str
+	path_executable(Allocator allocator)
+	{
+		char path[PATH_MAX + 1];
+		::memset(path, 0, sizeof(path));
+
+		char absolute_path[PATH_MAX + 1];
+		::memset(absolute_path, 0, sizeof(absolute_path));
+
+		[[maybe_unused]] auto dir_length = readlink("/proc/self/exe", path, sizeof(path));
+		assert(dir_length > -1 && dir_length < (ssize_t)sizeof(path));
+
+		[[maybe_unused]] auto realpath_res = realpath(path, absolute_path);
+		assert(realpath_res == absolute_path);
+
+		return mn::str_from_c(absolute_path, allocator);
+	}
+
 	int64_t
 	file_last_write_time(const char* path)
 	{

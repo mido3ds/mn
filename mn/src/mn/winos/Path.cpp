@@ -274,6 +274,25 @@ namespace mn
 		return res;
 	}
 
+	Str
+	path_executable(Allocator allocator)
+	{
+		auto path = mn::str_tmp();
+		mn::buf_resize_fill(path, (MAX_PATH + 1) * sizeof(WCHAR), '\0');
+
+		DWORD res = 0;
+		while (true)
+		{
+			res = GetModuleFileName(NULL, (LPWSTR)path.ptr, (DWORD)(path.count / sizeof(WCHAR)));
+			if (res == path.count / sizeof(WCHAR) && GetLastError() == ERROR_INSUFFICIENT_BUFFER)
+				mn::buf_resize_fill(path, path.count * 2, '\0');
+			else
+				break;
+		}
+
+		return from_os_encoding({(void*)path.ptr, (res + 1) * sizeof(WCHAR)}, allocator);
+	}
+
 	int64_t
 	file_last_write_time(const char* path)
 	{
