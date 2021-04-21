@@ -118,7 +118,11 @@ namespace mn
 	str_null_terminate(Str& self)
 	{
 		if (self.count == 0)
+		{
+			if (self.cap > 0)
+				self.ptr[self.count] = '\0';
 			return;
+		}
 		buf_reserve(self, 1);
 		self.ptr[self.count] = '\0';
 	}
@@ -266,6 +270,8 @@ namespace mn
 	str_clear(Str& self)
 	{
 		buf_clear(self);
+		if (self.cap > 0)
+			self.ptr[self.count] = '\0';
 	}
 
 	Str
