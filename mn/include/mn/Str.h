@@ -433,6 +433,9 @@ namespace mn
 	inline static void
 	str_trim_left_pred(Str& self, TFunc&& f)
 	{
+		if (self.count == 0)
+			return;
+
 		const char* it = begin(self);
 		for(; it != end(self); it = rune_next(it))
 		{
@@ -480,6 +483,9 @@ namespace mn
 	inline static void
 	str_trim_right_pred(Str& self, TFunc&& f)
 	{
+		if (self.count == 0)
+			return;
+
 		auto it = rune_prev(end(self));
 		auto c = rune_read(it);
 		if (f(c) == false)
