@@ -99,19 +99,6 @@ namespace mn
 		// adjust the size back
 		self.count -= (4 - width) + 1;
 		self.ptr[self.count] = '\0';
-		
-		/*
-		int s = rune_size(r);
-		assert(s > 0 && s <= 4);
-		buf_resize(self, self.count + 4);
-		size_t self_len = self.count;
-		buf_resize(self, self.count + s + 1);
-		--self.count;
-		const char* bytes = (const char*)&r;
-		for(int i = 0; i < s; ++i)
-			self.ptr[self_len + i] = bytes[i];
-		self.ptr[self.count] = '\0';
-		*/
 	}
 
 	void
