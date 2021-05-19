@@ -174,7 +174,7 @@ namespace mn
 	}
 
 	inline static Worker
-	_worker_new(mn::Str name, Fabric fabric, Ring<Job> stolen_jobs = ring_new<Job>())
+	_worker_new(Str name, Fabric fabric, Ring<Job> stolen_jobs = ring_new<Job>())
 	{
 		auto self = alloc_zerod<IWorker>();
 		self->name = name;
@@ -448,7 +448,7 @@ namespace mn
 	Worker
 	worker_new(const char* name)
 	{
-		return _worker_new(mn::str_from_c(name), nullptr);
+		return _worker_new(str_from_c(name), nullptr);
 	}
 
 	void
@@ -625,8 +625,6 @@ namespace mn
 
 		auto next_worker = self->next_worker++;
 		next_worker %= self->workers.count;
-
-		log_debug("batch {} submitted", count);
 
 		auto worker = self->workers[next_worker];
 		worker_task_batch_do(worker, ptr, count);
