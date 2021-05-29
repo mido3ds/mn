@@ -10,17 +10,17 @@
 
 namespace mn
 {
-	/**
-	 * @brief      A Buf is a growable area of memory
-	 *
-	 * @tparam     T     Element type
-	 */
+	// Buf is the workhorse of the containers, it's a dynamic array
 	template<typename T>
 	struct Buf
 	{
+		// the allocator which this buf instance uses
 		Allocator allocator;
+		// pointer to the memory allocated by this buf
 		T* ptr;
+		// count of elements that exist in this buf
 		size_t count;
+		// capacity of elements which the allocated memroy can hold
 		size_t cap;
 
 		T&
@@ -38,9 +38,7 @@ namespace mn
 		}
 	};
 
-	/**
-	 * @brief      Creates a new buf using the top allocator
-	 */
+	// creates a new buf using the default allocator
 	template<typename T>
 	inline static Buf<T>
 	buf_new()
@@ -50,11 +48,7 @@ namespace mn
 		return self;
 	}
 
-	/**
-	 * @brief      Creates a new buf using the given allocator
-	 *
-	 * @param[in]  allocator  The allocator
-	 */
+	// creates a buf instance with a custom allocator
 	template<typename T>
 	inline static Buf<T>
 	buf_with_allocator(Allocator allocator)
@@ -64,11 +58,8 @@ namespace mn
 		return self;
 	}
 
-	/**
-	 * @brief      Creates a new buf using the given values initializer_list
-	 *
-	 * @param[in]  values  The values
-	 */
+	// creates a buf and populates it with the given initializer list of element
+	// example: auto array = mn::buf_lit({1, 2, 3});
 	template<typename T>
 	inline static Buf<T>
 	buf_lit(const std::initializer_list<T>& values)
@@ -80,11 +71,7 @@ namespace mn
 		return self;
 	}
 
-	/**
-	 * @brief      Creates a buf with resized to the given count
-	 *
-	 * @param[in]  count  The count
-	 */
+	// creates a new buf instance with the given count of elements, note: the memory is allocated and not initialized
 	template<typename T>
 	inline static Buf<T>
 	buf_with_count(size_t count)
@@ -94,11 +81,7 @@ namespace mn
 		return self;
 	}
 
-	/**
-	 * @brief      Creates a buf with capacity to hold the given count
-	 *
-	 * @param[in]  cap  The capacity
-	 */
+	// creates a new buf instance with the given capcity of elements
 	template<typename T>
 	inline static Buf<T>
 	buf_with_capacity(size_t cap)
@@ -108,9 +91,7 @@ namespace mn
 		return self;
 	}
 
-	/**
-	 * @brief      Frees the given buf
-	 */
+	// frees the given buf instance, if it's empty it does nothing
 	template<typename T>
 	inline static void
 	buf_free(Buf<T>& self)
@@ -122,11 +103,7 @@ namespace mn
 		self.ptr = nullptr;
 	}
 
-	/**
-	 * @brief      A General destruct function which calls the destructor of the given value
-	 *
-	 * @param      value  The value
-	 */
+	// a general destruct function overload which calls the destructor of the given value
 	template<typename T>
 	inline static void
 	destruct(T& value)
@@ -134,6 +111,7 @@ namespace mn
 		value.~T();
 	}
 
+	// default no-op destruct functions for the builtin types
 	inline static void destruct(char&) {}
 	inline static void destruct(uint8_t&) {}
 	inline static void destruct(uint16_t&) {}
@@ -147,13 +125,10 @@ namespace mn
 	inline static void destruct(double&) {}
 	inline static void destruct(long double&) {}
 
-	/**
-	 * @brief      A Custom destruct function for the buf which iterates over all the elements
-	 * and calls destruct on each element thus useful for destructing a big hierarchy 
-	 * without memory leaks
-	 *
-	 * @param      self  The buf
-	 */
+	// a custom overload for buf which loops over all the elements and calls destruct, this is useful for destructing
+	// a big hierarchy without memory leaks, for example when you free mn::Buf<mn::Buf<int>> if you use mn::buf_free
+	// you'll only free the top level buf and won't free the small mn::Buf<int> inside, it's more appropriate to use
+	// destruct instead of mn::buf_free for this case which will destruct each mn::Buf<int> inside the bigger buf
 	template<typename T>
 	inline static void
 	destruct(Buf<T>& self)
@@ -163,15 +138,11 @@ namespace mn
 		buf_free(self);
 	}
 
-	/**
-	 * @brief      indexes the buffer with signed integers like python
-	 * buf_of(self, 0) = self[0]
-	 * buf_of(self, 1) = self[1]
-	 * buf_of(self, -1) = self[self.count - 1]
-	 *
-	 * @param      self  The buffer
-	 * @param[in]  ix    The index
-	 */
+	// indexes the buf with signed integers like python
+	// examples:
+	// mn::buf_of(b, 0) = b[0]
+	// mn::buf_of(b, 1) = b[1]
+	// mn::buf_of(b, -1) = b[b.count - 1];
 	template<typename T>
 	inline static T&
 	buf_of(Buf<T>& self, int ix)
@@ -183,15 +154,11 @@ namespace mn
 		return self.ptr[ix];
 	}
 
-	/**
-	 * @brief      indexes the buffer with signed integers like python
-	 * buf_of(self, 0) = self[0]
-	 * buf_of(self, 1) = self[1]
-	 * buf_of(self, -1) = self[self.count - 1]
-	 *
-	 * @param      self  The buffer
-	 * @param[in]  ix    The index
-	 */
+	// indexes the buf with signed integers like python
+	// examples:
+	// mn::buf_of(b, 0) = b[0]
+	// mn::buf_of(b, 1) = b[1]
+	// mn::buf_of(b, -1) = b[b.count - 1];
 	template<typename T>
 	inline static const T&
 	buf_of(const Buf<T>& self, int ix)
@@ -203,9 +170,8 @@ namespace mn
 		return self.ptr[ix];
 	}
 
-	/**
-	 * @brief      Clears the given buf
-	 */
+	// clears the given buf, by changing the element count to 0, it doesn't free the memory not does it destruct the
+	// elements
 	template<typename T>
 	inline static void
 	buf_clear(Buf<T>& self)
@@ -213,12 +179,7 @@ namespace mn
 		self.count = 0;
 	}
 
-	/**
-	 * @brief      Fills all the values of the given buf with the given value
-	 *
-	 * @param      self   The buf
-	 * @param[in]  value  The value
-	 */
+	// fills the given buf with a value
 	template<typename T, typename R>
 	inline static void
 	buf_fill(Buf<T>& self, const R& value)
@@ -245,12 +206,8 @@ namespace mn
 		self.cap = new_count;
 	}
 
-	/**
-	 * @brief      Ensures the given buf has the capacity to hold the added size
-	 *
-	 * @param      self        The buf
-	 * @param[in]  added_size  The added size
-	 */
+	// ensures the given buf has the capacity to hold the added size, which might allocate memory in case the current
+	// capacity can't hold the added size
 	template<typename T>
 	inline static void
 	buf_reserve(Buf<T>& self, size_t added_size)
@@ -264,12 +221,7 @@ namespace mn
 		_buf_reserve_exact(self, request_cap);
 	}
 
-	/**
-	 * @brief      Resizes the given buf to the new size
-	 *
-	 * @param      self      The buf
-	 * @param[in]  new_size  The new size
-	 */
+	// resizes the given buf to the new count of elements
 	template<typename T>
 	inline static void
 	buf_resize(Buf<T>& self, size_t new_size)
@@ -279,14 +231,8 @@ namespace mn
 		self.count = new_size;
 	}
 
-	/**
-	 * @brief      Resizes the given buf to the new size and in case the new size is bigger than
-	 * the current size it fills the new element with the given fill_val
-	 *
-	 * @param      self      The buf
-	 * @param[in]  new_size  The new size
-	 * @param[in]  fill_val  The fill value
-	 */
+	// resizes the given buf to the new size and in case the new size is bigger than the current size it fills the newly
+	// allocated elements with the given value
 	template<typename T, typename U>
 	inline static void
 	buf_resize_fill(Buf<T>& self, size_t new_size, const U& fill_val)
@@ -300,9 +246,7 @@ namespace mn
 		self.count = new_size;
 	}
 
-	/**
-	 * @brief      Shrinks the given buf to exactly the size of the contained elements
-	 */
+	// shrinks the given buf to exactly the size of the contained elements
 	template<typename T>
 	inline static void
 	buf_shrink_to_fit(Buf<T>& self)
@@ -320,14 +264,7 @@ namespace mn
 		self.cap = self.count;
 	}
 
-	/**
-	 * @brief      Pushes a new value to the given buf
-	 *
-	 * @param      self   The buf
-	 * @param[in]  value  The value
-	 * 
-	 * @return     A Pointer to the added element
-	 */
+	// pushes a new value to the end of the given buf
 	template<typename T, typename R>
 	inline static T*
 	buf_push(Buf<T>& self, const R& value)
@@ -340,13 +277,7 @@ namespace mn
 		return self.ptr + self.count - 1;
 	}
 
-	/**
-	 * @brief      Pushes the given value to the end of the buf n times
-	 *
-	 * @param      self   The buf
-	 * @param[in]  count  The repeating count
-	 * @param[in]  value  The value
-	 */
+	// pushes the given value n number of times (according to the given count) to the end of the given buf
 	template<typename T>
 	inline static void
 	buf_pushn(Buf<T>& self, size_t count, const T& value)
@@ -357,15 +288,7 @@ namespace mn
 			self.ptr[i] = value;
 	}
 
-	/**
-	 * @brief      insert a new value to the given buf at given index
-	 *
-	 * @param      self   The buf
-	 * @param      index  The insertion position
-	 * @param[in]  value  The value
-	 *
-	 * @return     A Pointer to the added element
-	 */
+	// inserts a new value at a specific index
 	template<typename T, typename R>
 	inline static T*
 	buf_insert(Buf<T>& self, size_t index, const R& value)
@@ -379,15 +302,7 @@ namespace mn
 		return self.ptr + index;
 	}
 
-	/**
-	 * @brief      remove a value to the given buf at given index
-	 *
-	 * @param      self   The buf
-	 * @param      index  The deletion position
-	 * @param[in]  value  The value
-	 *
-	 * @return     void
-	 */
+	// remove the value found at the given index while preserving the order of the elements in the given buf
 	template<typename T>
 	inline static void
 	buf_remove_ordered(Buf<T>& self, size_t index)
@@ -397,13 +312,7 @@ namespace mn
 		--self.count;
 	}
 
-	/**
-	 * @brief      Concats two Bufs together
-	 *
-	 * @param      self   The buf to concatenate to
-	 * @param[in]  begin  The begin
-	 * @param[in]  end    The end
-	 */
+	// pushes a range of elements to the end of the given buf
 	template<typename T>
 	inline static void
 	buf_concat(Buf<T>& self, const T* begin, const T* end)
@@ -414,12 +323,7 @@ namespace mn
 		::memcpy(self.ptr + old_count, begin, added_count * sizeof(T));
 	}
 
-	/**
-	 * @brief  update self buffer after concatenating other.
-	 *
-	 * @param[in]  first buffer to concat.
-	 * @param[in]  second buffer to concat.
-	 */
+	// concatenates two bufs together
 	template<typename T>
 	inline static void
 	buf_concat(Buf<T>& self, const Buf<T>& other)
@@ -427,10 +331,7 @@ namespace mn
 		buf_concat(self, other.ptr, other.ptr + other.count);
 	}
 
-
-	/**
-	 * @brief      Pops the last element of the buf
-	 */
+	// pops the last element of the buf
 	template<typename T>
 	inline static void
 	buf_pop(Buf<T>& self)
@@ -439,12 +340,7 @@ namespace mn
 		--self.count;
 	}
 
-	/**
-	 * @brief      Removes any data which the predicate returns true on
-	 *
-	 * @param      self     The buf
-	 * @param      pred     The predicate
-	 */
+	// rmeoves any element which the predicate signals (by returning true)
 	template<typename T, typename TLambda>
 	inline static void
 	buf_remove_if(Buf<T>& self, TLambda&& pred)
@@ -465,12 +361,7 @@ namespace mn
 		self.count -= end_it - front_it;
 	}
 
-	/**
-	 * @brief      Removes the element in the given index (will not keep order)
-	 *
-	 * @param      self  The buf
-	 * @param[in]  ix    The index
-	 */
+	// removes the element found at the given index (will not keep order)
 	template<typename T>
 	inline static void
 	buf_remove(Buf<T>& self, size_t ix)
@@ -485,12 +376,7 @@ namespace mn
 		--self.count;
 	}
 
-	/**
-	 * @brief      Removes the element the iterator points to
-	 *
-	 * @param      self  The buf
-	 * @param      it    The iterator
-	 */
+	// removes the element which the given iterator points to (will not keep order)
 	template<typename T>
 	inline static void
 	buf_remove(Buf<T>& self, T* it)
@@ -498,9 +384,7 @@ namespace mn
 		buf_remove(self, it - self.ptr);
 	}
 
-	/**
-	 * @brief      Returns a const ref to the last element off the buf
-	 */
+	// returns the top/last element in the given buf
 	template<typename T>
 	inline static const T&
 	buf_top(const Buf<T>& self)
@@ -509,9 +393,7 @@ namespace mn
 		return self.ptr[self.count - 1];
 	}
 
-	/**
-	 * @brief      Returns a ref to the last element off the buf
-	 */
+	// returns the top/last element in the given buf
 	template<typename T>
 	inline static T&
 	buf_top(Buf<T>& self)
@@ -520,9 +402,7 @@ namespace mn
 		return self.ptr[self.count - 1];
 	}
 
-	/**
-	 * @brief      Returns whether the buff is empty or not
-	 */
+	// returns whether the given buf is empty or not
 	template<typename T>
 	inline static bool
 	buf_empty(const Buf<T>& self)
@@ -530,9 +410,7 @@ namespace mn
 		return self.count == 0;
 	}
 
-	/**
-	 * @brief      Returns a const pointer to the start of the buf
-	 */
+	// returns an iterator to the start of the given buf
 	template<typename T>
 	inline static const T*
 	buf_begin(const Buf<T>& self)
@@ -540,9 +418,7 @@ namespace mn
 		return self.ptr;
 	}
 
-	/**
-	 * @brief      Returns a pointer to the start of the buf
-	 */
+	// returns an iterator to the start of the given buf
 	template<typename T>
 	inline static T*
 	buf_begin(Buf<T>& self)
@@ -550,9 +426,7 @@ namespace mn
 		return self.ptr;
 	}
 
-	/**
-	 * @brief      Returns a const pointer to the end of the buf
-	 */
+	// returns an iterator at the end of the given buf
 	template<typename T>
 	inline static const T*
 	buf_end(const Buf<T>& self)
@@ -560,9 +434,7 @@ namespace mn
 		return self.ptr + self.count;
 	}
 
-	/**
-	 * @brief      Returns a pointer to the end of the buf
-	 */
+	// returns an iterator at the end of the given buf
 	template<typename T>
 	inline static T*
 	buf_end(Buf<T>& self)
@@ -570,6 +442,8 @@ namespace mn
 		return self.ptr + self.count;
 	}
 
+	// begin function overload which is useful when using range for loop ex. `for (auto x: buf)` and various standard
+	// algorithms ex. `std::sort(begin(buf), end(buf));`
 	template<typename T>
 	inline static const T*
 	begin(const Buf<T>& self)
@@ -577,6 +451,8 @@ namespace mn
 		return buf_begin(self);
 	}
 
+	// begin function overload which is useful when using range for loop ex. `for (auto x: buf)` and various standard
+	// algorithms ex. `std::sort(begin(buf), end(buf));`
 	template<typename T>
 	inline static T*
 	begin(Buf<T>& self)
@@ -584,6 +460,8 @@ namespace mn
 		return buf_begin(self);
 	}
 
+	// end function overload which is useful when using range for loop ex. `for (auto x: buf)` and various standard
+	// algorithms ex. `std::sort(begin(buf), end(buf));`
 	template<typename T>
 	inline static const T*
 	end(const Buf<T>& self)
@@ -591,6 +469,8 @@ namespace mn
 		return buf_end(self);
 	}
 
+	// end function overload which is useful when using range for loop ex. `for (auto x: buf)` and various standard
+	// algorithms ex. `std::sort(begin(buf), end(buf));`
 	template<typename T>
 	inline static T*
 	end(Buf<T>& self)
@@ -598,15 +478,7 @@ namespace mn
 		return buf_end(self);
 	}
 
-	/**
-	 * @brief      General clone function which returns a new instance of the given value
-	 *
-	 * @param[in]  value  The value
-	 *
-	 * @tparam     T      Instance type
-	 *
-	 * @return     Copy of this object.
-	 */
+	// general clone function which returns a new equal and disjoint instance of the given value
 	template<typename T>
 	inline static T
 	clone(const T& value)
@@ -642,15 +514,8 @@ namespace mn
 		}
 	}
 
-	/**
-	 * @brief      A Custom clone function which iterates over the buf and calls the clone function
-	 * over each element thus making a deep copy of the complex structure
-	 *
-	 * @param[in]  other      The buf to be cloned
-	 * @param[in]  allocator  The allocator to be used by the cloned instance
-	 *
-	 * @return     The newly cloned buf
-	 */
+	// a custom clone function for the buf, which iterators over the elements and calls clone on each one of them
+	// thus making a deep copy of the buf
 	template<typename T>
 	inline static Buf<T>
 	buf_clone(const Buf<T>& other, Allocator allocator = allocator_top())
@@ -662,14 +527,8 @@ namespace mn
 		return buf;
 	}
 
-	/**
-	 * @brief      An overload of the general clone function which uses the custom clone
-	 * function of the buf
-	 *
-	 * @param[in]  other  The buf to be cloned
-	 *
-	 * @return     Copy of this object.
-	 */
+	// an overload of the general clone function which uses the custom clone function of the buf which iterators over
+	// the elements and calls clone on each one of them thus making a deep copy of the buf
 	template<typename T>
 	inline static Buf<T>
 	clone(const Buf<T>& other)
@@ -677,8 +536,7 @@ namespace mn
 		return buf_clone(other);
 	}
 
-	// buf_memcpy_clone is used to memcpy the underlying memory of the buf, this is useful as a fast copy for
-	// trivially copyable types
+	// memcpys the underlying memory of the given buf, this is useful as a fast copy for tivially copyable types
 	template<typename T>
 	inline static Buf<T>
 	buf_memcpy_clone(const Buf<T>& other, Allocator allocator = allocator_top())
@@ -689,6 +547,7 @@ namespace mn
 		return buf;
 	}
 
+	// general clone functions for builtin types
 	#define TRIVIAL_MEMCPY_CLONE(TYPE) \
 	inline static Buf<TYPE> \
 	clone(const Buf<TYPE>& other) \
@@ -710,6 +569,7 @@ namespace mn
 
 	#undef TRIVIAL_MEMCPY_CLONE
 
+	// returns a block of memory which encloses the given buf elements
 	template<typename T>
 	inline static Block
 	block_from(const Buf<T>& b)
