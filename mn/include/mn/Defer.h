@@ -19,5 +19,7 @@ namespace mn
 	#define mn_DEFER_1(x, y) x##y
 	#define mn_DEFER_2(x, y) mn_DEFER_1(x, y)
 	#define mn_DEFER_3(x)    mn_DEFER_2(x, __COUNTER__)
+
+	// defers the given code/block of code to the end of the current scopre
 	#define mn_defer(code)   auto mn_DEFER_3(_defer_) = mn::make_defer([&](){code;})
 }

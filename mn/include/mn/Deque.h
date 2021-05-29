@@ -15,6 +15,7 @@ namespace mn
 		size_t element_index;
 	};
 
+	// a double ended queue which allows you to push to either sides of the array
 	template<typename T>
 	struct Deque
 	{
@@ -34,7 +35,7 @@ namespace mn
 			assert(ix < count);
 			size_t bucket_index = ix / bucket_size;
 			size_t element_index = ix % bucket_size;
-			
+
 			bucket_index += front.bucket_index;
 			element_index += front.element_index;
 
@@ -59,6 +60,7 @@ namespace mn
 		}
 	};
 
+	// creates a new instance of a deque
 	template<typename T>
 	inline static Deque<T>
 	deque_new()
@@ -76,6 +78,7 @@ namespace mn
 		return self;
 	}
 
+	// creates a new deque instance with the given allocator
 	template<typename T>
 	inline static Deque<T>
 	deque_with_allocator(Allocator allocator)
@@ -93,6 +96,7 @@ namespace mn
 		return self;
 	}
 
+	// frees the given deque instance
 	template<typename T>
 	inline static void
 	deque_free(Deque<T>& self)
@@ -102,6 +106,10 @@ namespace mn
 		free_from(self.allocator, Block{ self.buckets, self.bucket_cap * sizeof(T*) });
 	}
 
+	// a custom overload for deque which loops over all the elements and calls destruct, this is useful for destructing
+	// a big hierarchy without memory leaks, for example when you free mn::Deque<mn::Deque<int>> if you use mn::deque_free
+	// you'll only free the top level deque and won't free the small mn::Deque<int> inside, it's more appropriate to use
+	// destruct instead of mn::deque_free for this case which will destruct each mn::Deque<int> inside the bigger deque
 	template<typename T>
 	inline static void
 	destruct(Deque<T>& self)
@@ -179,7 +187,7 @@ namespace mn
 			return;
 
 		T* bucket = (T*)alloc_from(self.allocator, sizeof(T) * self.bucket_size, alignof(T)).ptr;
-		
+
 		// then we need to resize this array
 		if (self.bucket_count >= self.bucket_cap)
 		{
@@ -199,6 +207,7 @@ namespace mn
 		++self.bucket_count;
 	}
 
+	// pushes the given value to the back of the deque
 	template<typename T>
 	inline static void
 	deque_push_back(Deque<T>& self, const T& v)
@@ -209,6 +218,7 @@ namespace mn
 		++self.count;
 	}
 
+	// allocates space for a single element at the back of the deque and returns a pointer to it
 	template<typename T>
 	inline static T*
 	deque_alloc_back(Deque<T>& self)
@@ -255,6 +265,7 @@ namespace mn
 		deque_grow_back(self);
 	}
 
+	// pushes the given value to the front of the deque
 	template<typename T>
 	inline static void
 	deque_push_front(Deque<T>& self, const T& v)
@@ -265,6 +276,7 @@ namespace mn
 		++self.count;
 	}
 
+	// allocates space for a single element at the front of the deque and returns a pointer to it
 	template<typename T>
 	inline static T*
 	deque_alloc_front(Deque<T>& self)
@@ -276,6 +288,7 @@ namespace mn
 		return p;
 	}
 
+	// removes an element off the back of the given deque
 	template<typename T>
 	inline static void
 	deque_pop_back(Deque<T>& self)
@@ -286,6 +299,7 @@ namespace mn
 		--self.count;
 	}
 
+	// removes an element off the front of the given deque
 	template<typename T>
 	inline static void
 	deque_pop_front(Deque<T>& self)
@@ -296,6 +310,7 @@ namespace mn
 		--self.count;
 	}
 
+	// returns a reference to the front of the given deque
 	template<typename T>
 	inline static T&
 	deque_front(Deque<T>& self)
@@ -303,6 +318,7 @@ namespace mn
 		return self[0];
 	}
 
+	// returns a reference to the front of the given deque
 	template<typename T>
 	inline static const T&
 	deque_front(const Deque<T>& self)
@@ -310,6 +326,7 @@ namespace mn
 		return self[0];
 	}
 
+	// returns a reference to the back of the given deque
 	template<typename T>
 	inline static T&
 	deque_back(Deque<T>& self)
@@ -317,6 +334,7 @@ namespace mn
 		return self[self.count - 1];
 	}
 
+	// returns a reference to the back of the given deque
 	template<typename T>
 	inline static const T&
 	deque_back(const Deque<T>& self)
@@ -324,6 +342,8 @@ namespace mn
 		return self[self.count - 1];
 	}
 
+	// a custom clone function for the deque, which iterators over the elements and calls clone on each one of them
+	// thus making a deep copy of the deque
 	template<typename T>
 	inline static Deque<T>
 	deque_clone(const Deque<T>& other, Allocator allocator = allocator_top())
@@ -334,6 +354,8 @@ namespace mn
 		return res;
 	}
 
+	// an overload of the general clone function which uses the custom clone function of the deque which iterators over
+	// the elements and calls clone on each one of them thus making a deep copy of the deque
 	template<typename T>
 	inline static Deque<T>
 	clone(const Deque<T>& other)
