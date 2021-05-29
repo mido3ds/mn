@@ -13,33 +13,40 @@ namespace mn
 	inline static size_t
 	block_stream_read(Block_Stream& self, Block data);
 
+	// wraps a stream interface around a simple memory block, which allows you to use standard read, write, and cursor
+	// operation over a block of memory
 	struct Block_Stream final : IStream
 	{
 		Block data;
 		int64_t cursor;
 
+		// frees the given block stream
 		void
 		dispose() override
 		{}
 
+		// reads into the given memory block and returns the amount of read memory in bytes
 		size_t
 		read(Block data) override
 		{
 			return block_stream_read(*this, data);
 		}
 
+		// block stream is a readonly one so it fails when you write into it by returning 0 bytes written
 		size_t
 		write(Block data) override
 		{
 			return 0;
 		}
 
+		// returns the size of the stream
 		int64_t
 		size() override
 		{
 			return data.size;
 		}
 
+		// performs the given operation on the cursor and returns the new value of the cursor
 		int64_t
 		cursor_operation(STREAM_CURSOR_OP op, int64_t arg) override
 		{
@@ -66,6 +73,7 @@ namespace mn
 		}
 	};
 
+	// wraps the given memory block into a block stream
 	inline static Block_Stream
 	block_stream_wrap(Block data)
 	{
@@ -74,6 +82,7 @@ namespace mn
 		return self;
 	}
 
+	// reads from the block stream into the given memory block and returns the amount of read data in bytes
 	inline static size_t
 	block_stream_read(Block_Stream& self, Block data)
 	{
@@ -87,36 +96,42 @@ namespace mn
 		return read_size;
 	}
 
+	// returns the size of the block stream in bytes
 	inline static int64_t
 	block_stream_size(const Block_Stream& self)
 	{
 		return self.data.size;
 	}
 
+	// returns the current position of stream's cursor
 	inline static int64_t
 	block_stream_cursor_pos(const Block_Stream& self)
 	{
 		return self.cursor;
 	}
 
+	// moves the cursor position with the given offset, which is signed to allow you to move forwards and backwards
 	inline static void
 	block_stream_cursor_move(Block_Stream& self, int64_t offset)
 	{
 		self.cursor += offset;
 	}
 
+	// sets the cursor position to an absolute position
 	inline static void
 	block_stream_cursor_set(Block_Stream& self, int64_t abs)
 	{
 		self.cursor = abs;
 	}
 
+	// resets the cursor position back to the start of the stream
 	inline static void
 	block_stream_cursor_to_start(Block_Stream& self)
 	{
 		self.cursor = 0;
 	}
 
+	// sets the cursor position to the end of the stream
 	inline static void
 	block_stream_cursor_to_end(Block_Stream& self)
 	{
