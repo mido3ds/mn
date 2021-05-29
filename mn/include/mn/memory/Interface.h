@@ -7,6 +7,7 @@
 
 namespace mn::memory
 {
+	// memory allocators interface, all memory allocators should implement this interface
 	struct Interface
 	{
 		virtual ~Interface() = default;

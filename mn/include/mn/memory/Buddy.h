@@ -6,6 +6,8 @@
 
 namespace mn::memory
 {
+	// a general purpose buddy allocator, which acts as a containerized malloc
+	// implementation, with a log(N) complexity for both alloc and free
 	struct Buddy : Interface
 	{
 		struct Node
@@ -79,15 +81,19 @@ namespace mn::memory
 		// used to know when to call "brk" to request more memory from the kernel.
 		uint8_t* max_ptr;
 
+		// creates a new instance of buddy allocator
 		MN_EXPORT
 		Buddy(size_t heap_size, Interface* meta = virtual_mem());
 
+		// frees the given instance of the allocator
 		MN_EXPORT
 		~Buddy();
 
+		// allocates a block with the given size and alignement
 		MN_EXPORT Block
 		alloc(size_t size, uint8_t alignment) override;
 
+		// frees the given block, in case the block is empty it does nothing
 		MN_EXPORT void
 		free(Block block) override;
 	};

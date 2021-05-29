@@ -9,17 +9,21 @@
 
 namespace mn::memory
 {
+	// virtual memory allocator which allocates memory directly from the OS's virtual table
 	struct Virtual : Interface
 	{
 		~Virtual() = default;
 
+		// allocates and commits a new memory block with the given size and alignment
 		MN_EXPORT Block
 		alloc(size_t size, uint8_t alignment) override;
 
+		// frees the given memory block, if the block is empty it does nothing
 		MN_EXPORT void
 		free(Block block) override;
 	};
 
+	// returns the global virtual memory allocator instance
 	MN_EXPORT Virtual*
 	virtual_mem();
 }
