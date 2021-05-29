@@ -45,31 +45,23 @@ namespace mn
 	MN_EXPORT Context*
 	context_local(Context* new_context = nullptr);
 
-	/**
-	 * Allocators are organized in a per thread stack so that you can change the allocator of any
-	 * part of the code even if it doesn't support custom allocator by using
-	 * allocator_push() and allocator_pop()
-	 * At the base of the stack is the clib_allocator and it can't be popped
-	 *
-	 * @return     The current top of allocator stack of the calling thread
-	 */
+	// allocators are organized in a per thread stack so that you can default/top used allocator by calling
+	// mn::allocator_push and mn::allocator_pop, at the base of the stack is the clib allocator and it can't be popped
+	// it returns the current default/top allocator of the calling thread
 	MN_EXPORT Allocator
 	allocator_top();
 
-	/**
-	 * @brief      Pushes the given allocator to the top of the calling thread allocator stack
-	 */
+	// pushes the given allocator to the top of the calling thread allocator stack
 	MN_EXPORT void
 	allocator_push(Allocator allocator);
 
-	/**
-	 * @brief      Pops an allocator off the calling thread allocator stack
-	 */
+	// pops an allocator off the calling thread allocator stack
 	MN_EXPORT void
 	allocator_pop();
 
 	namespace memory
 	{
+		// returns the current thread's tmp memory allocator
 		MN_EXPORT Arena*
 		tmp();
 	}
@@ -77,17 +69,22 @@ namespace mn
 	MN_EXPORT memory::Arena*
 	_memory_tmp_set(memory::Arena* a);
 
+	// returns the current thread's tmp reader, useful for quick parsing of string
 	MN_EXPORT Reader
 	reader_tmp();
 
-	// Profiling Wrapper
+	// profiling hooks for memory allocation and free
 	struct Memory_Profile_Interface
 	{
+		// pointer to user data
 		void* self;
+		// function which will be called every time we allocate memory
 		void (*profile_alloc)(void* self, void* ptr, size_t size);
+		// function which will be called every time we free memory
 		void (*profile_free)(void* self, void* ptr, size_t size);
 	};
 
+	// changes the current memory profiling hooks to the given interface and returns the old one
 	MN_EXPORT Memory_Profile_Interface
 	memory_profile_interface_set(Memory_Profile_Interface self);
 
@@ -97,17 +94,24 @@ namespace mn
 	MN_EXPORT void
 	_memory_profile_free(void* ptr, size_t size);
 
-	// Log Wrapper
+	// logger hooks for unified logging experience
 	struct Log_Interface
 	{
+		// pointer to user data
 		void* self;
+		// logs a debug level message
 		void (*debug)(void* self, const char* msg);
+		// logs an info level message
 		void (*info)(void* self, const char* msg);
+		// logs a warning level message
 		void (*warning)(void* self, const char* msg);
+		// logs an error level message
 		void (*error)(void* self, const char* msg);
+		// logs a critical level message
 		void (*critical)(void* self, const char* msg);
 	};
 
+	// changes the current logger hooks to the given interface and returns the old one
 	MN_EXPORT Log_Interface
 	log_interface_set(Log_Interface self);
 
@@ -131,6 +135,7 @@ namespace mn
 	typedef struct IMutex* Mutex;
 	typedef struct IMutex_RW* Mutex_RW;
 
+	// multi-threading profiling hooks
 	struct Thread_Profile_Interface
 	{
 		// Thread hooks functions
@@ -157,7 +162,7 @@ namespace mn
 		void (*mutex_after_write_unlock)(Mutex_RW handle, void* user_data);
 	};
 
-	// used to setup the global threading profiling interface
+	// changes the current multi-threading hooks to the given interface and returns the old one
 	MN_EXPORT Thread_Profile_Interface
 	thread_profile_interface_set(Thread_Profile_Interface self);
 
