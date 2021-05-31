@@ -13,8 +13,6 @@ namespace mn
 	constexpr static auto DEFAULT_COOP_BLOCKING_THRESHOLD = 10;
 	constexpr static auto DEFAULT_EXTR_BLOCKING_THRESHOLD = 1000;
 
-	using Job = Task<void()>;
-
 	// Worker
 	struct IWorker
 	{
@@ -30,8 +28,9 @@ namespace mn
 		Mutex mtx;
 		Cond_Var cv;
 		Fabric fabric;
-		Ring<Job> job_q;
+		Ring<Fabric_Task> job_q;
 		Thread thread;
+		std::atomic<FABRIC_TASK_FLAGS> atomic_current_job_flags;
 		std::atomic<uint64_t> atomic_job_start_time_in_ms;
 		std::atomic<uint64_t> atomic_block_start_time_in_ms;
 		std::atomic<STATE> atomic_state;
@@ -74,7 +73,7 @@ namespace mn
 			auto state = self->atomic_state.load();
 			if (state == IWorker::STATE_RUNNING)
 			{
-				Job job{};
+				Fabric_Task job{};
 				{
 					mutex_lock(self->mtx);
 					mn_defer(mutex_unlock(self->mtx));
@@ -95,14 +94,16 @@ namespace mn
 					ring_pop_front(self->job_q);
 				}
 
-				if (job)
+				if (job.task)
 				{
 					self->atomic_job_start_time_in_ms.store(time_in_millis());
 					self->atomic_disable_block_timing = false;
-					job();
+					self->atomic_current_job_flags.store(job.flags);
+					job.task();
 					self->atomic_disable_block_timing = true;
 					self->atomic_job_start_time_in_ms.store(0);
-					task_free(job);
+					self->atomic_current_job_flags.store(FABRIC_TASK_FLAG_NONE);
+					fabric_task_free(job);
 					memory::tmp()->clear_all();
 					if (self->fabric)
 					{
@@ -174,7 +175,7 @@ namespace mn
 	}
 
 	inline static Worker
-	_worker_new(Str name, Fabric fabric, Ring<Job> stolen_jobs = ring_new<Job>())
+	_worker_new(Str name, Fabric fabric, Ring<Fabric_Task> stolen_jobs = ring_new<Fabric_Task>())
 	{
 		auto self = alloc_zerod<IWorker>();
 		self->name = name;
@@ -219,8 +220,9 @@ namespace mn
 		// detect blocking workers
 		for (size_t i = 0; i < self->workers.count; ++i)
 		{
+			auto current_job_flags = self->workers[i]->atomic_current_job_flags.load();
 			auto block_start_time = self->workers[i]->atomic_block_start_time_in_ms.load();
-			if(block_start_time != 0)
+			if(block_start_time != 0 && current_job_flags == FABRIC_TASK_FLAG_NONE)
 			{
 				auto block_time = time_in_millis() - block_start_time;
 				if(block_time > self->settings.coop_blocking_threshold_in_ms)
@@ -242,13 +244,13 @@ namespace mn
 		// move the blocking workers out
 		for (auto blocking_worker: blocking_workers)
 		{
-			Ring<Job> job_q{};
+			Ring<Fabric_Task> job_q{};
 			{
 				mutex_lock(blocking_worker.worker->mtx);
 				mn_defer(mutex_unlock(blocking_worker.worker->mtx));
 
 				job_q = blocking_worker.worker->job_q;
-				blocking_worker.worker->job_q = ring_new<Job>();
+				blocking_worker.worker->job_q = ring_new<Fabric_Task>();
 			}
 
 			{
@@ -295,8 +297,9 @@ namespace mn
 		// detect blocking workers
 		for (size_t i = 0; i < self->workers.count; ++i)
 		{
+			auto current_job_flags = self->workers[i]->atomic_current_job_flags.load();
 			auto job_start_time = self->workers[i]->atomic_job_start_time_in_ms.load();
-			if (job_start_time != 0)
+			if (job_start_time != 0 && current_job_flags == FABRIC_TASK_FLAG_NONE)
 			{
 				auto job_run_time = time_in_millis() - job_start_time;
 				if(job_run_time > self->settings.external_blocking_threshold_in_ms)
@@ -313,13 +316,13 @@ namespace mn
 		// move the blocking workers out
 		for (auto blocking_worker: blocking_workers)
 		{
-			Ring<Job> job_q{};
+			Ring<Fabric_Task> job_q{};
 			{
 				mutex_lock(blocking_worker.worker->mtx);
 				mn_defer(mutex_unlock(blocking_worker.worker->mtx));
 
 				job_q = blocking_worker.worker->job_q;
-				blocking_worker.worker->job_q = ring_new<Job>();
+				blocking_worker.worker->job_q = ring_new<Fabric_Task>();
 			}
 
 			{
@@ -378,7 +381,7 @@ namespace mn
 		auto dead_workers = buf_with_capacity<Worker>(self->workers.count);
 		mn_defer(destruct(dead_workers));
 
-		auto tmp_jobs = buf_new<Job>();
+		auto tmp_jobs = buf_new<Fabric_Task>();
 		mn_defer(destruct(tmp_jobs));
 
 		auto timeslice = self->settings.coop_blocking_threshold_in_ms;
@@ -530,7 +533,7 @@ namespace mn
 	}
 
 	void
-	worker_task_do(Worker self, const Task<void()>& task)
+	worker_task_do(Worker self, const Fabric_Task& task)
 	{
 		mutex_lock(self->mtx);
 		mn_defer(mutex_unlock(self->mtx));
@@ -540,7 +543,7 @@ namespace mn
 	}
 
 	void
-	worker_task_batch_do(Worker self, const Task<void()>* ptr, size_t count)
+	worker_task_batch_do(Worker self, const Fabric_Task* ptr, size_t count)
 	{
 		mutex_lock(self->mtx);
 		mn_defer(mutex_unlock(self->mtx));
@@ -673,7 +676,7 @@ namespace mn
 	}
 
 	void
-	fabric_task_do(Fabric self, const Task<void()>& task)
+	fabric_task_do(Fabric self, const Fabric_Task& task)
 	{
 		mutex_lock(self->mtx);
 		mn_defer(mutex_unlock(self->mtx));
@@ -689,7 +692,7 @@ namespace mn
 	}
 
 	void
-	fabric_task_batch_do(Fabric self, const Task<void()>* ptr, size_t count)
+	fabric_task_batch_do(Fabric self, const Fabric_Task* ptr, size_t count)
 	{
 		mutex_lock(self->mtx);
 		mn_defer(mutex_unlock(self->mtx));
@@ -716,7 +719,7 @@ namespace mn
 	void
 	_multi_threaded_compute(Fabric self, Compute_Dims global, Compute_Dims local, Task<void(Compute_Args)> fn)
 	{
-		auto batch = buf_with_allocator<Job>(memory::tmp());
+		auto batch = buf_with_allocator<Fabric_Task>(memory::tmp());
 
 		Auto_Waitgroup wg;
 		for (size_t z = 0; z < global.z; ++z)
@@ -725,7 +728,8 @@ namespace mn
 			{
 				for (size_t x = 0; x < global.x; ++x)
 				{
-					buf_push(batch, Job::make([global_x = x, global_y = y, global_z = z, global, local, &wg, &fn]
+					Fabric_Task entry{};
+					entry.task = Task<void()>::make([global_x = x, global_y = y, global_z = z, global, local, &wg, &fn]
 					{
 						for (size_t z = 0; z < local.z; ++z)
 						{
@@ -750,7 +754,9 @@ namespace mn
 							}
 						}
 						wg.done();
-					}));
+					});
+					entry.flags = FABRIC_TASK_FLAG_COMPUTE;
+					buf_push(batch, entry);
 				}
 			}
 		}
@@ -764,7 +770,7 @@ namespace mn
 	void
 	_multi_threaded_compute_sized(Fabric self, Compute_Dims global, Compute_Dims size, Compute_Dims local, Task<void(Compute_Args)> fn)
 	{
-		auto batch = buf_with_allocator<Job>(memory::tmp());
+		auto batch = buf_with_allocator<Fabric_Task>(memory::tmp());
 
 		Auto_Waitgroup wg;
 		for (size_t z = 0; z < global.z; ++z)
@@ -773,7 +779,8 @@ namespace mn
 			{
 				for (size_t x = 0; x < global.x; ++x)
 				{
-					buf_push(batch, Job::make([global_x = x, global_y = y, global_z = z, global, size, local, &wg, &fn]
+					Fabric_Task entry{};
+					entry.task = Task<void()>::make([global_x = x, global_y = y, global_z = z, global, size, local, &wg, &fn]
 					{
 						for (size_t z = 0; z < local.z; ++z)
 						{
@@ -800,7 +807,9 @@ namespace mn
 							}
 						}
 						wg.done();
-					}));
+					});
+					entry.flags = FABRIC_TASK_FLAG_COMPUTE;
+					buf_push(batch, entry);
 				}
 			}
 		}
@@ -814,7 +823,7 @@ namespace mn
 	void
 	_multi_threaded_compute_tiled(Fabric self, Compute_Dims total_size, Compute_Dims tile_size, Task<void(Compute_Args)> fn)
 	{
-		auto batch = buf_with_allocator<Job>(memory::tmp());
+		auto batch = buf_with_allocator<Fabric_Task>(memory::tmp());
 
 		Auto_Waitgroup wg;
 		for (size_t global_z = 0; global_z < total_size.z; ++global_z)
@@ -823,7 +832,8 @@ namespace mn
 			{
 				for (size_t global_x = 0; global_x < total_size.x; ++global_x)
 				{
-					buf_push(batch, Job::make([global_x, global_y, global_z, total_size, tile_size, &wg, &fn] {
+					Fabric_Task entry{};
+					entry.task = Task<void()>::make([global_x, global_y, global_z, total_size, tile_size, &wg, &fn] {
 						Compute_Args args{};
 						args.workgroup_size = tile_size;
 						args.workgroup_num = total_size;
@@ -836,7 +846,9 @@ namespace mn
 						};
 						fn(args);
 						wg.done();
-					}));
+					});
+					entry.flags = FABRIC_TASK_FLAG_COMPUTE;
+					buf_push(batch, entry);
 				}
 			}
 		}

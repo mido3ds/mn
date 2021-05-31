@@ -15,6 +15,33 @@
 
 namespace mn
 {
+	enum FABRIC_TASK_FLAGS
+	{
+		// default flags
+		FABRIC_TASK_FLAG_NONE = 0,
+		// used to flag the compute tasks which have special handling
+		FABRIC_TASK_FLAG_COMPUTE = 1,
+	};
+
+	// represents a single task in the fabric's worker task queue
+	struct Fabric_Task
+	{
+		Task<void()> task;
+		FABRIC_TASK_FLAGS flags;
+	};
+
+	inline static void
+	fabric_task_free(Fabric_Task& self)
+	{
+		task_free(self.task);
+	}
+
+	inline static void
+	destruct(Fabric_Task& self)
+	{
+		fabric_task_free(self);
+	}
+
 	// Worker
 	typedef struct IWorker* Worker;
 
@@ -34,18 +61,20 @@ namespace mn
 
 	// worker_task_do schedules a task into the worker queue
 	MN_EXPORT void
-	worker_task_do(Worker self, const Task<void()>& task);
+	worker_task_do(Worker self, const Fabric_Task& task);
 
 	// schedules a task batch in to worker queue
 	MN_EXPORT void
-	worker_task_batch_do(Worker self, const Task<void()>* ptr, size_t count);
+	worker_task_batch_do(Worker self, const Fabric_Task* ptr, size_t count);
 
 	// worker_do schedules any callable into the worker queue
 	template<typename TFunc>
 	inline static void
 	worker_do(Worker self, TFunc&& f)
 	{
-		worker_task_do(self, Task<void()>::make(std::forward<TFunc>(f)));
+		Fabric_Task entry{};
+		entry.task = Task<void()>::make(std::forward<TFunc>(f));
+		worker_task_do(self, entry);
 	}
 
 	MN_EXPORT Worker
@@ -133,17 +162,19 @@ namespace mn
 
 	// fabric_task_do adds a task to the fabric
 	MN_EXPORT void
-	fabric_task_do(Fabric self, const Task<void()>& task);
+	fabric_task_do(Fabric self, const Fabric_Task& task);
 
 	// adds a batch of tasks to fabric
 	MN_EXPORT void
-	fabric_task_batch_do(Fabric self, const Task<void()>* ptr, size_t count);
+	fabric_task_batch_do(Fabric self, const Fabric_Task* ptr, size_t count);
 
 	template<typename TFunc>
 	inline static void
 	fabric_do(Fabric self, TFunc&& f)
 	{
-		fabric_task_do(self, Task<void()>::make(std::forward<TFunc>(f)));
+		Fabric_Task entry{};
+		entry.task = Task<void()>::make(std::forward<TFunc>(f));
+		fabric_task_do(self, entry);
 	}
 
 	MN_EXPORT Fabric
@@ -168,14 +199,18 @@ namespace mn
 	inline static void
 	go(Fabric f, TFunc&& fn)
 	{
-		fabric_task_do(f, Task<void()>::make(std::forward<TFunc>(fn)));
+		Fabric_Task entry{};
+		entry.task = Task<void()>::make(std::forward<TFunc>(fn));
+		fabric_task_do(f, entry);
 	}
 
 	template<typename TFunc>
 	inline static void
 	go(Worker worker, TFunc&& fn)
 	{
-		worker_task_do(worker, Task<void()>::make(std::forward<TFunc>(fn)));
+		Fabric_Task entry{};
+		entry.task = Task<void()>::make(std::forward<TFunc>(fn));
+		worker_task_do(worker, entry);
 	}
 
 	template<typename TFunc>
@@ -183,11 +218,21 @@ namespace mn
 	go(TFunc&& fn)
 	{
 		if (Fabric f = fabric_local())
-			fabric_task_do(f, Task<void()>::make(std::forward<TFunc>(fn)));
+		{
+			Fabric_Task entry{};
+			entry.task = Task<void()>::make(std::forward<TFunc>(fn));
+			fabric_task_do(f, entry);
+		}
 		else if (Worker w = worker_local())
-			worker_task_do(w, Task<void()>::make(std::forward<TFunc>(fn)));
+		{
+			Fabric_Task entry{};
+			entry.task = Task<void()>::make(std::forward<TFunc>(fn));
+			worker_task_do(w, entry);
+		}
 		else
+		{
 			panic("can't find any local fabric or worker");
+		}
 	}
 
 	typedef struct IChan_Stream* Chan_Stream;
