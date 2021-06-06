@@ -15,6 +15,7 @@
 
 namespace mn
 {
+	// represents the type of the task submitted to fabric
 	enum FABRIC_TASK_FLAGS
 	{
 		// default flags
@@ -30,12 +31,14 @@ namespace mn
 		FABRIC_TASK_FLAGS flags;
 	};
 
+	// frees the given fabric task
 	inline static void
 	fabric_task_free(Fabric_Task& self)
 	{
 		task_free(self.task);
 	}
 
+	// destruct overload for the fabric task free function
 	inline static void
 	destruct(Fabric_Task& self)
 	{
@@ -43,23 +46,25 @@ namespace mn
 	}
 
 	// Worker
+	// represents a fabric worker which is a thread with a job queue attached to it
 	typedef struct IWorker* Worker;
 
-	// worker_new creates a new worker which is a threads with a job queue
+	// creates a new worker which is a threads with a job queue
 	MN_EXPORT Worker
 	worker_new(const char* name);
 
-	// worker_free frees the worker and stops its thread
+	// frees the worker and stops its thread
 	MN_EXPORT void
 	worker_free(Worker self);
 
+	// destruct overload for the worker
 	inline static void
 	destruct(Worker self)
 	{
 		worker_free(self);
 	}
 
-	// worker_task_do schedules a task into the worker queue
+	// schedules a task into the worker queue
 	MN_EXPORT void
 	worker_task_do(Worker self, const Fabric_Task& task);
 
@@ -67,7 +72,7 @@ namespace mn
 	MN_EXPORT void
 	worker_task_batch_do(Worker self, const Fabric_Task* ptr, size_t count);
 
-	// worker_do schedules any callable into the worker queue
+	// schedules any callable into the worker queue
 	template<typename TFunc>
 	inline static void
 	worker_do(Worker self, TFunc&& f)
@@ -77,15 +82,24 @@ namespace mn
 		worker_task_do(self, entry);
 	}
 
+	// returns the local worker of the calling thread if it has one, if it doesn't have a worker it will return nullptr
 	MN_EXPORT Worker
 	worker_local();
 
+	// used to signal to fabric that the calling thread's worker will do something that will
+	// potentially block worker's thread which is useful meta info for sysmon to decide what
+	// will it do to worker's unscheduled jobs
+	// blocking work examples: sleep, disk IO, network IO, mutex, etc..
 	MN_EXPORT void
 	worker_block_ahead();
 
+	// used to signal to fabric that the calling thread's worker has returned from the blocking workload and is
+	// executing actual code
 	MN_EXPORT void
 	worker_block_clear();
 
+	// blocks the current thread execution until the given function returns true
+	// it will check the function periodically (every 1 ms)
 	template<typename TFunc>
 	inline static void
 	worker_block_on(TFunc&& fn)
@@ -96,6 +110,8 @@ namespace mn
 		worker_block_clear();
 	}
 
+	// blocks the current thread execution until the given function returns true, or until it times out
+	// it will check the function periodically (every 1 ms)
 	template<typename TFunc>
 	inline static void
 	worker_block_on_with_timeout(Timeout timeout, TFunc&& fn)
@@ -120,11 +136,13 @@ namespace mn
 	}
 
 
-	// fabric
+	// fabric is a job queue system with multiple workers which it uses to execute jobs effieciently
 	typedef struct IFabric* Fabric;
 
+	// fabric construction settings, which is used to customize fabric behavior on creation
 	struct Fabric_Settings
 	{
+		// fabric instance name
 		const char* name;
 		// default: CPU cores count
 		size_t workers_count;
@@ -142,25 +160,28 @@ namespace mn
 		// will use to start evicting these workers if the blocking_workers_count >= workers_count * blocking_workers_threshold
 		// default: 0.5f
 		float blocking_workers_threshold;
+		// function which will be executed after each worker finishes executing a job
 		Task<void()> after_each_job;
+		// function which will be executed when a new worker is started
 		Task<void()> on_worker_start;
 	};
 
-	// fabric_new creates a group of workers
+	// creates a new fabric instance with the given construction settings
 	MN_EXPORT Fabric
 	fabric_new(Fabric_Settings settings);
 
-	// fabric_free stops and frees the group of workers
+	// stops and frees the given fabric
 	MN_EXPORT void
 	fabric_free(Fabric self);
 
+	// destruct overload of fabric_free fabric
 	inline static void
 	destruct(Fabric self)
 	{
 		fabric_free(self);
 	}
 
-	// fabric_task_do adds a task to the fabric
+	// adds a task to the fabric
 	MN_EXPORT void
 	fabric_task_do(Fabric self, const Fabric_Task& task);
 
@@ -168,6 +189,7 @@ namespace mn
 	MN_EXPORT void
 	fabric_task_batch_do(Fabric self, const Fabric_Task* ptr, size_t count);
 
+	// schedules any callable into the fabric queue
 	template<typename TFunc>
 	inline static void
 	fabric_do(Fabric self, TFunc&& f)
@@ -177,24 +199,38 @@ namespace mn
 		fabric_task_do(self, entry);
 	}
 
+	// returns the local fabric of the calling thread if it has one, if it doesn't it will return nullptr
 	MN_EXPORT Fabric
 	fabric_local();
 
+	// represents the compute interface dimensions which is used to specify
+	// how many tasks you need along x, y, and z axis
+	// similar to graphics compute dispatch interface
 	struct Compute_Dims
 	{
 		size_t x, y, z;
 	};
 
+	// represents the parameter for each compute job, it contains the same
+	// info as the graphics compute dispatch interface
 	struct Compute_Args
 	{
+		// the size of local workgroup (potentially the size which a single thread will handle)
+		// this is the local dimension input passed to the compute interface
 		Compute_Dims workgroup_size;
+		// the number of the local workgroups in this compute dispatch call
+		// this is the global dimension input passed to the compute interface
 		Compute_Dims workgroup_num;
+		// current global id of the local workgroup (indexes of the workgroup_num)
 		Compute_Dims workgroup_id;
+		// current local id of within the local workgroup (indexed of the workgroup_size)
 		Compute_Dims local_invocation_id;
+		// global id of the current compute invokation (workgroup_id * workgroup_size + local_invocation_id)
+		// index within both local + global indices of the compute dispatch
 		Compute_Dims global_invocation_id;
 	};
 
-	//easy interface
+	// schedules the given callable into the given fabric
 	template<typename TFunc>
 	inline static void
 	go(Fabric f, TFunc&& fn)
@@ -204,6 +240,7 @@ namespace mn
 		fabric_task_do(f, entry);
 	}
 
+	// schedules the given callable into the given worker
 	template<typename TFunc>
 	inline static void
 	go(Worker worker, TFunc&& fn)
@@ -213,6 +250,8 @@ namespace mn
 		worker_task_do(worker, entry);
 	}
 
+	// tries to schedule the given callable into the local worker/fabric
+	// if it doesn't find any it will panic
 	template<typename TFunc>
 	inline static void
 	go(TFunc&& fn)
@@ -235,6 +274,9 @@ namespace mn
 		}
 	}
 
+	// a message passing primitive used to communicate between fabric tasks
+	// this one is built around messages being simple byte streams
+	// which is useful if you're going to do work like encryption/compression
 	typedef struct IChan_Stream* Chan_Stream;
 	struct IChan_Stream final: IStream
 	{
@@ -245,21 +287,26 @@ namespace mn
 		std::atomic<int32_t> atomic_arc;
 		std::atomic<bool> atomic_closed;
 
+		// disposes of the current state of the channel stream
 		MN_EXPORT void
 		dispose() override;
 
+		// tries to read into the data_out block and returns the actual number of read bytes
 		MN_EXPORT size_t
 		read(Block data_out) override;
 
+		// tried to write data_in block into the given stream and returns the actual number of written bytes
 		MN_EXPORT size_t
 		write(Block data_in) override;
 
+		// returns 0 because we don't know the size of the stream beforehand
 		int64_t
 		size() override
 		{
 			return 0;
 		};
 
+		// it always fails because a stream doesn't have cursor support
 		int64_t
 		cursor_operation(STREAM_CURSOR_OP, int64_t) override
 		{
@@ -268,24 +315,39 @@ namespace mn
 		}
 	};
 
+	// creates a new channel stream which is a message passing primitive used
+	// to communicate between fabric tasks in byte/binary messages
 	MN_EXPORT Chan_Stream
 	chan_stream_new();
 
+	// frees the given channel stream, by decrementing its reference count and only freeing it if it reaches 0
 	MN_EXPORT void
 	chan_stream_free(Chan_Stream self);
 
+	// increments the reference count of the given stream
+	// because this stream is used to communicate between threads, it follows that
+	// its ownership model is not unique to single thread, but it's shared between multiple threads
+	// that's why it uses a reference counting model for its ownership
 	MN_EXPORT Chan_Stream
 	chan_stream_ref(Chan_Stream self);
 
+	// decrements the reference count of the given stream and frees the stream if it reaches 0
+	// because this stream is used to communicate between threads, it follows that
+	// its ownership model is not unique to single thread, but it's shared between multiple threads
+	// that's why it uses a reference counting model for its ownership
 	MN_EXPORT void
 	chan_stream_unref(Chan_Stream self);
 
+	// closes the given channel stream which means that any subsequent writes will fail
 	MN_EXPORT void
 	chan_stream_close(Chan_Stream self);
 
+	// returns whether the given channel stream is closed
 	MN_EXPORT bool
 	chan_stream_closed(Chan_Stream self);
 
+	// automatic wrapper around channel stream which uses RAII to handle the reference counting
+	// useful for scoped usage of channel streams
 	struct Auto_Chan_Stream
 	{
 		Chan_Stream handle;
@@ -334,6 +396,30 @@ namespace mn
 		operator Chan_Stream() const { return handle; }
 	};
 
+	// converts a given stream from an active one to a lazy one which is much suitable for piping a
+	// single stream through different processing functions
+	// for example if i have a file stream which is streamed from disk, ex. `auto file = file_open(...);`
+	// and i want to compress it using a compression function, ex. `compress(stream_in, stream_out);`
+	// then i want to encrypt it using an encryption function, ex. `encrypt(stream_in, stream_out);`
+	// the normal usage would be to:
+	// ```
+	// auto file = file_open(...);
+	// auto my_temporary_stream = get_desired_temporary_stream(...);
+	// compress(file, my_temporary_stream);
+	// auto my_output_stream = get_desired_output_stream(...);
+	// encrypt(my_temporary_stream, my_output_stream);
+	// ```
+	// this is fine but it forces you to compress the file completely before encrypting it
+	// and this file might be very large, it's desirable to process it without copying it in memory
+	// this function allows your code to be like this:
+	// ```
+	// auto file = file_open(...)
+	// auto compressed_stream = lazy_stream(fabric, compress, file);
+	// auto encrypted_stream = lazy_stream(fabric, encrypt, compressed_stream);
+	// auto my_output_stream = get_desired_output_stream(...);
+	// copy_stream(encrypted_stream, my_output_stream);
+	// ```
+	// this way you won't need to load the entire file into memory in order to process it
 	template<typename TFunc, typename ... TArgs>
 	inline static Auto_Chan_Stream
 	lazy_stream(Fabric f, TFunc&& func, mn::Stream stream_in, TArgs&& ... args)
@@ -347,7 +433,7 @@ namespace mn
 	}
 
 
-	// Channel
+	// a generic message passing primitive used to communicate between fabric tasks
 	template<typename T>
 	struct IChan
 	{
@@ -361,6 +447,7 @@ namespace mn
 	template<typename T>
 	using Chan = IChan<T>*;
 
+	// creates a new channel
 	template<typename T>
 	inline static Chan<T>
 	chan_new(int32_t limit = 1)
@@ -378,6 +465,10 @@ namespace mn
 		return self;
 	}
 
+	// increments the reference count of the given channel
+	// because this channel is used to communicate between threads, it follows that
+	// its ownership model is not unique to single thread, but it's shared between multiple threads
+	// that's why it uses a reference counting model for its ownership
 	template<typename T>
 	inline static Chan<T>
 	chan_ref(Chan<T> self)
@@ -386,10 +477,15 @@ namespace mn
 		return self;
 	}
 
+	// closes the given channel, which means that any subsquent writes will fail
 	template<typename T>
 	inline static void
 	chan_close(Chan<T> self);
 
+	// decrements the reference count of the given channel
+	// because this channel is used to communicate between threads, it follows that
+	// its ownership model is not unique to single thread, but it's shared between multiple threads
+	// that's why it uses a reference counting model for its ownership
 	template<typename T>
 	inline static Chan<T>
 	chan_unref(Chan<T> self)
@@ -408,6 +504,8 @@ namespace mn
 		return self;
 	}
 
+	// increments the reference count of the given channel and returns it
+	// thus making a new instance of the same channel
 	template<typename T>
 	inline static Chan<T>
 	chan_new(Chan<T> self)
@@ -416,6 +514,7 @@ namespace mn
 		return self;
 	}
 
+	// frees the given channel, by decrementing its reference count and only freeing it if it reaches 0
 	template<typename T>
 	inline static void
 	chan_free(Chan<T> self)
@@ -423,6 +522,7 @@ namespace mn
 		chan_unref(self);
 	}
 
+	// destruct overload of channel free
 	template<typename T>
 	inline static void
 	destruct(Chan<T> self)
@@ -430,6 +530,7 @@ namespace mn
 		chan_free(self);
 	}
 
+	// returns whether the given channel is closed
 	template<typename T>
 	inline static bool
 	chan_closed(Chan<T> self)
@@ -437,6 +538,7 @@ namespace mn
 		return self->atomic_limit.load() == 0;
 	}
 
+	// closes the given channel, which means that any subsquent writes will fail
 	template<typename T>
 	inline static void
 	chan_close(Chan<T> self)
@@ -448,6 +550,7 @@ namespace mn
 		cond_var_notify_all(self->write_cv);
 	}
 
+	// checks whether you can send to the given channel
 	template<typename T>
 	inline static bool
 	chan_can_send(Chan<T> self)
@@ -458,6 +561,7 @@ namespace mn
 		return res;
 	}
 
+	// tries to send the given value to the channel and returns whether it succeeded or not
 	template<typename T>
 	inline static bool
 	chan_send_try(Chan<T> self, const T& v)
@@ -473,6 +577,7 @@ namespace mn
 		return false;
 	}
 
+	// sends the given value to the channel, if it doesn't succeed it will block until it the value is sent
 	template<typename T>
 	inline static void
 	chan_send(Chan<T> self, const T& v)
@@ -495,6 +600,7 @@ namespace mn
 		cond_var_notify(self->read_cv);
 	}
 
+	// checks whether you can recieve from the given channel
 	template<typename T>
 	inline static bool
 	chan_can_recv(Chan<T> self)
@@ -505,12 +611,17 @@ namespace mn
 		return res;
 	}
 
+	// represents the return of the channel recieve operation
 	template<typename T>
-	struct Recv_Result {
+	struct Recv_Result
+	{
+		// the actualy recieved value
 		T res;
+		// boolean to indicate whether the recieve operation succeeded
 		bool more;
 	};
 
+	// tries to recieve a value from the given channel
 	template<typename T>
 	inline static Recv_Result<T>
 	chan_recv_try(Chan<T> self)
@@ -527,6 +638,7 @@ namespace mn
 		return { T{}, false };
 	}
 
+	// recieves a value from the given channel, it doesn't succeed it will block until a value is recieved
 	template<typename T>
 	inline static Recv_Result<T>
 	chan_recv(Chan<T> self)
@@ -559,6 +671,8 @@ namespace mn
 		}
 	}
 
+	// an iterator wrapper over the channel which allows you to use it in a range for loop
+	// `for (auto value: my_channel)`
 	template<typename T>
 	struct Chan_Iterator
 	{
@@ -617,6 +731,7 @@ namespace mn
 		}
 	};
 
+	// begin overload of the channel which allows its use in range for loops
 	template<typename T>
 	inline static Chan_Iterator<T>
 	begin(Chan<T> self)
@@ -624,6 +739,7 @@ namespace mn
 		return Chan_Iterator<T>{self, chan_recv(self)};
 	}
 
+	// end overload of the channel which allows its use in range for loops
 	template<typename T>
 	inline static Chan_Iterator<T>
 	end(Chan<T> self)
@@ -631,6 +747,8 @@ namespace mn
 		return Chan_Iterator<T>{self, {}};
 	}
 
+	// automatic wrapper around channel which uses RAII to handle the reference counting
+	// useful for scoped usage of channels
 	template<typename T>
 	struct Auto_Chan
 	{
@@ -677,6 +795,7 @@ namespace mn
 		Chan_Iterator<T> end() { return Chan_Iterator<T>{handle, {}}; }
 	};
 
+	// returns whether the given automatic channel is closed
 	template<typename T>
 	inline static bool
 	chan_closed(const Auto_Chan<T> &self)
@@ -684,6 +803,7 @@ namespace mn
 		return chan_closed(self.handle);
 	}
 
+	// closes the given automatic channel
 	template<typename T>
 	inline static void
 	chan_close(Auto_Chan<T> &self)
@@ -691,6 +811,7 @@ namespace mn
 		chan_close(self.handle);
 	}
 
+	// checks whether the given automatic channel can send
 	template<typename T>
 	inline static bool
 	chan_can_send(const Auto_Chan<T> &self)
@@ -698,6 +819,7 @@ namespace mn
 		return chan_can_send(self.handle);
 	}
 
+	// tries to send a value to the given automatic channel
 	template<typename T>
 	inline static bool
 	chan_send_try(Auto_Chan<T> &self, const T& v)
@@ -705,6 +827,7 @@ namespace mn
 		return chan_send_try(self.handle, v);
 	}
 
+	// sends a value to the given automatic channel, if it doesn't succeed it will block until the value is sent
 	template<typename T>
 	inline static void
 	chan_send(Auto_Chan<T> &self, const T& v)
@@ -712,6 +835,7 @@ namespace mn
 		return chan_send(self.handle, v);
 	}
 
+	// returns whether you can recieve from the given automatic channel
 	template<typename T>
 	inline static bool
 	chan_can_recv(const Auto_Chan<T> &self)
@@ -719,6 +843,7 @@ namespace mn
 		return chan_can_recv(self.handle);
 	}
 
+	// tries to recieve from the given automatic channel
 	template<typename T>
 	inline static Recv_Result<T>
 	chan_recv_try(Auto_Chan<T> &self)
@@ -726,6 +851,7 @@ namespace mn
 		return chan_recv_try(self.handle);
 	}
 
+	// recieves a value from the given automatic channel, if it doesn't succeed it will block until a value is recieved
 	template<typename T>
 	inline static Recv_Result<T>
 	chan_recv(Auto_Chan<T> &self)
@@ -779,6 +905,9 @@ namespace mn
 	MN_EXPORT void
 	_multi_threaded_compute(Fabric self, Compute_Dims global, Compute_Dims local, Task<void(Compute_Args)> fn);
 
+	// dispatches a compute task with the given global and local dimensions using the given fabric
+	// this interface is similar to compute shaders interface which means that fabric will execute
+	// global * local number of tasks using the given function
 	template<typename TFunc>
 	inline static void
 	compute(Fabric f, Compute_Dims global, Compute_Dims local, TFunc&& fn)
@@ -789,6 +918,7 @@ namespace mn
 			_multi_threaded_compute(f, global, local, mn::Task<void(Compute_Args)>::make(std::forward<TFunc>(fn)));
 	}
 
+	// single threaded overload/interface of fabric compute
 	template<typename TFunc>
 	inline static void
 	compute(Compute_Dims global, Compute_Dims local, TFunc&& fn)
@@ -844,6 +974,10 @@ namespace mn
 	MN_EXPORT void
 	_multi_threaded_compute_sized(Fabric self, Compute_Dims global, Compute_Dims size, Compute_Dims local, Task<void(Compute_Args)> fn);
 
+	// dispatches a compute task with the given total and local sizes using the given fabric
+	// this interface is similar to compute shaders interface which means that fabric will execute
+	// total * local number of tasks using the given function, it will also take care not to exceed
+	// the given total_size which means it will handle if total % local != 0
 	template<typename TFunc>
 	inline static void
 	compute_sized(Fabric f, Compute_Dims total_size, Compute_Dims local, TFunc&& fn)
@@ -859,6 +993,7 @@ namespace mn
 			_multi_threaded_compute_sized(f, global, total_size, local, mn::Task<void(Compute_Args)>::make(std::forward<TFunc>(fn)));
 	}
 
+	// single threaded overload/interface of fabric compute sized
 	template<typename TFunc>
 	inline static void
 	compute_sized(Compute_Dims total_size, Compute_Dims local, TFunc&& fn)
