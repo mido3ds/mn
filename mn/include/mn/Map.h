@@ -8,7 +8,7 @@
 
 namespace mn
 {
-	//Key value section
+	// a key value pair, used in hash map implementation
 	template<typename TKey, typename TValue>
 	struct Key_Value
 	{
@@ -28,6 +28,7 @@ namespace mn
 		}
 	};
 
+	// destruct overload for the key value pair
 	template<typename TKey, typename TValue>
 	inline static void
 	destruct(Key_Value<TKey, TValue>& self)
@@ -36,6 +37,7 @@ namespace mn
 		destruct(self.value);
 	}
 
+	// clone overload for the key value pair
 	template<typename TKey, typename TValue>
 	inline static Key_Value<TKey, TValue>
 	clone(const Key_Value<TKey, TValue>& self)
@@ -49,11 +51,7 @@ namespace mn
 
 	//hash section
 
-	/**
-	 * @brief      Default hash functor
-	 *
-	 * @tparam     T     Type to be hashed
-	 */
+	// the default hash functor
 	template<typename T>
 	struct Hash
 	{
@@ -65,6 +63,7 @@ namespace mn
 		}
 	};
 
+	// hash specialization for pointer types
 	template<typename T>
 	struct Hash<T*>
 	{
@@ -75,6 +74,7 @@ namespace mn
 		}
 	};
 
+	// hash specializations for trivial types
 	#define TRIVIAL_HASH(TYPE)\
 	template<>\
 	struct Hash<TYPE>\
@@ -100,7 +100,7 @@ namespace mn
 
 	#undef TRIVIAL_HASH
 
-	//MurmurHashUnaligned2
+	// unaligned implementation for murmur hash
 	inline static size_t
 	_murmur_hash_unaligned2(const void* ptr, size_t len, size_t seed)
 	{
@@ -193,35 +193,21 @@ namespace mn
 		}
 	}
 
-	/**
-	 * @brief      Given a block of memory does a murmur hash on it
-	 *
-	 * @param[in]  ptr   The pointer to memory
-	 * @param[in]  len   The length(in bytes) of the memory
-	 * @param[in]  seed  The seed (optional)
-	 *
-	 * @return     The hash value of the given memory
-	 */
+	// hashes a block of bytes using murmur hash algorithm
 	inline static size_t
 	murmur_hash(const void* ptr, size_t len, size_t seed = 0xc70f6907UL)
 	{
 		return _murmur_hash_unaligned2(ptr, len, seed);
 	}
 
-	/**
-	 * @brief      Given a block of memory does a murmur hash on it
-	 *
-	 * @param[in]  block  The block to hash
-	 * @param[in]  seed   The seed (optional)
-	 *
-	 * @return     The hash value of the given memory
-	 */
+	// hashes a block of bytes using murmur hash algorithm
 	inline static size_t
 	murmur_hash(const Block& block, size_t seed = 0xc70f6907UL)
 	{
 		return murmur_hash(block.ptr, block.size, seed);
 	}
 
+	// hash specialization for float values
 	template<>
 	struct Hash<float>
 	{
@@ -232,6 +218,7 @@ namespace mn
 		}
 	};
 
+	// hash specialization for float values
 	template<>
 	struct Hash<double>
 	{
@@ -242,6 +229,7 @@ namespace mn
 		}
 	};
 
+	// hash specialization for key value pair
 	template<typename TKey, typename TValue>
 	struct Hash<Key_Value<TKey, TValue>>
 	{
@@ -253,6 +241,7 @@ namespace mn
 		}
 	};
 
+	// key value hasher
 	template<typename TKey, typename TValue, typename THash = Hash<TKey>>
 	struct Key_Value_Hash
 	{
@@ -264,12 +253,7 @@ namespace mn
 		}
 	};
 
-	/**
-	 * @brief      Mixes two hash values together
-	 *
-	 * @param[in]  a     first hash value
-	 * @param[in]  b     second hash value
-	 */
+	// mixes two hash values together
 	inline static size_t
 	hash_mix(size_t a, size_t b)
 	{
@@ -287,9 +271,10 @@ namespace mn
 	}
 
 
-	//Map section
+	// hash table slot flags
 	enum HASH_FLAGS: uint8_t { HASH_EMPTY, HASH_USED, HASH_DELETED };
 
+	// hash table slot with the index and hash
 	struct Hash_Slot
 	{
 		// most signficant 2 bits = HASH_FLAGS enum
@@ -298,6 +283,7 @@ namespace mn
 		size_t hash;
 	};
 
+	// returns the flags of the given hash slot
 	inline static HASH_FLAGS
 	hash_slot_flags(Hash_Slot s)
 	{
@@ -307,6 +293,7 @@ namespace mn
 			return HASH_FLAGS((s.index & 0xC0000000) >> 30);
 	}
 
+	// returns the index of the given hash slot
 	inline static size_t
 	hash_slot_index(Hash_Slot s)
 	{
@@ -316,6 +303,7 @@ namespace mn
 			return size_t(s.index & 0x3FFFFFFF);
 	}
 
+	// sets the flags of the given hash slot
 	inline static Hash_Slot
 	hash_slot_set_flags(Hash_Slot s, HASH_FLAGS f)
 	{
@@ -332,6 +320,7 @@ namespace mn
 		return s;
 	}
 
+	// sets the index of the given hash slot
 	inline static Hash_Slot
 	hash_slot_set_index(Hash_Slot s, size_t index)
 	{
@@ -348,6 +337,7 @@ namespace mn
 		return s;
 	}
 
+	// a hash set
 	template<typename T, typename THash = Hash<T>>
 	struct Set
 	{
@@ -360,6 +350,7 @@ namespace mn
 		size_t _deleted_count_threshold;
 	};
 
+	// creates a new hash set instance with the top/default allocator
 	template<typename T, typename THash = Hash<T>>
 	inline static Set<T, THash>
 	set_new()
@@ -370,6 +361,7 @@ namespace mn
 		return self;
 	}
 
+	// creates a new hash set instance with the given allocator
 	template<typename T, typename THash = Hash<T>>
 	inline static Set<T, THash>
 	set_with_allocator(Allocator allocator)
@@ -380,6 +372,7 @@ namespace mn
 		return self;
 	}
 
+	// frees the given hash set
 	template<typename T, typename THash = Hash<T>>
 	inline static void
 	set_free(Set<T, THash>& self)
@@ -390,6 +383,7 @@ namespace mn
 		self._deleted_count = 0;
 	}
 
+	// destruct overload for the given hash set
 	template<typename T, typename THash = Hash<T>>
 	inline static void
 	destruct(Set<T, THash>& self)
@@ -400,6 +394,7 @@ namespace mn
 		self._deleted_count = 0;
 	}
 
+	// clears the given hash set content, note this doesn't free any complex data structure stored in the hash set
 	template<typename T, typename THash = Hash<T>>
 	inline static void
 	set_clear(Set<T, THash>& self)
@@ -410,8 +405,9 @@ namespace mn
 		self._deleted_count = 0;
 	}
 
+	// returns the capacity of the given hash set
 	template<typename T, typename THash = Hash<T>>
-	inline static void
+	inline static size_t
 	set_capacity(Set<T, THash>& self)
 	{
 		return self._slots.count;
@@ -608,6 +604,7 @@ namespace mn
 		}
 	}
 
+	// ensures that the given hash set has capacity for the given count of elements
 	template<typename T, typename THash = Hash<T>>
 	inline static void
 	set_reserve(Set<T, THash>& self, size_t added_count)
@@ -624,6 +621,7 @@ namespace mn
 		}
 	}
 
+	// inserts an element into the hash set and returns an iterator to it
 	template<typename T, typename THash = Hash<T>>
 	inline static const T*
 	set_insert(Set<T, THash>& self, const T& key)
@@ -667,6 +665,8 @@ namespace mn
 		}
 	}
 
+	// searches for the given key in the hash set and returns an iterator to it, if the key doesn't exist it will return
+	// nullptr
 	template<typename T, typename THash = Hash<T>>
 	inline static const T*
 	set_lookup(const Set<T, THash>& self, const T& key)
@@ -679,6 +679,7 @@ namespace mn
 		return (const T*)(self.values.ptr + index);
 	}
 
+	// remove the given value from the hash set, and returns whether it found and removed the element
 	template<typename T, typename THash = Hash<T>>
 	inline static bool
 	set_remove(Set<T, THash>& self, const T& key)
@@ -701,7 +702,7 @@ namespace mn
 			self._slots[last_res.index] = hash_slot_set_index(self._slots[last_res.index], index);
 			buf_remove(self.values, index);
 		}
-		
+
 		--self.count;
 		++self._deleted_count;
 
@@ -719,6 +720,7 @@ namespace mn
 		return true;
 	}
 
+	// clones the given hash set using the given allocator
 	template<typename T, typename THash = Hash<T>>
 	inline static Set<T, THash>
 	set_clone(const Set<T, THash>& other, Allocator allocator = allocator_top())
@@ -729,6 +731,8 @@ namespace mn
 		return self;
 	}
 
+	// clones the given hash set using the given allocator by calling into memcpy, this is useful for POD/trivial
+	// structures which doesn't have a clone overload
 	template<typename T, typename THash = Hash<T>>
 	inline static Set<T, THash>
 	set_memcpy_clone(const Set<T, THash>& other, Allocator allocator = allocator_top())
@@ -739,6 +743,7 @@ namespace mn
 		return self;
 	}
 
+	// clone overload for the hash set
 	template<typename T, typename THash = Hash<T>>
 	inline static Set<T, THash>
 	clone(const Set<T, THash>& other)
@@ -746,6 +751,7 @@ namespace mn
 		return set_clone(other);
 	}
 
+	// returns an iterator to the start of the hash set
 	template<typename T, typename THash = Hash<T>>
 	inline static const T*
 	set_begin(const Set<T, THash>& self)
@@ -753,6 +759,7 @@ namespace mn
 		return buf_begin(self.values);
 	}
 
+	// returns an iterator to the end of the hash set
 	template<typename T, typename THash = Hash<T>>
 	inline static const T*
 	set_end(const Set<T, THash>& self)
@@ -760,6 +767,7 @@ namespace mn
 		return buf_end(self.values);
 	}
 
+	// begin overload for hash set
 	template<typename T, typename THash = Hash<T>>
 	inline static const T*
 	begin(const Set<T, THash>& self)
@@ -767,6 +775,7 @@ namespace mn
 		return buf_begin(self.values);
 	}
 
+	// end overload for hash set
 	template<typename T, typename THash = Hash<T>>
 	inline static const T*
 	end(const Set<T, THash>& self)
@@ -774,9 +783,11 @@ namespace mn
 		return buf_end(self.values);
 	}
 
+	// a hash map with a key, value storage
 	template<typename TKey, typename TValue, typename THash = Hash<TKey>>
 	using Map = Set<Key_Value<TKey, TValue>, Key_Value_Hash<TKey, TValue, THash>>;
 
+	// creates a new hash map
 	template<typename TKey, typename TValue, typename THash = Hash<TKey>>
 	inline static Map<TKey, TValue, THash>
 	map_new()
@@ -784,6 +795,7 @@ namespace mn
 		return set_new<Key_Value<TKey, TValue>, Key_Value_Hash<TKey, TValue, THash>>();
 	}
 
+	// creates a new hash map with the given allocator
 	template<typename TKey, typename TValue, typename THash = Hash<TKey>>
 	inline static Map<TKey, TValue, THash>
 	map_with_allocator(Allocator allocator)
@@ -791,6 +803,7 @@ namespace mn
 		return set_with_allocator<Key_Value<TKey, TValue>, Key_Value_Hash<TKey, TValue, THash>>(allocator);
 	}
 
+	// frees the given hash map
 	template<typename TKey, typename TValue, typename THash = Hash<TKey>>
 	inline static void
 	map_free(Map<TKey, TValue, THash>& self)
@@ -798,6 +811,7 @@ namespace mn
 		set_free(self);
 	}
 
+	// clears the given hash map content, note this doesn't free any complex data structure stored in the hash map
 	template<typename TKey, typename TValue, typename THash = Hash<TKey>>
 	inline static void
 	map_clear(Map<TKey, TValue, THash>& self)
@@ -805,6 +819,7 @@ namespace mn
 		set_clear(self);
 	}
 
+	// returns the capacity of the given hash map
 	template<typename TKey, typename TValue, typename THash = Hash<TKey>>
 	inline static size_t
 	map_capacity(Map<TKey, TValue, THash>& self)
@@ -812,6 +827,7 @@ namespace mn
 		return set_capacity(self);
 	}
 
+	// inserts a key with zero/empty value into the given hash map and returns an iterator to it
 	template<typename TKey, typename TValue, typename THash = Hash<TKey>>
 	inline static Key_Value<const TKey, TValue>*
 	map_insert(Map<TKey, TValue, THash>& self, const TKey& key)
@@ -819,6 +835,7 @@ namespace mn
 		return (Key_Value<const TKey, TValue>*)set_insert(self, Key_Value<TKey, TValue>{key});
 	}
 
+	// inserts the given key and value into the hash map and returns an iterator to it
 	template<typename TKey, typename TValue, typename THash = Hash<TKey>>
 	inline static Key_Value<const TKey, TValue>*
 	map_insert(Map<TKey, TValue, THash>& self, const TKey& key, const TValue& value)
@@ -826,6 +843,7 @@ namespace mn
 		return (Key_Value<const TKey, TValue>*)set_insert(self, Key_Value<TKey, TValue>{key, value});
 	}
 
+	// searches for the given key in the hash map, if it doesn't exist it will return nullptr
 	template<typename TKey, typename TValue, typename THash = Hash<TKey>>
 	inline static const Key_Value<const TKey, TValue>*
 	map_lookup(const Map<TKey, TValue, THash>& self, const TKey& key)
@@ -833,6 +851,7 @@ namespace mn
 		return (const Key_Value<const TKey, TValue>*)set_lookup(self, Key_Value<TKey, TValue>{key});
 	}
 
+	// searches for the given key in the hash map, if it doesn't exist it will return nullptr
 	template<typename TKey, typename TValue, typename THash = Hash<TKey>>
 	inline static Key_Value<const TKey, TValue>*
 	map_lookup(Map<TKey, TValue, THash>& self, const TKey& key)
@@ -840,6 +859,7 @@ namespace mn
 		return (Key_Value<const TKey, TValue>*)set_lookup(self, Key_Value<TKey, TValue>{key, {}});
 	}
 
+	// remove the given value from the hash map, and returns whether it found and removed the element
 	template<typename TKey, typename TValue, typename THash = Hash<TKey>>
 	inline static bool
 	map_remove(Map<TKey, TValue, THash>& self, const TKey& key)
@@ -847,6 +867,7 @@ namespace mn
 		return set_remove(self, Key_Value<TKey, TValue>{key, {}});
 	}
 
+	// ensures that the given hash map has capacity for the given count of elements
 	template<typename TKey, typename TValue, typename THash = Hash<TKey>>
 	inline static void
 	map_reserve(Map<TKey, TValue, THash>& self, size_t added_count)
@@ -854,6 +875,7 @@ namespace mn
 		set_reserve(self, added_count);
 	}
 
+	// clones the given hash map using the given allocator
 	template<typename TKey, typename TValue, typename THash = Hash<TKey>>
 	inline static Map<TKey, TValue, THash>
 	map_clone(const Map<TKey, TValue, THash>& other, Allocator allocator = allocator_top())
@@ -861,6 +883,8 @@ namespace mn
 		return set_clone(other, allocator);
 	}
 
+	// clones the given hash map using the given allocator by calling into memcpy, this is useful for POD/trivial
+	// structures which doesn't have a clone overload
 	template<typename TKey, typename TValue, typename THash = Hash<TKey>>
 	inline static Map<TKey, TValue, THash>
 	map_memcpy_clone(const Map<TKey, TValue, THash>& other, Allocator allocator = allocator_top())
@@ -868,6 +892,7 @@ namespace mn
 		return set_memcpy_clone(other, allocator);
 	}
 
+	// returns an iterator to the start of the hash map
 	template<typename TKey, typename TValue, typename THash = Hash<TKey>>
 	inline static const Key_Value<const TKey, TValue>*
 	map_begin(const Map<TKey, TValue, THash>& self)
@@ -875,6 +900,7 @@ namespace mn
 		return (const Key_Value<const TKey, TValue>*)set_begin(self);
 	}
 
+	// returns an iterator to the start of the hash map
 	template<typename TKey, typename TValue, typename THash = Hash<TKey>>
 	inline static Key_Value<const TKey, TValue>*
 	map_begin(Map<TKey, TValue, THash>& self)
@@ -882,6 +908,7 @@ namespace mn
 		return (Key_Value<const TKey, TValue>*)set_begin(self);
 	}
 
+	// returns an iterator to the end of the hash map
 	template<typename TKey, typename TValue, typename THash = Hash<TKey>>
 	inline static const Key_Value<const TKey, TValue>*
 	map_end(const Map<TKey, TValue, THash>& self)
@@ -889,6 +916,7 @@ namespace mn
 		return (Key_Value<const TKey, TValue>*)set_end(self);
 	}
 
+	// returns an iterator to the end of the hash map
 	template<typename TKey, typename TValue, typename THash = Hash<TKey>>
 	inline static Key_Value<const TKey, TValue>*
 	map_end(Map<TKey, TValue, THash>& self)
@@ -896,6 +924,7 @@ namespace mn
 		return (Key_Value<const TKey, TValue>*)set_end(self);
 	}
 
+	// begin overload for hash map
 	template<typename TKey, typename TValue, typename THash = Hash<TKey>>
 	inline static const Key_Value<const TKey, TValue>*
 	begin(const Map<TKey, TValue, THash>& self)
@@ -903,6 +932,7 @@ namespace mn
 		return (const Key_Value<const TKey, TValue>*)set_begin(self);
 	}
 
+	// begin overload for hash map
 	template<typename TKey, typename TValue, typename THash = Hash<TKey>>
 	inline static Key_Value<const TKey, TValue>*
 	begin(Map<TKey, TValue, THash>& self)
@@ -910,6 +940,7 @@ namespace mn
 		return (Key_Value<const TKey, TValue>*)set_begin(self);
 	}
 
+	// end overload for hash map
 	template<typename TKey, typename TValue, typename THash = Hash<TKey>>
 	inline static const Key_Value<const TKey, TValue>*
 	end(const Map<TKey, TValue, THash>& self)
@@ -917,6 +948,7 @@ namespace mn
 		return (Key_Value<const TKey, TValue>*)set_end(self);
 	}
 
+	// end overload for hash map
 	template<typename TKey, typename TValue, typename THash = Hash<TKey>>
 	inline static Key_Value<const TKey, TValue>*
 	end(Map<TKey, TValue, THash>& self)
