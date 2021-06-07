@@ -6,37 +6,48 @@
 
 namespace mn::ipc
 {
+	// an inter-process mutex which can be used to sync multiple processes
 	typedef struct IIPC_Mutex *Mutex;
 
+	// creates a new inter-process mutex with the given name
 	MN_EXPORT Mutex
 	mutex_new(const Str& name);
 
+	// creates a new inter-process mutex with the given name
 	inline static Mutex
 	mutex_new(const char* name)
 	{
 		return mutex_new(str_lit(name));
 	}
 
+	// frees the given mutex
 	MN_EXPORT void
 	mutex_free(Mutex self);
 
+	// destruct overload for mutex free
 	inline static void
 	destruct(Mutex self)
 	{
 		mn::ipc::mutex_free(self);
 	}
 
+	// locks the given mutex
 	MN_EXPORT void
 	mutex_lock(Mutex self);
 
+	// tries to lock the given mutex, and returns whether it has succeeded
 	MN_EXPORT bool
 	mutex_try_lock(Mutex self);
 
+	// unlocks the given mutex
 	MN_EXPORT void
 	mutex_unlock(Mutex self);
 
 	// OS communication primitives
+
+	// sputnik is an inter-process communicateion protocol
 	typedef struct ISputnik* Sputnik;
+
 	struct ISputnik final : IStream
 	{
 		union
@@ -67,45 +78,58 @@ namespace mn::ipc
 		}
 	};
 
+	// creates a new sputnik instance with the given name, if it fails it will return nullptr
 	MN_EXPORT Sputnik
 	sputnik_new(const Str& name);
 
+	// creates a new sputnik instance with the given name, if it fails it will return nullptr
 	inline static Sputnik
 	sputnik_new(const char* name)
 	{
 		return sputnik_new(str_lit(name));
 	}
 
+	// connects to a given sputnik instance with the given name, if it fails it will return nullptr
 	MN_EXPORT Sputnik
 	sputnik_connect(const Str& name);
 
+	// connects to a given sputnik instance with the given name, if it fails it will return nullptr
 	inline static Sputnik
 	sputnik_connect(const char* name)
 	{
 		return sputnik_connect(str_lit(name));
 	}
 
+	// frees the given sputnik instance
 	MN_EXPORT void
 	sputnik_free(Sputnik self);
 
+	// starts listening for connection on the given sputnik instance
 	MN_EXPORT bool
 	sputnik_listen(Sputnik self);
 
+	// tries to accept connection from the given sputnik instance within the given timeout window
+	// if it fails it will return nullptr
 	MN_EXPORT Sputnik
 	sputnik_accept(Sputnik self, Timeout timeout);
 
+	// tries to read from the given sputnik instance within the given timeout window
+	// returns the number of read bytes
 	MN_EXPORT size_t
 	sputnik_read(Sputnik self, Block data, Timeout timeout);
 
+	// writes the given block of bytes into the given sputnik instance and returns the number of written bytes
 	MN_EXPORT size_t
 	sputnik_write(Sputnik self, Block data);
 
+	// disconnects the given sputnik instance
 	MN_EXPORT bool
 	sputnik_disconnect(Sputnik self);
 
 	// sputnik message protocol
+	// a message is an encapsulated binary blob of data which is transimetted over the sputnik stream
 
-	// sputnik_msg_write writes a message unit to sputnik which is {len: 8 bytes, the message}
+	// writes a message unit to sputnik which is {len: 8 bytes, the message}
 	MN_EXPORT bool
 	sputnik_msg_write(Sputnik self, Block data);
 
@@ -115,11 +139,11 @@ namespace mn::ipc
 		uint64_t remaining;
 	};
 
-	// sputnik_msg_read reads a message unit from sputnik
+	// reads a message unit from sputnik
 	MN_EXPORT Msg_Read_Return
 	sputnik_msg_read(Sputnik self, Block data, Timeout timeout);
 
-	// sputnik_msg_read_alloc allocates and reads a single message
+	// allocates and reads a single message
 	MN_EXPORT Str
 	sputnik_msg_read_alloc(Sputnik self, Timeout timeout, Allocator allocator = allocator_top());
 }
