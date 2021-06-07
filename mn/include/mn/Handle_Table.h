@@ -4,6 +4,7 @@
 
 namespace mn
 {
+	// handle table index struct
 	struct Handle_Table_Index
 	{
 		// higher 32 bit
@@ -12,6 +13,7 @@ namespace mn
 		uint32_t index;
 	};
 
+	// constructs a handle table index from a single uint64_t value
 	inline static Handle_Table_Index
 	handle_table_index_from_uint64(uint64_t v)
 	{
@@ -21,6 +23,7 @@ namespace mn
 		return self;
 	}
 
+	// converts a handle table index to a single uint64_t value
 	inline static uint64_t
 	handle_table_index_to_uint64(Handle_Table_Index self)
 	{
@@ -30,12 +33,14 @@ namespace mn
 		return v;
 	}
 
+	// handle table entry/slot
 	struct Handle_Table_Entry
 	{
 		uint32_t generation;
 		uint32_t items_index;
 	};
 
+	// handle table value
 	template<typename T>
 	struct Handle_Table_Item
 	{
@@ -43,6 +48,8 @@ namespace mn
 		uint32_t map_index;
 	};
 
+	// handle table which stores values and hands you out safe handles to such values
+	// it's useful if you want to quickly generate a safe handle table when you work on APIs
 	template<typename T>
 	struct Handle_Table
 	{
@@ -51,8 +58,10 @@ namespace mn
 		// used to index the index free list in the map
 		uint32_t _free_list_head;
 	};
+	// handle table's invalid index
 	constexpr inline uint64_t HANDLE_TABLE_INVLAID_INDEX = UINT64_MAX;
 
+	// creates a new handle table
 	template<typename T>
 	inline static Handle_Table<T>
 	handle_table_new()
@@ -64,6 +73,7 @@ namespace mn
 		return self;
 	}
 
+	// frees the given handle table
 	template<typename T>
 	inline static void
 	handle_table_free(Handle_Table<T>& self)
@@ -72,6 +82,7 @@ namespace mn
 		mn::buf_free(self._map);
 	}
 
+	// destruct overload for handle table free
 	template<typename T>
 	inline static void
 	destruct(Handle_Table<T>& self)
@@ -79,6 +90,7 @@ namespace mn
 		handle_table_free(self);
 	}
 
+	// inserts a new value into the handle table and returns its associated handle
 	template<typename T>
 	inline static uint64_t
 	handle_table_insert(Handle_Table<T>& self, T v)
@@ -99,7 +111,7 @@ namespace mn
 		{
 			// load the item from the map
 			auto& entry = self._map[self._free_list_head];
-			
+
 			// fill out the result index
 			h.index = self._free_list_head;
 			h.generation = entry.generation;
@@ -114,6 +126,7 @@ namespace mn
 		return handle_table_index_to_uint64(h);
 	}
 
+	// removes the given item associated with the handle from the given handle table
 	template<typename T>
 	inline static void
 	handle_table_remove(Handle_Table<T>& self, uint64_t v)
@@ -144,6 +157,7 @@ namespace mn
 		mn::buf_pop(self.items);
 	}
 
+	// checks whether the value associated with the given handle exists
 	template<typename T>
 	inline static bool
 	handle_table_exists(const Handle_Table<T>& self, uint64_t v)
@@ -153,6 +167,7 @@ namespace mn
 		return entry.generation == h.generation;
 	}
 
+	// returns the value associated with the given handle
 	template<typename T>
 	inline static T
 	handle_table_get(Handle_Table<T>& self, uint64_t v)
