@@ -26,7 +26,7 @@ namespace mn
 	file_content_str(const char* filename, Allocator allocator)
 	{
 		Str str = str_with_allocator(allocator);
-		File f = file_open(filename, IO_MODE::READ, OPEN_MODE::OPEN_ONLY);
+		File f = file_open(filename, IO_MODE_READ, OPEN_MODE_OPEN_ONLY);
 		if(file_valid(f) == false)
 			panic("cannot read file \"{}\"", filename);
 

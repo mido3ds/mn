@@ -234,15 +234,15 @@ namespace mn
 		DWORD desired_access;
 		switch(io_mode)
 		{
-			case IO_MODE::READ:
+			case IO_MODE_READ:
 				desired_access = GENERIC_READ;
 				break;
 
-			case IO_MODE::WRITE:
+			case IO_MODE_WRITE:
 				desired_access = GENERIC_WRITE;
 				break;
 
-			case IO_MODE::READ_WRITE:
+			case IO_MODE_READ_WRITE:
 			default:
 				desired_access = GENERIC_READ | GENERIC_WRITE;
 				break;
@@ -252,24 +252,24 @@ namespace mn
 		DWORD creation_disposition;
 		switch(open_mode)
 		{
-			case OPEN_MODE::CREATE_ONLY:
+			case OPEN_MODE_CREATE_ONLY:
 				creation_disposition = CREATE_NEW;
 				break;
 
-			case OPEN_MODE::OPEN_OVERWRITE:
+			case OPEN_MODE_OPEN_OVERWRITE:
 				creation_disposition = TRUNCATE_EXISTING;
 				break;
 
-			case OPEN_MODE::OPEN_ONLY:
-			case OPEN_MODE::OPEN_APPEND:
+			case OPEN_MODE_OPEN_ONLY:
+			case OPEN_MODE_OPEN_APPEND:
 				creation_disposition = OPEN_EXISTING;
 				break;
 
-			case OPEN_MODE::CREATE_APPEND:
+			case OPEN_MODE_CREATE_APPEND:
 				creation_disposition = OPEN_ALWAYS;
 				break;
 
-			case OPEN_MODE::CREATE_OVERWRITE:
+			case OPEN_MODE_CREATE_OVERWRITE:
 			default:
 				creation_disposition = CREATE_ALWAYS;
 				break;

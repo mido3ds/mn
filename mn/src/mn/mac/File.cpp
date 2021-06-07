@@ -138,15 +138,15 @@ namespace mn
 		//translate the io mode
 		switch(io_mode)
 		{
-			case IO_MODE::READ:
+			case IO_MODE_READ:
 				flags |= O_RDONLY;
 				break;
 
-			case IO_MODE::WRITE:
+			case IO_MODE_WRITE:
 				flags |= O_WRONLY;
 				break;
 
-			case IO_MODE::READ_WRITE:
+			case IO_MODE_READ_WRITE:
 			default:
 				flags |= O_RDWR;
 				break;
@@ -155,29 +155,29 @@ namespace mn
 		//translate the open mode
 		switch(open_mode)
 		{
-			case OPEN_MODE::CREATE_ONLY:
+			case OPEN_MODE_CREATE_ONLY:
 				flags |= O_CREAT;
 				flags |= O_EXCL;
 				break;
 
-			case OPEN_MODE::CREATE_APPEND:
+			case OPEN_MODE_CREATE_APPEND:
 				flags |= O_CREAT;
 				flags |= O_APPEND;
 				break;
 
-			case OPEN_MODE::OPEN_ONLY:
+			case OPEN_MODE_OPEN_ONLY:
 				//do nothing
 				break;
 
-			case OPEN_MODE::OPEN_OVERWRITE:
+			case OPEN_MODE_OPEN_OVERWRITE:
 				flags |= O_TRUNC;
 				break;
 
-			case OPEN_MODE::OPEN_APPEND:
+			case OPEN_MODE_OPEN_APPEND:
 				flags |= O_APPEND;
 				break;
 
-			case OPEN_MODE::CREATE_OVERWRITE:
+			case OPEN_MODE_CREATE_OVERWRITE:
 			default:
 				flags |= O_CREAT;
 				flags |= O_TRUNC;
@@ -192,7 +192,7 @@ namespace mn
 				if(flags & O_CREAT)
 					flags |= O_EXCL;
 				break;
-			
+
 			default:
 				break;
 		}

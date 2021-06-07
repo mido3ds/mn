@@ -66,7 +66,7 @@ folder_list_headers(const mn::Str& path, mn::Buf<mn::Str>& out)
 inline static void
 header_doc(const mn::Str& path, mn::Buf<Doc_Element>& out)
 {
-	auto f = mn::file_open(path, mn::IO_MODE::READ, mn::OPEN_MODE::OPEN_ONLY);
+	auto f = mn::file_open(path, mn::IO_MODE_READ, mn::OPEN_MODE_OPEN_ONLY);
 	if (f == nullptr)
 	{
 		mn::printerr("could not open header file '{}'", path);

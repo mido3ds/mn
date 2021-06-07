@@ -7,9 +7,9 @@
 int
 main()
 {
-	auto o = mn::file_open("other.bin", mn::IO_MODE::READ_WRITE, mn::OPEN_MODE::CREATE_OVERWRITE);
+	auto o = mn::file_open("other.bin", mn::IO_MODE_READ_WRITE, mn::OPEN_MODE_CREATE_OVERWRITE);
 
-	auto f = mn::file_open("koko.bin", mn::IO_MODE::READ_WRITE, mn::OPEN_MODE::OPEN_ONLY);
+	auto f = mn::file_open("koko.bin", mn::IO_MODE_READ_WRITE, mn::OPEN_MODE_OPEN_ONLY);
 
 	mn::file_write_lock(f, 0, 8);
 

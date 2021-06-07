@@ -7,7 +7,7 @@
 int
 main()
 {
-	auto f = mn::file_open("koko.bin", mn::IO_MODE::READ_WRITE, mn::OPEN_MODE::CREATE_OVERWRITE);
+	auto f = mn::file_open("koko.bin", mn::IO_MODE_READ_WRITE, mn::OPEN_MODE_CREATE_OVERWRITE);
 	mn_defer(mn::file_close(f));
 
 	uint64_t v = 0;

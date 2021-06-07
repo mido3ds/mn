@@ -6,9 +6,11 @@
 
 namespace mn
 {
+	// a file handle
 	typedef struct IFile* File;
 
-	// just forward declaration because this language require this kind of thing
+	// some forward declarations because this language require this kind of thing
+
 	MN_EXPORT int64_t
 	file_cursor_pos(File handle);
 
@@ -72,212 +74,163 @@ namespace mn
 	};
 
 
-	/**
-	 * @brief      Converts a string from utf-8 to os-specific encoding
-	 *
-	 * @param[in]  utf8  The utf 8
-	 *
-	 * @return     A Block of memory containing the encoded string
-	 */
+	// converts a string from utf-8 to os specific encoding it will use tmp allocator by default
+	// you probably won't need to use this function because mn takes care of utf-8 conversion internally
+	// it might be of use if you're writing os specific code outside of mn
 	MN_EXPORT Block
 	to_os_encoding(const Str& utf8, Allocator allocator = memory::tmp());
 
-	/**
-	 * @brief      Converts a string from utf-8 to os-specific encoding
-	 *
-	 * @param[in]  utf8  The utf 8
-	 *
-	 * @return     A Block of memory containing the encoded string
-	 */
+	// converts a string from utf-8 to os specific encoding it will use tmp allocator by default
+	// you probably won't need to use this function because mn takes care of utf-8 conversion internally
+	// it might be of use if you're writing os specific code outside of mn
 	MN_EXPORT Block
 	to_os_encoding(const char* utf8, Allocator allocator = memory::tmp());
 
-	/**
-	 * @brief      Converts from os-specific encoding to utf-8
-	 *
-	 * @param[in]  os_str  The operating system string
-	 *
-	 * @return     A String containing the encoded string
-	 */
+	// converts a string from os specific encoding to utf-8 it will use tmp allocator by default
+	// you probably won't need to use this function because mn takes care of utf-8 conversion internally
+	// it might be of use if you're writing os specific code outside of mn
 	MN_EXPORT Str
 	from_os_encoding(Block os_str, Allocator allocator = memory::tmp());
 
-	/**
-	 * @brief      OPEN_MODE enum
-	 *
-	 * - **CREATE_ONLY**: creates the file if it doesn't exist. if it exists it fails.
-	 * - **CREATE_OVERWRITE**: creates the file if it doesn't exist. if it exists it overwrite it.
-	 * - **CREATE_APPEND**: creates the file if it doesn't exist. if it exists it appends to it.
-	 * - **OPEN_ONLY**: opens the file if it exists. fails otherwise.
-	 * - **OPEN_OVERWRITE**: opens the file if it exist and overwrite its content. if it doesn't exist it fails.
-	 * - **OPEN_APPEND**: opens the file it it exists and append to its content. if it doesn't exist it fails.
-	 */
-	enum class OPEN_MODE
+	// file open mode options
+	enum OPEN_MODE
 	{
-		CREATE_ONLY,
-		CREATE_OVERWRITE,
-		CREATE_APPEND,
-		OPEN_ONLY,
-		OPEN_OVERWRITE,
-		OPEN_APPEND
+		// creates the file if it doesn't exist, if it exists the function will fail
+		OPEN_MODE_CREATE_ONLY,
+		// creates the file if it doesn't exist, if it exists it will be overwritten
+		OPEN_MODE_CREATE_OVERWRITE,
+		// creates the file if it doesn't exist, if it exists it will be append to its end
+		OPEN_MODE_CREATE_APPEND,
+		// opens the file if it exists, fails otherwise
+		OPEN_MODE_OPEN_ONLY,
+		// opens the file if it exists and its content will be overwritten, if it doesn't exist the function will fail
+		OPEN_MODE_OPEN_OVERWRITE,
+		// opens the file if it exists and new writes will append to the file, if it doesn't exist the function will fail
+		OPEN_MODE_OPEN_APPEND
 	};
 
+	// file share mode options
 	enum SHARE_MODE
 	{
+		// enables subsequent open operations on a file or device to request read access
 		SHARE_MODE_READ,
+		// enables subsequent open operations on a file or device to request write access
 		SHARE_MODE_WRITE,
+		// enables subsequent open operations on a file or device to request delete access
 		SHARE_MODE_DELETE,
+		// combines the read write options from above
 		SHARE_MODE_READ_WRITE,
+		// combines the read delete options from above
 		SHARE_MODE_READ_DELETE,
+		// combines the write delete options from above
 		SHARE_MODE_WRITE_DELETE,
+		// combines all the options
 		SHARE_MODE_ALL,
+		// no sharing is allowed so any subsequent opens will fail
 		SHARE_MODE_NONE,
 	};
 
-	/**
-	 * @brief      IO_MODE enum
-	 * 
-	 * - **READ**: only performs reads to the file
-	 * - **WRITE**: only performs writes to the file
-	 * - **READ_WRITE**: performs both reads and writes to the file
-	 */
-	enum class IO_MODE
+	// file io mode options
+	enum IO_MODE
 	{
-		READ,
-		WRITE,
-		READ_WRITE
+		// only read operations are allowed
+		IO_MODE_READ,
+		// only write operations are allowed
+		IO_MODE_WRITE,
+		// read and write operations are allowed
+		IO_MODE_READ_WRITE
 	};
 
-	/**
-	 * @brief      Returns a file handle pointing to the standard output
-	 */
+	// returns a file handle pointing to the standard output
 	MN_EXPORT File
 	file_stdout();
 
-	/**
-	 * @brief      Returns a file handle pointing to the standard error
-	 */
+	// returns a file handle pointing to the standard error
 	MN_EXPORT File
 	file_stderr();
 
-	/**
-	 * @brief      Returns a file handle pointing to the standard input
-	 */
+	// returns a file handle pointing to the standard input
 	MN_EXPORT File
 	file_stdin();
 
-	/**
-	 * @brief      Opens a file
-	 *
-	 * @param[in]  filename   The filename
-	 * @param[in]  io_mode    The i/o mode
-	 * @param[in]  open_mode  The open mode
-	 */
+	// opens a file, if it fails it will return null handle
 	MN_EXPORT File
 	file_open(const char* filename, IO_MODE io_mode, OPEN_MODE open_mode, SHARE_MODE share_mode = SHARE_MODE_ALL);
 
+	// opens a file, if it fails it will return null handle
 	inline static File
 	file_open(const Str& filename, IO_MODE io_mode, OPEN_MODE open_mode, SHARE_MODE share_mode = SHARE_MODE_ALL)
 	{
 		return file_open(filename.ptr, io_mode, open_mode, share_mode);
 	}
 
-	/**
-	 * @brief      Closes a file
-	 */
+	// closes an open file handle
 	MN_EXPORT void
 	file_close(File handle);
 
-	/**
-	 * @brief      Validates a file handle
-	 */
+	// checks if the given file handle is valid
 	MN_EXPORT bool
 	file_valid(File handle);
 
-	/**
-	 * @brief      Writes a block of bytes into a file
-	 *
-	 * @param[in]  handle  The file handle
-	 * @param[in]  data    The data
-	 * 
-	 * @return     The written size in bytes
-	 */
+	// writes the given block of bytes to the given file, and returns the written amount of bytes
 	MN_EXPORT size_t
 	file_write(File handle, Block data);
 
-	/**
-	 * @brief      Reads a block of bytes from a file
-	 *
-	 * @param[in]  handle  The file handle
-	 * @param[in]  data    The data
-	 *
-	 * @return     The read size in bytes
-	 */
+	// reads from the file into the given block of bytes, and returns the read amount of bytes
 	MN_EXPORT size_t
 	file_read(File handle, Block data);
 
-	/**
-	 * @brief      Returns the size in bytes of a given file
-	 */
+	// returns the size of the file in bytes
 	MN_EXPORT int64_t
 	file_size(File handle);
 
-	/**
-	 * @brief      Returns the cursor position of the given file
-	 */
+	// returns the cursor position of the given file
 	MN_EXPORT int64_t
 	file_cursor_pos(File handle);
 
-	/**
-	 * @brief      Moves the file cursor by the given offset
-	 *
-	 * @param[in]  handle  The file handle
-	 * @param[in]  offset  The offset
-	 */
+	// moves the file cursor by the given offset, and returns whether it succeeded
 	MN_EXPORT bool
 	file_cursor_move(File handle, int64_t offset);
 
-	/**
-	 * @brief      Set the file cursor by the given offset
-	 *
-	 * @param[in]  handle  The file handle
-	 * @param[in]  absolute The offset
-	 */
+	// sets the file cursor to the given absolute position, and returns whether it succeeded
 	MN_EXPORT bool
 	file_cursor_set(File handle, int64_t absolute);
 
-	/**
-	 * @brief      Sets the file cursor to the start
-	 */
+	// moves the file cursor to the start of the file, and returns whether it succeeded
 	MN_EXPORT bool
 	file_cursor_move_to_start(File handle);
 
-	/**
-	 * @brief      Sets the file cursor to the end
-	 */
+	// sets the file cursor to the end of the file, and returns whether it succeeded
 	MN_EXPORT bool
 	file_cursor_move_to_end(File handle);
 
-	// specify a region of the file to be locked
-	// locks can't overlap -> file_lock will fail
-	// you can lock a region beyond EOF to coordinate record addition to a file
+	// locks the specified region of the file, locks can't overlap otherwise the locking operation will fail
+	// you can lock a region beyond EOF to coordinate additions to a file
+	// returns whether the lock operation has succeeded
 	MN_EXPORT bool
 	file_write_try_lock(File handle, int64_t offset, int64_t size);
 
+	// locks the specified region of the file, locks can't overlap otherwise the locking operation will fail
+	// you can lock a region beyond EOF to coordinate additions to a file
+	// this function will block until it can acquire the lock
 	MN_EXPORT void
 	file_write_lock(File handle, int64_t offset, int64_t size);
 
+	// unlocks the specified region of the file
 	MN_EXPORT bool
 	file_write_unlock(File handle, int64_t offset, int64_t size);
 
-	// specify a region of the file to be locked
-	// read locks allow multiple readers
+	// specifies a region of the file to be locked, read locks allow multiple readers and zero writers
+	// returns whether the lock operation has succeeded
 	MN_EXPORT bool
 	file_read_try_lock(File handle, int64_t offset, int64_t size);
 
+	// specifies a region of the file to be locked, read locks allow multiple readers and zero writers
+	// this function will block until it can acquire the lock
 	MN_EXPORT void
 	file_read_lock(File handle, int64_t offset, int64_t size);
 
+	// unlocks the specified region of the file
 	MN_EXPORT bool
 	file_read_unlock(File handle, int64_t offset, int64_t size);
 }
