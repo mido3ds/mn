@@ -4,12 +4,7 @@
 
 namespace mn
 {
-	/**
-	* @brief      A Fixed_Buf is a buffer with fixed capacity
-	*
-	* @tparam     T         Element type
-	* @tparam     Capacity  Capacity of the fixed buffer
-	*/
+	// fixed capacity buffer, with capacity known at compile time
 	template<typename T, size_t Capacity>
 	struct Fixed_Buf
 	{
@@ -31,9 +26,7 @@ namespace mn
 		}
 	};
 
-	/**
-	* @brief      Creates a new fixed_buf with fixed capacity
-	*/
+	// creates a new fixed buffer instance
 	template<typename T, size_t Capacity>
 	inline static Fixed_Buf<T, Capacity>
 	fixed_buf_new()
@@ -43,6 +36,7 @@ namespace mn
 		return self;
 	}
 
+	// frees the given fixed buffer
 	template<typename T, size_t Capacity>
 	inline static void
 	fixed_buf_free(Fixed_Buf<T, Capacity>& self)
@@ -50,6 +44,7 @@ namespace mn
 		self.count = 0;
 	}
 
+	// destruct overload for fixed buffer free
 	template<typename T, size_t Capacity>
 	inline static void
 	destruct(Fixed_Buf<T, Capacity>& self)
@@ -59,13 +54,7 @@ namespace mn
 		fixed_buf_free(self);
 	}
 
-	/**
-	* @brief      Pushes a new value to the given fixed_buf
-	*
-	* @param      self   The fixed_buf
-	* @param[in]  value  The value to be pushed
-	*
-	*/
+	// pushes a new value to the given buffer
 	template<typename T, size_t Capacity>
 	inline static void
 	fixed_buf_push(Fixed_Buf<T, Capacity>& self, const T& value)
@@ -75,9 +64,7 @@ namespace mn
 		++self.count;
 	}
 
-	/**
-	* @brief      Returns const pointer to the first element of the fixed_buf
-	*/
+	// returns an iterator to the begining of the buffer
 	template<typename T, size_t Capacity>
 	inline static const T*
 	fixed_buf_begin(const Fixed_Buf<T, Capacity>& self)
@@ -85,9 +72,7 @@ namespace mn
 		return self.elements;
 	}
 
-	/**
-	* @brief      Returns pointer to the first element of the fixed_buf
-	*/
+	// returns an iterator to the begining of the buffer
 	template<typename T, size_t Capacity>
 	inline static T*
 	fixed_buf_begin(Fixed_Buf<T, Capacity>& self)
@@ -95,9 +80,7 @@ namespace mn
 		return self.elements;
 	}
 
-	/**
-	* @brief      Returns const pointer to the last element of the fixed_buf
-	*/
+	// returns an iterator to the end of the buffer
 	template<typename T, size_t Capacity>
 	inline static const T*
 	fixed_buf_end(const Fixed_Buf<T, Capacity>& self)
@@ -105,9 +88,7 @@ namespace mn
 		return self.elements + self.count;
 	}
 
-	/**
-	* @brief      Returns pointer to the last element of the fixed_buf
-	*/
+	// returns an iterator to the end of the buffer
 	template<typename T, size_t Capacity>
 	inline static T*
 	fixed_buf_end(Fixed_Buf<T, Capacity>& self)
@@ -115,6 +96,7 @@ namespace mn
 		return self.elements + self.count;
 	}
 
+	// begin iterator overload for fixed buffer
 	template<typename T, size_t Capacity>
 	inline static const T*
 	begin(const Fixed_Buf<T, Capacity>& self)
@@ -122,6 +104,7 @@ namespace mn
 		return fixed_buf_begin(self);
 	}
 
+	// begin iterator overload for fixed buffer
 	template<typename T, size_t Capacity>
 	inline static T*
 	begin(Fixed_Buf<T, Capacity>& self)
@@ -129,6 +112,7 @@ namespace mn
 		return fixed_buf_begin(self);
 	}
 
+	// end iterator overload for fixed buffer
 	template<typename T, size_t Capacity>
 	inline static const T*
 	end(const Fixed_Buf<T, Capacity>& self)
@@ -136,6 +120,7 @@ namespace mn
 		return fixed_buf_end(self);
 	}
 
+	// end iterator overload for fixed buffer
 	template<typename T, size_t Capacity>
 	inline static T*
 	end(Fixed_Buf<T, Capacity>& self)
