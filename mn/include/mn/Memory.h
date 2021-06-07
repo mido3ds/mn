@@ -15,31 +15,18 @@
 
 namespace mn
 {
+	// a memory allocator handle
 	using Allocator = memory::Interface*;
 
 
-	//alloc from interface
-	/**
-	 * @brief      Allocates a block of memory off the given allocator
-	 *
-	 * @param[in]  allocator  The allocator
-	 * @param[in]  size       The size
-	 * @param[in]  alignment  The alignment
-	 *
-	 * @return     The allocated block of memory
-	 */
+	// allocates from the given allocator the given size of memory with the specified alignment
 	inline static Block
 	alloc_from(Allocator self, size_t size, uint8_t alignment)
 	{
 		return self->alloc(size, alignment);
 	}
 
-	/**
-	 * @brief      Frees a block of memory off the given allocator
-	 *
-	 * @param[in]  allocator  The allocator
-	 * @param[in]  block      The block
-	 */
+	// frees a block using the given allocator
 	inline static void
 	free_from(Allocator self, Block block)
 	{
@@ -47,15 +34,7 @@ namespace mn
 	}
 
 
-	/**
-	 * @brief      Allocates a single instance of type T from the given allocator
-	 *
-	 * @param[in]  allocator  The allocator
-	 *
-	 * @tparam     T          Instance type
-	 *
-	 * @return     A Pointer to the allocated instance
-	 */
+	// allocates from the given allocator a single instance of the given type
 	template<typename T>
 	inline static T*
 	alloc_from(Allocator self)
@@ -63,14 +42,7 @@ namespace mn
 		return (T*)alloc_from(self, sizeof(T), alignof(T)).ptr;
 	}
 
-	/**
-	 * @brief      Frees a single instance off the given allocator
-	 *
-	 * @param[in]  allocator  The allocator
-	 * @param[in]  ptr        The pointer
-	 *
-	 * @tparam     T          Instance type
-	 */
+	// frees from the given allocator a single instance of the given type
 	template<typename T>
 	inline static void
 	free_from(Allocator self, const T* ptr)
@@ -79,23 +51,14 @@ namespace mn
 	}
 
 
-	/**
-	 * @brief      Allocates a block of memory off the top of the allocator stack
-	 *
-	 * @param[in]  size       The size
-	 * @param[in]  alignment  The alignment
-	 */
+	// allocates from the top/default allocator the given size of memory with the specified alignment
 	inline static Block
 	alloc(size_t size, uint8_t alignment)
 	{
 		return alloc_from(allocator_top(), size, alignment);
 	}
 
-	/**
-	 * @brief      Frees a block of memory off the top of the allocate stack
-	 *
-	 * @param[in]  block  The block
-	 */
+	// frees a block from the top/default allocator
 	inline static void
 	free(Block block)
 	{
@@ -103,13 +66,7 @@ namespace mn
 	}
 
 
-	/**
-	 * @brief      Allocates a single instance of type T off the top of the allocator stack
-	 *
-	 * @tparam     T     Instance type
-	 *
-	 * @return     A Pointer to the allocated instance
-	 */
+	// allocates a single instance of type t from the top/default allocator
 	template<typename T>
 	inline static T*
 	alloc()
@@ -117,13 +74,7 @@ namespace mn
 		return (T*)alloc(sizeof(T), alignof(T)).ptr;
 	}
 
-	/**
-	 * @brief      Frees a single instance off the top of the allocator stack
-	 *
-	 * @param[in]  ptr   The pointer
-	 *
-	 * @tparam     T     Instance type
-	 */
+	// frees a single instance of type t from the top/default allocator
 	template<typename T>
 	inline static void
 	free(const T* ptr)
@@ -132,6 +83,7 @@ namespace mn
 	}
 
 
+	// allocates a single instance of the given type and calls its constructor with the given arguments
 	template<typename T, typename ... TArgs>
 	inline static T*
 	alloc_construct_from(Allocator self, TArgs&& ... args)
@@ -141,6 +93,7 @@ namespace mn
 		return res;
 	}
 
+	// destructs and frees the given instance from the allocator
 	template<typename T>
 	inline static void
 	free_destruct_from(Allocator self, T* ptr)
@@ -150,6 +103,7 @@ namespace mn
 	}
 
 
+	// allocates a single instance of the given type and calls its constructor with the given arguments
 	template<typename T, typename ... TArgs>
 	inline static T*
 	alloc_construct(TArgs&& ... args)
@@ -159,6 +113,7 @@ namespace mn
 		return res;
 	}
 
+	// destructs and frees the given instance from the top/default allocator
 	template<typename T>
 	inline static void
 	free_destruct(T* ptr)
@@ -168,15 +123,7 @@ namespace mn
 	}
 
 
-	/**
-	 * @brief      Allocates a single zero-initialized instance from the given allocator
-	 *
-	 * @param[in]  allocator  The allocator
-	 *
-	 * @tparam     T          Instance type
-	 *
-	 * @return     A Pointer to the allocated instance
-	 */
+	// allocates a single instance of the given type and zeros the memory
 	template<typename T>
 	inline static T*
 	alloc_zerod_from(Allocator self)
@@ -186,13 +133,7 @@ namespace mn
 		return (T*)block.ptr;
 	}
 
-	/**
-	 * @brief      Allocates a single zero-initialized instance off the the top of the allocator stack
-	 *
-	 * @tparam     T     Instance type
-	 *
-	 * @return     A Pointer to the allocated instance
-	 */
+	// allocates a single instance of the given type and zeros the memory
 	template<typename T>
 	inline static T*
 	alloc_zerod()
@@ -202,38 +143,45 @@ namespace mn
 		return (T*)block.ptr;
 	}
 
-
+	// creates a new stack allocator with the given size and using the meta allocator
+	// read more about stack allocator in Stack.h
 	inline static memory::Stack*
 	allocator_stack_new(size_t stack_size, Allocator meta = memory::clib())
 	{
 		return alloc_construct<memory::Stack>(stack_size, meta);
 	}
 
+	// creates a new arena allocator with the given block size and meta allocator
+	// read more about arena allocator in Arena.h
 	inline static memory::Arena*
 	allocator_arena_new(size_t block_size = 4096, Allocator meta = memory::clib())
 	{
 		return alloc_construct<memory::Arena>(block_size, meta);
 	}
 
+	// creates a new buddy allocator with the given heap size and meta allocator
+	// read more about buddy allocator in Buddy.h
 	inline static memory::Buddy*
 	allocator_buddy_new(size_t heap_size = 1ULL * 1024ULL * 1024ULL, Allocator meta = memory::virtual_mem())
 	{
 		return alloc_construct<memory::Buddy>(heap_size, meta);
 	}
 
+	// frees the given allocator
 	inline static void
 	allocator_free(Allocator self)
 	{
 		free_destruct(self);
 	}
 
+	// destruct overload for allocator free
 	inline static void
 	destruct(Allocator self)
 	{
 		allocator_free(self);
 	}
 
-
+	// copies the given block of bytes using the given allocator
 	inline static Block
 	block_clone(const Block& other, Allocator allocator = allocator_top())
 	{
