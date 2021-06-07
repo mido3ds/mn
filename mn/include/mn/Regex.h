@@ -61,6 +61,7 @@ namespace mn
 		buf_free(self.bytes);
 	}
 
+	// destruct overload for regex_free
 	inline static void
 	destruct(Regex& self)
 	{
@@ -74,6 +75,7 @@ namespace mn
 		return Regex{ buf_memcpy_clone(other.bytes, allocator) };
 	}
 
+	// clone overload for regex_clone
 	inline static Regex
 	clone(const Regex& other)
 	{
@@ -107,6 +109,9 @@ namespace mn
 		return regex_compile(unit);
 	}
 
+	// compiles a regular expression into a regex program with a match2 opcode at the end
+	// this is useful in case you want to identify which match did happen, in case you have
+	// different matches like (abc|def) and want to identify whether the match is abc or def
 	inline static Result<Regex>
 	regex_compile_with_payload(const char* str, int32_t payload, Allocator allocator = allocator_top())
 	{
@@ -123,6 +128,7 @@ namespace mn
 		return regex_compile(unit);
 	}
 
+	// compiles a regular expression into a regex program
 	inline static Result<Regex>
 	regex_compile(const char* str, Allocator allocator = allocator_top())
 	{

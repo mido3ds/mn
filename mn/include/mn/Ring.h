@@ -8,6 +8,7 @@
 
 namespace mn
 {
+	// a ring buffer which is useful for doing queues because it can push front and back
 	template<typename T>
 	struct Ring
 	{
@@ -32,6 +33,7 @@ namespace mn
 		}
 	};
 
+	// creates a new ring instance
 	template<typename T>
 	inline static Ring<T>
 	ring_new()
@@ -41,6 +43,7 @@ namespace mn
 		return self;
 	}
 
+	// creates a new ring with the given allocator
 	template<typename T>
 	inline static Ring<T>
 	ring_with_allocator(Allocator allocator)
@@ -50,6 +53,7 @@ namespace mn
 		return self;
 	}
 
+	// frees the given ring
 	template<typename T>
 	inline static void
 	ring_free(Ring<T>& self)
@@ -58,6 +62,7 @@ namespace mn
 			free_from(self.allocator, Block { self.ptr, self.cap * sizeof(T) });
 	}
 
+	// destruct overload for ring free
 	template<typename T>
 	inline static void
 	destruct(Ring<T>& self)
@@ -69,6 +74,7 @@ namespace mn
 		ring_free(self);
 	}
 
+	// ensures the ring has capacity for the given added size
 	template<typename T>
 	inline static void
 	ring_reserve(Ring<T>& self, size_t added_size)
@@ -95,6 +101,7 @@ namespace mn
 		self.head = 0;
 	}
 
+	// pushes a value to the end of the ring buffer
 	template<typename T, typename R>
 	inline static void
 	ring_push_back(Ring<T>& self, const R& value)
@@ -106,6 +113,7 @@ namespace mn
 		++self.count;
 	}
 
+	// pushes a value to the front of the ring buffer
 	template<typename T, typename R>
 	inline static void
 	ring_push_front(Ring<T>& self, const R& value)
@@ -118,6 +126,7 @@ namespace mn
 		++self.count;
 	}
 
+	// returns the value at the back of the ring buffer
 	template<typename T>
 	inline static T&
 	ring_back(Ring<T>& self)
@@ -127,6 +136,7 @@ namespace mn
 		return self.ptr[ix];
 	}
 
+	// returns the value at the back of the ring buffer
 	template<typename T>
 	inline static const T&
 	ring_back(const Ring<T>& self)
@@ -136,6 +146,7 @@ namespace mn
 		return self.ptr[ix];
 	}
 
+	// returns the value of the front of the ring buffer
 	template<typename T>
 	inline static T&
 	ring_front(Ring<T>& self)
@@ -144,6 +155,7 @@ namespace mn
 		return self.ptr[self.head];
 	}
 
+	// returns the value of the front of the ring buffer
 	template<typename T>
 	inline static const T&
 	ring_front(const Ring<T>& self)
@@ -152,6 +164,7 @@ namespace mn
 		return self.ptr[self.head];
 	}
 
+	// pops a value off the back of the ring
 	template<typename T>
 	inline static void
 	ring_pop_back(Ring<T>& self)
@@ -160,6 +173,7 @@ namespace mn
 		--self.count;
 	}
 
+	// pops a value off the front of the ring
 	template<typename T>
 	inline static void
 	ring_pop_front(Ring<T>& self)
@@ -169,6 +183,7 @@ namespace mn
 		--self.count;
 	}
 
+	// returns whether the given ring is empty
 	template<typename T>
 	inline static bool
 	ring_empty(const Ring<T>& self)

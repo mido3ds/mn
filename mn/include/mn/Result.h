@@ -7,12 +7,15 @@
 
 namespace mn
 {
+	// an error message (this type uses RAII to manage its memory)
 	struct Err
 	{
 		Str msg;
 
+		// creates a new empty error (not an error)
 		Err(): msg(str_new()) {}
 
+		// creates a new error with the given error message
 		template<typename... TArgs>
 		Err(const char* fmt, TArgs&& ... args)
 			:msg(strf(fmt, std::forward<TArgs>(args)...))
@@ -47,11 +50,14 @@ namespace mn
 			return *this;
 		}
 
+		// casts the given error to a boolean, (false = no error, true = error exists)
 		explicit operator bool() const { return msg.count != 0; }
 		bool operator==(bool v) const { return (msg.count != 0) == v; }
 		bool operator!=(bool v) const { return !operator==(v); }
 	};
 
+	// represents a result of a function which can fail, it holds either the value or the error
+	// error types shouldn't be of the same type as value types
 	template<typename T, typename E = Err>
 	struct Result
 	{
@@ -60,10 +66,12 @@ namespace mn
 		T val;
 		E err;
 
+		// creates a result instance from an error
 		Result(E e)
 			:err(e)
 		{}
 
+		// creates a result instance from a value
 		template<typename... TArgs>
 		Result(TArgs&& ... args)
 			:val(std::forward<TArgs>(args)...),
@@ -87,6 +95,7 @@ namespace mn
 		~Result() = default;
 	};
 
+	// template specialization for the Err type
 	template<typename T>
 	struct Result<T, Err>
 	{

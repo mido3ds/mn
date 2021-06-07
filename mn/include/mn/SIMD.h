@@ -21,6 +21,7 @@ typedef struct mn_simd_support
 	bool avx_supportted;
 } mn_simd_support;
 
+// returns the support status of various SIMD extensions
 MN_EXPORT mn_simd_support
 mn_simd_support_check();
 
