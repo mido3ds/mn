@@ -194,6 +194,16 @@ target_compile_options(mn
 		$<$<CXX_COMPILER_ID:GNU>:-Wall>
 		$<$<CXX_COMPILER_ID:Clang>:-Wall>)
 
+if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+	target_compile_options(mn PUBLIC /we4834)
+elseif((CMAKE_CXX_COMPILER_ID STREQUAL "GNU") OR
+		(CMAKE_CXX_COMPILER_ID STREQUAL "Clang") OR
+		(CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang"))
+	target_compile_options(mn PUBLIC -Werror=unused-result)
+else()
+	message(FATAL_ERROR "Unidentified Compiler")
+endif()
+
 if (UNIX AND NOT APPLE)
 	find_package(PkgConfig REQUIRED)
 	pkg_search_module(UUID REQUIRED uuid)

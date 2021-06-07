@@ -87,8 +87,10 @@ namespace fmt
 
 namespace mn
 {
+	// appends the formatted string to the end of the given out string, you should the returned value back into the given
+	// string
 	template<typename ... Args>
-	inline static Str
+	[[nodiscard]] inline static Str
 	strf(Str out, const char* format_str, const Args& ... args)
 	{
 		fmt::memory_buffer buf;
@@ -97,20 +99,23 @@ namespace mn
 		return out;
 	}
 
+	// creates a new string with the given allocator containing the formatted string
 	template<typename ... Args>
-	inline static Str
+	[[nodiscard]] inline static Str
 	strf(Allocator allocator, const char* format_str, const Args& ... args)
 	{
 		return strf(str_with_allocator(allocator), format_str, args...);
 	}
 
+	// creates a new string using the top/default allocator containing the formatted string
 	template<typename ... Args>
-	inline static Str
+	[[nodiscard]] inline static Str
 	strf(const char* format_str, const Args& ... args)
 	{
 		return strf(str_new(), format_str, args...);
 	}
 
+	// creates a new temporary string using the tmp allocator containing the formatted string
 	template<typename ... Args>
 	inline static Str
 	str_tmpf(const char* format_str, const Args& ... args)
@@ -118,6 +123,7 @@ namespace mn
 		return strf(str_tmp(), format_str, args...);
 	}
 
+	// prints the formatted string to the given stream
 	template<typename ... Args>
 	inline static size_t
 	print_to(Stream stream, const char* format_str, const Args& ... args)
@@ -127,6 +133,7 @@ namespace mn
 		return stream_write(stream, Block{buf.data(), buf.size()});
 	}
 
+	// prints the formatted string to the standard output stream
 	template<typename ... Args>
 	inline static size_t
 	print(const char* format_str, const Args& ... args)
@@ -134,6 +141,7 @@ namespace mn
 		return print_to(file_stdout(), format_str, args...);
 	}
 
+	// prints the formatted string to the standard error stream
 	template<typename ... Args>
 	inline static size_t
 	printerr(const char* format_str, const Args& ... args)
