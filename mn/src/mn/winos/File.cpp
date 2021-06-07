@@ -321,8 +321,8 @@ namespace mn
 		if(windows_handle == INVALID_HANDLE_VALUE)
 			return nullptr;
 
-		if(open_mode == OPEN_MODE::CREATE_APPEND ||
-		   open_mode == OPEN_MODE::OPEN_APPEND)
+		if(open_mode == OPEN_MODE_CREATE_APPEND ||
+		   open_mode == OPEN_MODE_OPEN_APPEND)
 		{
 			SetFilePointer (windows_handle,	//file handle
 							NULL,					//distance to move low part
