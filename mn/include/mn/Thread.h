@@ -11,46 +11,30 @@
 
 namespace mn
 {
-	/**
-	 * Mutex Handle
-	 */
+	// mutex handle
 	typedef struct IMutex* Mutex;
 
 	MN_EXPORT Mutex
 	_leak_allocator_mutex();
 
+	// creates a new mutex with the given source location info, which is useful for debugging and profiling
 	MN_EXPORT Mutex
 	mutex_new_with_srcloc(const Source_Location* srcloc);
 
-	/**
-	 * @brief      Creates a new mutex
-	 *
-	 * @param[in]  name  The mutex name
-	 */
+	// creates a new mutex
 	MN_EXPORT Mutex
 	mutex_new(const char* name = "Mutex");
 
-	/**
-	 * @brief      Locks the given mutex
-	 *
-	 * @param[in]  mutex  The mutex
-	 */
+	// locks the mutex, it will block until the lock is acquired
 	MN_EXPORT void
 	mutex_lock(Mutex mutex);
 
-	/**
-	 * @brief      Unlocks the given mutex
-	 *
-	 * @param[in]  mutex  The mutex
-	 */
+	// unlocks the mutex
 	MN_EXPORT void
 	mutex_unlock(Mutex mutex);
 
-	/**
-	 * @brief      Frees the given mutex
-	 *
-	 * @param[in]  mutex  The mutex
-	 */
+
+	// frees the mutex
 	MN_EXPORT void
 	mutex_free(Mutex mutex);
 
@@ -58,11 +42,7 @@ namespace mn
 	MN_EXPORT const Source_Location*
 	mutex_source_location(Mutex mutex);
 
-	/**
-	 * @brief      Destruct function overload for the mutex type
-	 *
-	 * @param[in]  mutex  The mutex
-	 */
+	// destruct overload for mutex free
 	inline static void
 	destruct(Mutex mutex)
 	{
@@ -70,56 +50,41 @@ namespace mn
 	}
 
 
-	//Read preferring multi-reader single-writer mutex
+	// read preferring multi-reader single-writer mutex
 	typedef struct IMutex_RW* Mutex_RW;
 
+	// creates a new read-write mutex with the given source location info, which is useful for debugging and profiling
 	MN_EXPORT Mutex_RW
 	mutex_rw_new_with_srcloc(const Source_Location* srcloc);
 
-	/**
-	 * @brief      Creates a new multi-reader single-writer mutex
-	 *
-	 * @param[in]  name  The mutex name
-	 */
+	// creates a new mutex with the given name
 	MN_EXPORT Mutex_RW
 	mutex_rw_new(const char* name = "Mutex_RW");
 
-	/**
-	 * @brief      Frees the mutex
-	 */
+	// frees the mutex
 	MN_EXPORT void
 	mutex_rw_free(Mutex_RW mutex);
 
-	/**
-	 * @brief      destruct overload function for Mutex_RW
-	 */
+	// destruct overload for read-write mutex free
 	inline static void
 	destruct(Mutex_RW mutex)
 	{
 		mutex_rw_free(mutex);
 	}
 
-	/**
-	 * @brief      Locks the mutex for a read operation
-	 */
+	// locks the mutex for read operation, it will block until a lock is acquired
 	MN_EXPORT void
 	mutex_read_lock(Mutex_RW mutex);
 
-	/**
-	 * @brief      Unlocks the mutex from a read operation
-	 */
+	// unlocks the mutex from a read lock
 	MN_EXPORT void
 	mutex_read_unlock(Mutex_RW mutex);
 
-	/**
-	 * @brief      Locks the mutex for a write operation
-	 */
+	// locks the mutex for write operation, it will block until a lock is acquired
 	MN_EXPORT void
 	mutex_write_lock(Mutex_RW mutex);
 
-	/**
-	 * @brief      Unlocks the mutex from a write operation
-	 */
+	// unlocks the mutex from a write operation
 	MN_EXPORT void
 	mutex_write_unlock(Mutex_RW mutex);
 
@@ -129,81 +94,76 @@ namespace mn
 
 
 	//Thread API
+
+	// a thread handle
 	typedef struct IThread* Thread;
 
-	/**
-	 * Thread function
-	 */
+	// thread function
 	using Thread_Func = void(*)(void*);
 
-	/**
-	 * @brief      Creates a new thread
-	 *
-	 * @param[in]  func  The function to run
-	 * @param      arg   The argument to pass to the function
-	 * @param[in]  name  The name of the thread
-	 */
+	// creates a new thread with the given function, argument, and name
 	MN_EXPORT Thread
 	thread_new(Thread_Func func, void* arg, const char* name = "Thread");
 
-	/**
-	 * @brief      Frees the thread
-	 */
+	// frees the given thread handle
 	MN_EXPORT void
 	thread_free(Thread thread);
 
-	/**
-	 * @brief      destruct overload for the thread type
-	 */
+	// destruct overload for thread free
 	inline static void
 	destruct(Thread thread)
 	{
 		thread_free(thread);
 	}
 
-	/**
-	 * @brief      joins the execution of the calling thread with the given thread
-	 */
+	// joins the execution of the calling thread with the given thread
 	MN_EXPORT void
 	thread_join(Thread thread);
 
-	/**
-	 * @brief      sleeps the calling thread by the given milliseconds
-	 */
+	// sleeps the calling thread by the given milliseconds
 	MN_EXPORT void
 	thread_sleep(uint32_t milliseconds);
 
 
-	// time in milliseonds
+	// returns time in milliseonds
 	MN_EXPORT uint64_t
 	time_in_millis();
 
 
-	// Condition Variable
+	// a condition variable handle
 	typedef struct ICond_Var* Cond_Var;
 
+	// condition variable wake state
 	enum class Cond_Var_Wake_State
 	{
+		// condition variable waked because it was signalled
 		SIGNALED,
+		// condition variable waked because it timed out
 		TIMEOUT,
+		// a spurious wake from OS scheduler
 		SPURIOUS
 	};
 
+	// creats a new condition variable
 	MN_EXPORT Cond_Var
 	cond_var_new();
 
+	// frees the given condition variable
 	MN_EXPORT void
 	cond_var_free(Cond_Var self);
 
+	// destruct overload for condition variable free
 	inline static void
 	destruct(Cond_Var self)
 	{
 		cond_var_free(self);
 	}
 
+	// waits on the condition variable
 	MN_EXPORT void
 	cond_var_wait(Cond_Var self, Mutex mtx);
 
+	// waits on the condition variable until the function returns true
 	template<typename TFunc>
 	inline static void
 	cond_var_wait(Cond_Var self, Mutex mtx, TFunc&& func)
@@ -212,9 +172,11 @@ namespace mn
 			cond_var_wait(self, mtx);
 	}
 
+	// waits on the condition variable with a timeout
 	MN_EXPORT Cond_Var_Wake_State
 	cond_var_wait_timeout(Cond_Var self, Mutex mtx, uint32_t millis);
 
+	// waits on the condition variable until the function returns true or until it times out
 	template<typename TFunc>
 	inline static bool
 	cond_var_wait_timeout(Cond_Var self, Mutex mtx, uint32_t millis, TFunc&& func)
@@ -240,30 +202,39 @@ namespace mn
 		}
 	}
 
+	// signals a condition variable waiter
 	MN_EXPORT void
 	cond_var_notify(Cond_Var self);
 
+	// signals all condition variable waiters
 	MN_EXPORT void
 	cond_var_notify_all(Cond_Var self);
 
-	// Semaphore
+	// a waitgroup is a sync primitive which is a counter you can wait on until it reaches zero
 	typedef struct IWaitgroup* Waitgroup;
 
+	// creates a new waitgroup
 	MN_EXPORT Waitgroup
 	waitgroup_new();
 
+	// frees the given waitgroup
 	MN_EXPORT void
 	waitgroup_free(Waitgroup self);
 
+	// waits until the waitgroup is zero
 	MN_EXPORT void
 	waitgroup_wait(Waitgroup self);
 
+	// adds c to the waitgroup counter
 	MN_EXPORT void
 	waitgroup_add(Waitgroup self, int c);
 
+	// decrements the waitgroup counter and signals it if it reaches 0
 	MN_EXPORT void
 	waitgroup_done(Waitgroup self);
 
+	// automatic waitgroup which uses RAII to manage its memory
+	// useful in case you want a quick scoped waitgroup
 	struct Auto_Waitgroup
 	{
 		Waitgroup handle;
@@ -301,18 +272,21 @@ namespace mn
 			return *this;
 		}
 
+		// adds c to the waitgroup counter
 		void
 		add(int c)
 		{
 			waitgroup_add(handle, c);
 		}
 
+		// decrements the waitgroup counter and signals it if it reaches 0
 		void
 		done()
 		{
 			waitgroup_done(handle);
 		}
 
+		// waits until the waitgroup is zero
 		void
 		wait()
 		{

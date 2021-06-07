@@ -13,83 +13,49 @@
 
 namespace mn
 {
-	/**
-	 * A String is just a `Buf<char>` so it's suitable to use the buf functions with the string
-	 * but use with caution since the null terminator should be maintained all the time
-	 */
+	// a string is just a `Buf<char>` so it's suitable to use the buf functions with the string
+	// but use with caution since the null terminator should be maintained all the time
 	using Str = Buf<char>;
 
-	/**
-	 * @brief      Returns a new string
-	 */
+	// creates a new string
 	MN_EXPORT Str
 	str_new();
 
-	/**
-	 * @brief      Returns a new string
-	 *
-	 * @param[in]  allocator  The allocator to be used by the string
-	 */
+	// creates a new string with the given allocator
 	MN_EXPORT Str
 	str_with_allocator(Allocator allocator);
 
-	/**
-	 * @brief      Returns a new string which has the same content as the given
-	 * C string (performs a copy)
-	 *
-	 * @param[in]  str        The C string
-	 * @param[in]  allocator  The allocator
-	 */
+	// creates a new string from the given c string
 	MN_EXPORT Str
 	str_from_c(const char* str, Allocator allocator = allocator_top());
 
-	/**
-	 * @brief      Returns a new string which has the same content of the given
-	 * C sub string (performs a copy)
-	 *
-	 * @param[in]  begin      The begin
-	 * @param[in]  end        The end
-	 * @param[in]  allocator  The allocator
-	 */
+	// creates a new string from the given sub string
 	MN_EXPORT Str
 	str_from_substr(const char* begin, const char* end, Allocator allocator = allocator_top());
 
-	/**
-	 * @brief      Just wraps the given C string literal (doesn't copy)
-	 *
-	 * @param[in]  lit   The C string literal
-	 */
+	// wraps a string literal into a string (does not allocate)
 	MN_EXPORT Str
 	str_lit(const char* lit);
 
+	// creates a new temporary string
 	inline static Str
 	str_tmp(const char* str = nullptr)
 	{
 		return str_from_c(str, memory::tmp());
 	}
 
-	/**
-	 * @brief      Frees the string
-	 */
+	// frees the given string
 	MN_EXPORT void
 	str_free(Str& self);
 
-	/**
-	 * @brief      Destruct function overload for the string
-	 *
-	 * @param      self  The string
-	 */
+	// destruct overload for str free
 	inline static void
 	destruct(Str& self)
 	{
 		str_free(self);
 	}
 
-	/**
-	 * @brief      Returns the rune count of the given string
-	 *
-	 * @param[in]  self  The string
-	 */
+	// returns the rune count of the given string
 	inline static size_t
 	str_rune_count(const Str& self)
 	{
@@ -98,337 +64,196 @@ namespace mn
 		return 0;
 	}
 
-	/**
-	 * @brief      Pushes the second string into the first one
-	 *
-	 * @param      self  The first string
-	 * @param[in]  str   The second string literal
-	 */
+	// pushes the second string into the first one
 	MN_EXPORT void
 	str_push(Str& self, const char* str);
 
-	/**
-	 * @brief      Pushes the second string into the first one
-	 *
-	 * @param      self  The first string
-	 * @param[in]  str   The second string
-	 */
+	// pushes the second string into the first one
 	inline static void
 	str_push(Str& self, const Str& str)
 	{
 		str_push(self, str.ptr);
 	}
 
-	/**
-	 * @brief      Pushes a block of memory into the string
-	 *
-	 * @param      self   The string
-	 * @param[in]  block  The block
-	 */
+	// pushes the given block of bytes into the string
 	MN_EXPORT void
 	str_block_push(Str& self, Block block);
 
-	/**
-	 * @brief      Pushes a runes to the back of the string
-	 *
-	 * @param      self  The string
-	 * @param[in]  r     rune
-	 */
+	// pushes a rune into the back of the string
 	MN_EXPORT void
 	str_push(Str& self, Rune r);
 
-	/**
-	 * @brief      Ensures that the string is null terminated
-	 *
-	 * @param      self  The string
-	 */
+	// ensures that string is null terminated
 	MN_EXPORT void
 	str_null_terminate(Str& self);
 
-	/**
-	 * @brief      Searches for the given string
-	 *
-	 * @param[in]  self    The string to search in
-	 * @param[in]  target  The target string to find
-	 * @param[in]  start   The start index to begin the search with
-	 *
-	 * @return     index of the found target or size_t(-1) instead
-	 */
+	// searches for the given target in the given string starting from the given index, returns the index of target 
+	// or SIZE_MAX if it doesn't exists
 	MN_EXPORT size_t
 	str_find(const Str& self, const Str& target, size_t start);
 
-	/**
-	 * @brief      Searches for the given string
-	 *
-	 * @param[in]  self    The string to search in
-	 * @param[in]  target  The target string to find
-	 * @param[in]  start   The start index to begin the search with
-	 *
-	 * @return     index of the found target or size_t(-1) instead
-	 */
+	// searches for the given target in the given string starting from the given index, returns the index of target 
+	// or SIZE_MAX if it doesn't exists
 	inline static size_t
 	str_find(const Str& self, const char* target, size_t start)
 	{
 		return str_find(self, str_lit(target), start);
 	}
 
-	/**
-	 * @brief      Searches for the given string
-	 *
-	 * @param[in]  self    The string to search in
-	 * @param[in]  target  The target string to find
-	 * @param[in]  start   The start index to begin the search with
-	 *
-	 * @return     index of the found target or size_t(-1) instead
-	 */
+	// searches for the given target in the given string starting from the given index, returns the index of target 
+	// or SIZE_MAX if it doesn't exists
 	inline static size_t
 	str_find(const char* self, const Str& target, size_t start)
 	{
 		return str_find(str_lit(self), target, start);
 	}
 
-	/**
-	 * @brief      Searches for the given string
-	 *
-	 * @param[in]  self    The string to search in
-	 * @param[in]  target  The target string to find
-	 * @param[in]  start   The start index to begin the search with
-	 *
-	 * @return     index of the found target or size_t(-1) instead
-	 */
+	// searches for the given target in the given string starting from the given index, returns the index of target 
+	// or SIZE_MAX if it doesn't exists
 	inline static size_t
 	str_find(const char* self, const char* target, size_t start)
 	{
 		return str_find(str_lit(self), str_lit(target), start);
 	}
 
+	// searches for the given rune in the given string starting from the given index, returns the index of target 
+	// or SIZE_MAX if it doesn't exists
 	MN_EXPORT size_t
 	str_find(const Str& self, Rune r, size_t start_in_bytes);
 
+	// searches for the given rune in the given string starting from the given index, returns the index of target 
+	// or SIZE_MAX if it doesn't exists
 	inline static size_t
 	str_find(const char* self, Rune r, size_t start_in_bytes)
 	{
 		return str_find(str_lit(self), r, start_in_bytes);
 	}
 
-	/**
-	 * @brief      Replaces a single char in the string
-	 *
-	 * @param      self       The string
-	 * @param[in]  to_remove  char to remove
-	 * @param[in]  to_add     char to add
-	 */
+	// replaces a single char in the given string
 	MN_EXPORT void
 	str_replace(Str& self, char to_remove, char to_add);
 
-	/**
-	 * @brief      Replaces a substring in the string
-	 *
-	 * @param      self     The string
-	 * @param[in]  search   The string to search for
-	 * @param[in]  replace  The string replace to add
-	 */
+	// replaces the search string with the replace one in the given string
 	MN_EXPORT void
 	str_replace(Str& self, const Str& search, const Str& replace);
 
+	// replaces the search string with the replace one in the given string
 	inline static void
 	str_replace(Str& self, const Str& search, const char* replace)
 	{
 		str_replace(self, search, str_lit(replace));
 	}
 
+	// replaces the search string with the replace one in the given string
 	inline static void
 	str_replace(Str& self, const char* search, const Str& replace)
 	{
 		str_replace(self, str_lit(search), replace);
 	}
 
+	// replaces the search string with the replace one in the given string
 	inline static void
 	str_replace(Str& self, const char* search, const char* replace)
 	{
 		str_replace(self, str_lit(search), str_lit(replace));
 	}
 
-	/**
-	 * @brief      Splits the string with the given delimiter
-	 *
-	 * @param[in]  self        The string
-	 * @param[in]  delim       The delimiter to split with
-	 * @param[in]  skip_empty  determines whether we shouldn't return empty strings or not
-	 * @param[in]  allocator   The allocator [optional] default is the tmp allocator
-	 */
+	// splits the string with the given delimiter, and returns a buf of sub strings allocated using the given allocator
+	// skip_empty option allows you to skip empty substrings if it's set to true
 	MN_EXPORT Buf<Str>
 	str_split(const Str& self, const Str& delim, bool skip_empty, Allocator allocator = memory::tmp());
 
-	/**
-	 * @brief      Splits the string with the given delimiter
-	 *
-	 * @param[in]  self        The string
-	 * @param[in]  delim       The delimiter to split with
-	 * @param[in]  skip_empty  determines whether we shouldn't return empty strings or not
-	 * @param[in]  allocator   The allocator [optional] default is the tmp allocator
-	 */
+	// splits the string with the given delimiter, and returns a buf of sub strings allocated using the given allocator
+	// skip_empty option allows you to skip empty substrings if it's set to true
 	inline static Buf<Str>
 	str_split(const Str& self, const char* delim, bool skip_empty, Allocator allocator = memory::tmp())
 	{
 		return str_split(self, str_lit(delim), skip_empty, allocator);
 	}
 
-	/**
-	 * @brief      Splits the string with the given delimiter
-	 *
-	 * @param[in]  self        The string
-	 * @param[in]  delim       The delimiter to split with
-	 * @param[in]  skip_empty  determines whether we shouldn't return empty strings or not
-	 * @param[in]  allocator   The allocator [optional] default is the tmp allocator
-	 */
+	// splits the string with the given delimiter, and returns a buf of sub strings allocated using the given allocator
+	// skip_empty option allows you to skip empty substrings if it's set to true
 	inline static Buf<Str>
 	str_split(const char* self, const Str& delim, bool skip_empty, Allocator allocator = memory::tmp())
 	{
 		return str_split(str_lit(self), delim, skip_empty, allocator);
 	}
 
-	/**
-	 * @brief      Splits the string with the given delimiter
-	 *
-	 * @param[in]  self        The string
-	 * @param[in]  delim       The delimiter to split with
-	 * @param[in]  skip_empty  determines whether we shouldn't return empty strings or not
-	 * @param[in]  allocator   The allocator [optional] default is the tmp allocator
-	 */
+	// splits the string with the given delimiter, and returns a buf of sub strings allocated using the given allocator
+	// skip_empty option allows you to skip empty substrings if it's set to true
 	inline static Buf<Str>
 	str_split(const char* self, const char* delim, bool skip_empty, Allocator allocator = memory::tmp())
 	{
 		return str_split(str_lit(self), str_lit(delim), skip_empty, allocator);
 	}
 
-	/**
-	 * @brief      Checks if the string is starting with the given prefix
-	 *
-	 * @param[in]  self    The string
-	 * @param[in]  prefix  The prefix
-	 */
+	// returns whether the string is starting with the given prefix
 	MN_EXPORT bool
 	str_prefix(const Str& self, const Str& prefix);
 
-	/**
-	 * @brief      Checks if the string is starting with the given prefix
-	 *
-	 * @param[in]  self    The string
-	 * @param[in]  prefix  The prefix
-	 */
+	// returns whether the string is starting with the given prefix
 	inline static bool
 	str_prefix(const Str& self, const char* prefix)
 	{
 		return str_prefix(self, str_lit(prefix));
 	}
 
-	/**
-	 * @brief      Checks if the string is starting with the given prefix
-	 *
-	 * @param[in]  self    The string
-	 * @param[in]  prefix  The prefix
-	 */
+	// returns whether the string is starting with the given prefix
 	inline static bool
 	str_prefix(const char* self, const Str& prefix)
 	{
 		return str_prefix(str_lit(self), prefix);
 	}
 
-	/**
-	 * @brief      Checks if the string is starting with the given prefix
-	 *
-	 * @param[in]  self    The string
-	 * @param[in]  prefix  The prefix
-	 */
+	// returns whether the string is starting with the given prefix
 	inline static bool
 	str_prefix(const char* self, const char* prefix)
 	{
 		return str_prefix(str_lit(self), str_lit(prefix));
 	}
 
-	/**
-	 * @brief      Checks if the string is ending with the given suffix
-	 *
-	 * @param[in]  self    The string
-	 * @param[in]  suffix  The suffix
-	 */
+	// returns whether the string is ending with the given suffix
 	MN_EXPORT bool
 	str_suffix(const Str& self, const Str& suffix);
 
-	/**
-	 * @brief      Checks if the string is ending with the given suffix
-	 *
-	 * @param[in]  self    The string
-	 * @param[in]  suffix  The suffix
-	 */
+	// returns whether the string is ending with the given suffix
 	inline static bool
 	str_suffix(const Str& self, const char* suffix)
 	{
 		return str_suffix(self, str_lit(suffix));
 	}
 
-	/**
-	 * @brief      Checks if the string is ending with the given suffix
-	 *
-	 * @param[in]  self    The string
-	 * @param[in]  suffix  The suffix
-	 */
+	// returns whether the string is ending with the given suffix
 	inline static bool
 	str_suffix(const char* self, const Str& suffix)
 	{
 		return str_suffix(str_lit(self), suffix);
 	}
 
-	/**
-	 * @brief      Checks if the string is ending with the given suffix
-	 *
-	 * @param[in]  self    The string
-	 * @param[in]  suffix  The suffix
-	 */
+	// returns whether the string is ending with the given suffix
 	inline static bool
 	str_suffix(const char* self, const char* suffix)
 	{
 		return str_suffix(str_lit(self), str_lit(suffix));
 	}
 
-	/**
-	 * @brief      Resizes the string to the given size
-	 *
-	 * @param      self  The string
-	 * @param[in]  size  The size
-	 */
+	// resizes the string to the given size in bytes
 	MN_EXPORT void
 	str_resize(Str& self, size_t size);
 
-	/**
-	 * @brief      Ensures the given string has the capacity to hold the given size
-	 *
-	 * @param      self  The string
-	 * @param[in]  size  The size
-	 */
+	// ensures the given string has the capacity to hold the specified size
 	MN_EXPORT void
 	str_reserve(Str& self, size_t size);
 
-	/**
-	 * @brief      Clears the string
-	 *
-	 * @param      self  The string
-	 */
+	// clears the string
 	MN_EXPORT void
 	str_clear(Str& self);
 
-	/**
-	 * @brief      Clones the given string
-	 *
-	 * @param[in]  other      The string
-	 * @param[in]  allocator  The allocator to be used in the returned string
-	 *
-	 * @return     The newly cloned string
-	 */
+	// clones the string using the given allocator
 	MN_EXPORT Str
 	str_clone(const Str& other, Allocator allocator = allocator_top());
 
+	// trims string from the left, it removes all the runes which when passed to the given function it will return true
 	template<typename TFunc>
 	inline static void
 	str_trim_left_pred(Str& self, TFunc&& f)
@@ -450,35 +275,28 @@ namespace mn
 		str_null_terminate(self);
 	}
 
-	/**
-	 * @brief      Trims the string from the left by removing any rune in the cutset
-	 *
-	 * @param      self    The string
-	 * @param[in]  cutset  The cutset to remove
-	 */
+	// trims the string from the left by removing any rune in the cutset
 	inline static void
 	str_trim_left(Str& self, const Str& cutset)
 	{
 		str_trim_left_pred(self, [&cutset](Rune r) { return str_find(cutset, r, 0) != size_t(-1); });
 	}
 
+	// trims the string from the left by removing any rune in the cutset
 	inline static void
 	str_trim_left(Str& self, const char* cutset)
 	{
 		str_trim_left(self, str_lit(cutset));
 	}
 
-	/**
-	 * @brief      removes whitespaces from the left of the string
-	 *
-	 * @param      self  The string
-	 */
+	// removes whitespaces from the left of the string
 	inline static void
 	str_trim_left(Str& self)
 	{
 		str_trim_left(self, str_lit("\n\t\r\v "));
 	}
 
+	// trims string from the right, it removes all the runes which when passed to the given function it will return true
 	template<typename TFunc>
 	inline static void
 	str_trim_right_pred(Str& self, TFunc&& f)
@@ -506,35 +324,28 @@ namespace mn
 		str_resize(self, s);
 	}
 
-	/**
-	 * @brief      Trims the string from the right by removing any rune in the cutset
-	 *
-	 * @param      self    The string
-	 * @param[in]  cutset  The cutset to remove
-	 */
+	// trims the string from the right by removing any rune in the cutset
 	inline static void
 	str_trim_right(Str& self, const Str& cutset)
 	{
 		str_trim_right_pred(self, [&cutset](Rune r) { return str_find(cutset, r, 0) != size_t(-1); });
 	}
 
+	// trims the string from the right by removing any rune in the cutset
 	inline static void
 	str_trim_right(Str& self, const char* cutset)
 	{
 		str_trim_right(self, str_lit(cutset));
 	}
 
-	/**
-	 * @brief      removes whitespace from the right of the string
-	 *
-	 * @param      self  The string
-	 */
+	// removes whitespaces from the right of the string
 	inline static void
 	str_trim_right(Str& self)
 	{
 		str_trim_right(self, str_lit("\n\t\r\v "));
 	}
 
+	// trims string from both ends by removing runes which when passed to the functor it returns true
 	template<typename TFunc>
 	inline static void
 	str_trim_pred(Str& self, TFunc&& f)
@@ -543,47 +354,43 @@ namespace mn
 		str_trim_right_pred(self, f);
 	}
 
-	/**
-	 * @brief      trims the string by removing the cutset from the left and right of the string
-	 *
-	 * @param      self    The string
-	 * @param[in]  cutset  The cutset to remove
-	 */
+	// trims string from both ends by removing runes in the given cutset
 	inline static void
 	str_trim(Str& self, const Str& cutset)
 	{
 		str_trim_pred(self, [&cutset](Rune r) { return str_find(cutset, r, 0) != size_t(-1); });
 	}
 
+	// trims string from both ends by removing runes in the given cutset
 	inline static void
 	str_trim(Str& self, const char* cutset)
 	{
 		str_trim(self, str_lit(cutset));
 	}
 
-	/**
-	 * @brief      removes whitespace from around the string
-	 *
-	 * @param      self  The string
-	 */
+	// removes whitespaces from both ends of the string
 	inline static void
 	str_trim(Str& self)
 	{
 		str_trim(self, str_lit("\n\t\r\v "));
 	}
 
+	// returns whether the string is empty
 	inline static bool
 	str_empty(const Str& self)
 	{
 		return self.count == 0;
 	}
 
+	// converts the given string to lower case
 	MN_EXPORT void
 	str_lower(Str& self);
 
+	// converts the given string to upper case
 	MN_EXPORT void
 	str_upper(Str& self);
 
+	// a rune iterator which allows string to be used in a range for loop to iterator over its runes
 	struct Rune_Iterator
 	{
 		const char* it;
@@ -631,6 +438,7 @@ namespace mn
 		}
 	};
 
+	// runes sub string, which is used to make range for loops work over string runes
 	struct Str_Runes
 	{
 		const char* begin_it;
@@ -671,13 +479,7 @@ namespace mn
 		return str_runes(str_lit(str));
 	}
 
-	/**
-	 * @brief      Clone function overload for the string type
-	 *
-	 * @param[in]  other  The string to be cloned
-	 *
-	 * @return     Copy of this object.
-	 */
+	// clone function overload for string clone
 	inline static Str
 	clone(const Str& other)
 	{
@@ -694,6 +496,7 @@ namespace mn
 		}
 	};
 
+	// compares two strings and returns 0 if they are equal, 1 if a > b, and -1 if a < b
 	inline static int
 	str_cmp(const char* a, const char* b)
 	{

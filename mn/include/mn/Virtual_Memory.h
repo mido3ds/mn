@@ -5,20 +5,11 @@
 
 namespace mn
 {
-	/**
-	 * @brief      Virtual allocates a block of memory
-	 *
-	 * @param      address_hint  The address hint for the allocator to put the allocated memory at
-	 * @param[in]  size          The size(in bytes)
-	 */
+	// allocates a block of memory using OS virtual memory, it will commit it as well
 	MN_EXPORT Block
 	virtual_alloc(void* address_hint, size_t size);
 
-	/**
-	 * @brief      Virtual frees a virtual allocated block of memory
-	 *
-	 * @param[in]  block  The block
-	 */
+	// frees a block from OS virtual memory
 	MN_EXPORT void
 	virtual_free(Block block);
 }

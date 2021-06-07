@@ -9,6 +9,7 @@
 
 namespace mn
 {
+	// a universally unique identifier
 	union UUID
 	{
 		struct
@@ -24,6 +25,7 @@ namespace mn
 		uint8_t bytes[16];
 	};
 
+	// empty uuid
 	inline UUID null_uuid{};
 
 	inline static bool
@@ -38,6 +40,7 @@ namespace mn
 		return !operator==(a, b);
 	}
 
+	// generates a new uuid using OS provided interface
 	MN_EXPORT UUID
 	uuid_generate();
 
@@ -67,6 +70,7 @@ namespace mn
 		return (_uuid_hex_to_uint8(a) << 4) | _uuid_hex_to_uint8(b);
 	}
 
+	// parses a uuid from a string, returns either a valid uuid or an error
 	inline static Result<UUID>
 	uuid_parse(const char* str)
 	{
@@ -112,6 +116,7 @@ namespace mn
 		return self;
 	}
 
+	// parses a uuid from a string, returns either a valid uuid or an error
 	inline static Result<UUID>
 	uuid_parse(const Str& s)
 	{
@@ -145,6 +150,7 @@ namespace mn
 		UUID_VARIANT_RESERVED,
 	};
 
+	// returns which variant this uuid uses
 	inline static UUID_VARIANT
 	uuid_variant(const UUID& self)
 	{
@@ -174,6 +180,7 @@ namespace mn
 		UUID_VERSION_NAME_BASED_SHA1,
 	};
 
+	// returns the version of the given uuid
 	inline static UUID_VERSION
 	uuid_version(const UUID& self)
 	{

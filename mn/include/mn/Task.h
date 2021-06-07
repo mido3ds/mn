@@ -7,9 +7,11 @@
 
 namespace mn
 {
+	// a task is a closure wrapper which takes care of allocation, free, and small buffer optimizations
 	template<typename>
 	struct Task;
 
+	// a task is a closure wrapper which takes care of allocation, free, and small buffer optimizations
 	template<typename R, typename ... Args>
 	struct Task<R(Args...)>
 	{
@@ -88,8 +90,10 @@ namespace mn
 			return _self().invoke(std::forward<Args>(args)...);
 		}
 
+		// bool casting operator to check if the task is holding a closure
 		operator bool() const { return isSet; }
 
+		// creates a new empty task
 		inline static Task<R(Args...)>
 		make()
 		{
@@ -97,6 +101,7 @@ namespace mn
 			return self;
 		}
 
+		// creates a new task from the given callable
 		template<typename F>
 		inline static Task<R(Args...)>
 		make(F&& f)
@@ -108,6 +113,7 @@ namespace mn
 			return self;
 		}
 
+		// creates a new task from the given callable using the given allocator
 		template<typename F>
 		inline static Task<R(Args...)>
 		make_with_allocator(Allocator allocator, F&& f)
@@ -120,6 +126,7 @@ namespace mn
 		}
 	};
 
+	// frees the given task
 	template<typename R, typename ... Args>
 	inline static void
 	task_free(Task<R(Args...)>& self)
@@ -131,6 +138,7 @@ namespace mn
 		}
 	}
 
+	// destruct overload for task free
 	template<typename R, typename ... Args>
 	inline static void
 	destruct(Task<R(Args...)>& self)
