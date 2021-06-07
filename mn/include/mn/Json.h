@@ -9,6 +9,7 @@
 
 namespace mn::json
 {
+	// represents a json value
 	struct Value
 	{
 		enum KIND: uint8_t
@@ -32,6 +33,7 @@ namespace mn::json
 		};
 	};
 
+	// creates a new json value from a boolean
 	inline static Value
 	value_bool_new(bool v)
 	{
@@ -41,6 +43,7 @@ namespace mn::json
 		return self;
 	}
 
+	// creates a new json value from a number
 	inline static Value
 	value_number_new(float v)
 	{
@@ -50,6 +53,7 @@ namespace mn::json
 		return self;
 	}
 
+	// creates a new json value from a string
 	inline static Value
 	value_string_new(Str v)
 	{
@@ -60,6 +64,7 @@ namespace mn::json
 		return self;
 	}
 
+	// creates a new json value from a string
 	inline static Value
 	value_string_new(const char* v)
 	{
@@ -70,6 +75,7 @@ namespace mn::json
 		return self;
 	}
 
+	// creates a new json array
 	inline static Value
 	value_array_new()
 	{
@@ -79,6 +85,7 @@ namespace mn::json
 		return self;
 	}
 
+	// creates a new json object
 	inline static Value
 	value_object_new()
 	{
@@ -88,6 +95,7 @@ namespace mn::json
 		return self;
 	}
 
+	// frees the given json value
 	inline static void
 	value_free(Value& self)
 	{
@@ -115,36 +123,42 @@ namespace mn::json
 		}
 	}
 
+	// destruct overload for value free
 	inline static void
 	destruct(Value& self)
 	{
 		value_free(self);
 	}
 
+	// returns the json value in the given array at the given index
 	inline static const Value&
 	value_array_at(const Value& self, size_t index)
 	{
 		return *(self.as_array->ptr + index);
 	}
 
+	// returns the json value in the given array at the given index
 	inline static Value&
 	value_array_at(Value& self, size_t index)
 	{
 		return *(self.as_array->ptr + index);
 	}
 
+	// pushes a new value into the given json array
 	inline static void
 	value_array_push(Value& self, Value v)
 	{
 		buf_push(*self.as_array, v);
 	}
 
+	// iterats over the given json array
 	inline static Buf<Value>&
 	value_array_iter(Value& self)
 	{
 		return *self.as_array;
 	}
 
+	// searches for a key inside the given json object, returns nullptr if the key doesn't exist
 	inline static const Value*
 	value_object_lookup(const Value& self, const Str& key)
 	{
@@ -153,6 +167,7 @@ namespace mn::json
 		return nullptr;
 	}
 
+	// searches for a key inside the given json object, returns nullptr if the key doesn't exist
 	inline static Value*
 	value_object_lookup(Value& self, const Str& key)
 	{
@@ -161,6 +176,7 @@ namespace mn::json
 		return nullptr;
 	}
 
+	// inserts a new key value pair into the given json value
 	inline static void
 	value_object_insert(Value& self, const Str& key, Value v)
 	{
@@ -175,21 +191,25 @@ namespace mn::json
 		}
 	}
 
+	// inserts a new key value pair into the given json value
 	inline static void
 	value_object_insert(Value& self, const char* key, Value v)
 	{
 		map_insert(*self.as_object, str_from_c(key), v);
 	}
 
+	// iteratos over the given json object
 	inline static Map<Str, Value>&
 	value_object_iter(Value& self)
 	{
 		return *self.as_object;
 	}
 
+	// tries to parse json value from the encoded string
 	MN_EXPORT Result<Value>
 	parse(const Str& content);
 
+	// tries to parse json value from the encoded string
 	inline static Result<Value>
 	parse(const char* content)
 	{
