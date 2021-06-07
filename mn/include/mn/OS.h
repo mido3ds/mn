@@ -8,12 +8,7 @@ namespace mn
 	[[noreturn]] MN_EXPORT void
 	_panic(const char* cause);
 
-	/**
-	 * @brief      Prints the given message and the call stack then exits the application
-	 *
-	 * @param[in]  fmt        The format
-	 * @param[in]  args       The arguments
-	 */
+	// prints the given message and the call stack then terminates the program
 	template<typename ... TArgs>
 	[[noreturn]] inline static void
 	panic(const char* fmt, TArgs&& ... args)
