@@ -201,7 +201,8 @@ namespace mn
 		[[maybe_unused]] DWORD written_size = GetFullPathName((LPCWSTR)os_str.ptr, required_size, (LPWSTR)full_path.ptr, NULL);
 		assert(written_size != 0 && "GetFullPathName failed");
 
-		Str res = from_os_encoding(full_path, allocator);
+		Block written_block{full_path.ptr, (written_size + 1) * sizeof(TCHAR)};
+		Str res = from_os_encoding(written_block, allocator);
 		return path_normalize(res);
 	}
 
