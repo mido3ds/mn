@@ -2,6 +2,53 @@
 
 namespace mn
 {
+	struct Rabin_Karp_State
+	{
+		uint32_t hash, pow;
+	};
+
+	constexpr uint32_t PRIME_RABIN_KARP = 16777619;
+
+	inline static Rabin_Karp_State
+	_hash_str_rabin_karp(const Str& str)
+	{
+		Rabin_Karp_State res{0, 1};
+
+		for (size_t i = 0; i < str.count; ++i)
+			res.hash = res.hash * PRIME_RABIN_KARP + uint32_t(str.ptr[i]);
+		auto sq = PRIME_RABIN_KARP;
+		for (size_t i = str.count; i > 0; i >>= 1)
+		{
+			if ((i & 1) != 0)
+				res.pow *= sq;
+			sq *= sq;
+		}
+		return res;
+	}
+
+	inline static Rabin_Karp_State
+	_hash_str_rabin_karp_reverse(const Str& str)
+	{
+		assert(str.count > 0);
+
+		Rabin_Karp_State res{0, 1};
+
+		for (size_t i = 0; i < str.count; ++i)
+		{
+			auto rev_i = str.count - i - 1;
+			res.hash = res.hash * PRIME_RABIN_KARP + uint32_t(str.ptr[rev_i]);
+		}
+		auto sq = PRIME_RABIN_KARP;
+		for (size_t i = str.count; i > 0; i >>= 1)
+		{
+			if ((i & 1) != 0)
+				res.pow *= sq;
+			sq *= sq;
+		}
+		return res;
+	}
+
+	// API
 	Str
 	str_new()
 	{
@@ -115,15 +162,121 @@ namespace mn
 	}
 
 	size_t
-	str_find(const Str& self, const Str& target, size_t start)
+	str_find(const Str& input, const Str& target, size_t start)
 	{
-		if (start >= self.count || target.count > self.count)
+		if (start >= input.count || input.count - start < target.count)
+		{
 			return size_t(-1);
+		}
 
-		for (size_t i = start; i <= self.count - target.count; ++i)
-			if (::memcmp(self.ptr + i, target.ptr, target.count) == 0)
-				return i;
+		// make a local dummy copy and advance the pointers etc...
+		auto self = input;
+		self.ptr += start;
+		self.count -= start;
 
+		if (target.count == 0)
+		{
+			return 0 + start;
+		}
+		else if (target.count == 1)
+		{
+			for (size_t i = 0; i < self.count; ++i)
+				if (self.ptr[i] == target.ptr[0])
+					return i + start;
+			return size_t(-1);
+		}
+		else if (target.count == self.count)
+		{
+			if (target == self)
+				return 0 + start;
+			return size_t(-1);
+		}
+		else if (target.count > self.count)
+		{
+			return size_t(-1);
+		}
+
+		auto [hash, pow] = _hash_str_rabin_karp(target);
+
+		uint32_t h{};
+		for (size_t i = 0; i < target.count; ++i)
+		{
+			h = h * PRIME_RABIN_KARP + uint32_t(self.ptr[i]);
+		}
+
+		if (h == hash && ::memcmp(self.ptr, target.ptr, target.count) == 0)
+		{
+			return 0 + start;
+		}
+
+		for (size_t i = target.count; i < self.count;)
+		{
+			h *= PRIME_RABIN_KARP;
+			h += uint32_t(self.ptr[i]);
+			h -= pow * uint32_t(self.ptr[i - target.count]);
+			i += 1;
+			if (h == hash && ::memcmp(self.ptr + i - target.count, target.ptr, target.count) == 0)
+			{
+				return i - target.count + start;
+			}
+		}
+		return size_t(-1);
+	}
+
+	size_t
+	str_find_last(const Str& input, const Str& target, size_t index)
+	{
+		// make a local dummy copy
+		auto self = input;
+
+		if (index < self.count)
+		{
+			self.count = index + 1;
+		}
+
+		if (target.count == 0)
+		{
+			return self.count;
+		}
+		else if (target.count == 1)
+		{
+			for (size_t i = 0; i < self.count; ++i)
+			{
+				auto rev_i = self.count - i - 1;
+				if (self.ptr[rev_i] == target.ptr[0])
+					return rev_i;
+			}
+			return size_t(-1);
+		}
+		else if (target.count == self.count)
+		{
+			if (::memcmp(self.ptr, target.ptr, target.count) == 0)
+				return 0;
+			return size_t(-1);
+		}
+		else if (target.count > self.count)
+		{
+			return size_t(-1);
+		}
+
+		auto [hash, pow] = _hash_str_rabin_karp_reverse(target);
+		auto last = self.count - target.count;
+
+		uint32_t h{};
+		for (size_t i = self.count - 1; i >= last; --i)
+			h = h * PRIME_RABIN_KARP + uint32_t(self.ptr[i]);
+		if (h == hash && ::memcmp(self.ptr + last, target.ptr, target.count) == 0)
+			return last;
+
+		for (size_t i = 0; i < last; i++)
+		{
+			auto rev_i = last - i - 1;
+			h *= PRIME_RABIN_KARP;
+			h += uint32_t(self.ptr[rev_i]);
+			h -= pow * uint32_t(self.ptr[rev_i + target.count]);
+			if (h == hash && ::memcmp(self.ptr + rev_i, target.ptr, target.count) == 0)
+				return rev_i;
+		}
 		return size_t(-1);
 	}
 
