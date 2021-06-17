@@ -1,6 +1,6 @@
-cmake_minimum_required(VERSION 3.9)
+cmake_minimum_required(VERSION 3.16)
 
-project(mn VERSION 3.3.0 LANGUAGES CXX)
+project(mn VERSION 4.0.0 LANGUAGES CXX)
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/$<CONFIG>")
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/$<CONFIG>")
@@ -11,6 +11,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_INSTALL_RPATH "$ORIGIN")
 set(CMAKE_BUILD_RPATH "$ORIGIN")
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+set(FETCHCONTENT_BASE_DIR "${PROJECT_SOURCE_DIR}/_deps" CACHE STRING "put fetch content base dir outside of build folder")
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
@@ -48,13 +49,34 @@ if (MN_THREAD_SANITIZER)
 	endif()
 endif ()
 
+# external dependencies
+include(FetchContent)
+FetchContent_Declare(
+	fmt
+	GIT_REPOSITORY https://github.com/fmtlib/fmt.git
+	GIT_TAG        7.1.3
+	GIT_PROGRESS   TRUE
+)
+FetchContent_MakeAvailable(fmt)
 
-
-add_subdirectory(fmt-7.1.3 EXCLUDE_FROM_ALL)
 add_subdirectory(mn)
 
 if (MN_BUILD_TESTS)
-	add_subdirectory(unittest/nanobench EXCLUDE_FROM_ALL)
+	# unittests dependencies
+	FetchContent_Declare(
+		doctest
+		GIT_REPOSITORY https://github.com/onqtam/doctest.git
+		GIT_TAG        2.4.6
+		GIT_PROGRESS   TRUE
+	)
+	FetchContent_Declare(
+		nanobench
+		GIT_REPOSITORY https://github.com/martinus/nanobench.git
+		GIT_TAG        v4.3.5
+		GIT_PROGRESS   TRUE
+	)
+	FetchContent_MakeAvailable(doctest nanobench)
+
 	add_subdirectory(unittest)
 endif()
 
