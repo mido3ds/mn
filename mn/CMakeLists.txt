@@ -269,8 +269,10 @@ target_include_directories(mn
 	${CMAKE_CURRENT_SOURCE_DIR}/src
 )
 
-install(TARGETS mn)
-install(DIRECTORY include/mn DESTINATION include)
-if (WIN32)
-	install(DIRECTORY tools/vs DESTINATION tools)
-endif (WIN32)
+if (MN_INSTALL)
+	install(TARGETS mn)
+	install(DIRECTORY include/mn DESTINATION include)
+	if (WIN32)
+		install(DIRECTORY tools/vs DESTINATION tools)
+	endif (WIN32)
+endif (MN_INSTALL)
