@@ -55,7 +55,6 @@ CPMAddPackage(
 	GIT_REPOSITORY   https://github.com/fmtlib/fmt.git
 	GIT_TAG          7.1.3
 	GIT_SHALLOW      TRUE
-	EXCLUDE_FROM_ALL TRUE
 )
 
 add_subdirectory(mn)
