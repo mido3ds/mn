@@ -56,7 +56,6 @@ endif ()
 
 # external dependencies
 include(CPM)
-set(FMT_INSTALL ${MN_INSTALL} CACHE INTERNAL "")
 CPMAddPackage(
 	NAME             fmt
 	GIT_REPOSITORY   https://github.com/fmtlib/fmt.git
