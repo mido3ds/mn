@@ -1,5 +1,10 @@
 cmake_minimum_required(VERSION 3.16)
 
+set(MASTER_PROJECT OFF)
+if (CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
+	set(MASTER_PROJECT ON)
+endif ()
+
 project(mn VERSION 4.0.0 LANGUAGES CXX)
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/$<CONFIG>")
@@ -14,8 +19,9 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 
-option(MN_BUILD_EXAMPLES    "Build example applications that showcase the mn library." ON)
-option(MN_BUILD_TESTS       "Build mn unit tests."                                     ON)
+option(MN_BUILD_EXAMPLES    "Build example applications that showcase the mn library." ${MASTER_PROJECT})
+option(MN_BUILD_TESTS       "Build mn unit tests."                                     ${MASTER_PROJECT})
+option(MN_INSTALL           "Generates the install target"                             ${MASTER_PROJECT})
 option(MN_UNITY_BUILD       "Combine all mn source files into one jumbo build."        ON)
 option(MN_LEAK              "Enables mn memory leak detection"                         OFF)
 option(MN_DEADLOCK          "Enables mn deadlock detection"                            OFF)
@@ -50,6 +56,7 @@ endif ()
 
 # external dependencies
 include(CPM)
+set(FMT_INSTALL ${MN_INSTALL} CACHE INTERNAL "")
 CPMAddPackage(
 	NAME             fmt
 	GIT_REPOSITORY   https://github.com/fmtlib/fmt.git
