@@ -51,7 +51,6 @@ set(HEADER_FILES
 	include/mn/SIMD.h
 	include/mn/Json.h
 	include/mn/Regex.h
-	include/utf8proc/utf8proc.h
 )
 
 # list the source files
@@ -269,3 +268,9 @@ target_include_directories(mn
 	PRIVATE
 	${CMAKE_CURRENT_SOURCE_DIR}/src
 )
+
+install(TARGETS mn)
+install(DIRECTORY include/mn DESTINATION include)
+if (WIN32)
+	install(DIRECTORY tools/vs DESTINATION tools)
+endif (WIN32)
