@@ -379,7 +379,7 @@ namespace mn
 		}
 		else if (size > filesize)
 		{
-			auto res = ::truncate(file->linux_handle, offset + size);
+			auto res = ::ftruncate(file->macos_handle, offset + size);
 			if (res != 0)
 				return nullptr;
 		}
@@ -389,7 +389,7 @@ namespace mn
 			size,
 			prot,
 			flags,
-			file->linux_handle,
+			file->macos_handle,
 			offset
 		);
 
