@@ -374,7 +374,15 @@ namespace mn
 
 		auto filesize = file_size(file);
 		if (size == 0)
+		{
 			size = filesize - offset;
+		}
+		else if (size > filesize)
+		{
+			auto res = ::ftruncate64(file->linux_handle, offset + size);
+			if (res != 0)
+				return nullptr;
+		}
 
 		auto ptr = ::mmap(
 			NULL,
