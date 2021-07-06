@@ -379,7 +379,7 @@ namespace mn
 		}
 		else if (size > filesize)
 		{
-			auto res = ::ftruncate64(file->linux_handle, offset + size);
+			auto res = ::truncate(file->linux_handle, offset + size);
 			if (res != 0)
 				return nullptr;
 		}
