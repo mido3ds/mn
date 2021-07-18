@@ -344,7 +344,7 @@ namespace mn
 		{
 			if(files[i].name == "." || files[i].name == "..")
 				continue;
-						
+
 			str_clear(tmp_path);
 			if(files[i].kind == Path_Entry::KIND_FILE)
 			{
