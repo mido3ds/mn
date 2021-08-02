@@ -24,8 +24,18 @@ namespace mn::memory
 			Node* next;
 		};
 
+		struct State
+		{
+			Node* head;
+			uint8_t* alloc_head;
+			size_t total_mem;
+			size_t used_mem;
+			size_t highwater_mem;
+		};
+
 		Interface* meta;
-		Node* root;
+		State state;
+		Node* head;
 		// contains the block size in bytes, this is the granularity of allocation/free
 		size_t block_size;
 		// total amount of memory used in bytes, including fragmentation and other wasted memory
@@ -70,6 +80,50 @@ namespace mn::memory
 
 		// checks whether this arena owns this pointer, which is useful for debugging and various assertions
 		MN_EXPORT bool
-		owns(void* ptr);
+		owns(void* ptr) const;
+
+		MN_EXPORT State
+		checkpoint() const;
+
+		MN_EXPORT void
+		restore(State state);
 	};
+}
+
+namespace mn
+{
+	// frees the entire arena back to the meta allocator
+	inline static void
+	allocator_arena_free_all(memory::Arena* self)
+	{
+		self->free_all();
+	}
+
+	// resets the allocation state back but doesn't free the memory to the meta allocator, which is useful for memory reuse
+	inline static void
+	allocator_arena_clear_all(memory::Arena* self)
+	{
+		self->clear_all();
+	}
+
+	// checks whether this arena owns this pointer, which is useful for debugging and various assertions
+	inline static bool
+	allocator_arena_owns(const memory::Arena* self, void* ptr)
+	{
+		return self->owns(ptr);
+	}
+
+	// saves the state of arena allocator to be used in a restore function later
+	inline static memory::Arena::State
+	allocator_arena_checkpoint(const memory::Arena* self)
+	{
+		return self->checkpoint();
+	}
+
+	// restores the arena back to the saved checkpoint
+	inline static void
+	allocator_arena_restore(memory::Arena* self, memory::Arena::State state)
+	{
+		self->restore(state);
+	}
 }

@@ -8,7 +8,7 @@ namespace mn::memory
 	{
 		assert(block_size != 0);
 		this->meta = meta;
-		this->root = nullptr;
+		this->head = nullptr;
 		this->block_size = block_size;
 		this->total_mem = 0;
 		this->used_mem = 0;
@@ -28,8 +28,8 @@ namespace mn::memory
 	{
 		grow(size);
 
-		uint8_t* ptr = this->root->alloc_head;
-		this->root->alloc_head += size;
+		uint8_t* ptr = this->head->alloc_head;
+		this->head->alloc_head += size;
 		this->used_mem += size;
 		this->highwater_mem = this->highwater_mem > this->used_mem ? this->highwater_mem : this->used_mem;
 		this->clear_all_current_highwater = this->clear_all_current_highwater > this->used_mem ? this->clear_all_current_highwater : this->used_mem;
@@ -45,10 +45,10 @@ namespace mn::memory
 	void
 	Arena::grow(size_t size)
 	{
-		if (this->root != nullptr)
+		if (this->head != nullptr)
 		{
-			size_t node_used_mem = this->root->alloc_head - (uint8_t*)this->root->mem.ptr;
-			size_t node_free_mem = this->root->mem.size - node_used_mem;
+			size_t node_used_mem = this->head->alloc_head - (uint8_t*)this->head->mem.ptr;
+			size_t node_free_mem = this->head->mem.size - node_used_mem;
 			if (node_free_mem >= size)
 				return;
 		}
@@ -62,20 +62,20 @@ namespace mn::memory
 		new_node->mem.ptr = &new_node[1];
 		new_node->mem.size = request_size - sizeof(Node);
 		new_node->alloc_head = (uint8_t*)new_node->mem.ptr;
-		new_node->next = this->root;
-		this->root = new_node;
+		new_node->next = this->head;
+		this->head = new_node;
 	}
 
 	void
 	Arena::free_all()
 	{
-		while (this->root)
+		while (this->head)
 		{
-			Node* next = this->root->next;
-			meta->free(Block{ this->root, this->root->mem.size + sizeof(Node) });
-			this->root = next;
+			Node* next = this->head->next;
+			meta->free(Block{ this->head, this->head->mem.size + sizeof(Node) });
+			this->head = next;
 		}
-		this->root = nullptr;
+		this->head = nullptr;
 		this->total_mem = 0;
 		this->used_mem = 0;
 	}
@@ -91,25 +91,25 @@ namespace mn::memory
 
 		bool readjust = delta >= this->clear_all_readjust_threshold;
 
-		if ((this->root && this->root->next != nullptr) || readjust)
+		if ((this->head && this->head->next != nullptr) || readjust)
 		{
 			this->free_all();
 			this->grow(this->clear_all_current_highwater);
 			this->clear_all_previous_highwater = this->clear_all_current_highwater;
 			this->clear_all_current_highwater = 0;
 		}
-		else if (this->root && this->root->next == nullptr)
+		else if (this->head && this->head->next == nullptr)
 		{
-			this->root->alloc_head = (uint8_t*)this->root->mem.ptr;
+			this->head->alloc_head = (uint8_t*)this->head->mem.ptr;
 			this->used_mem = 0;
 			this->clear_all_current_highwater = 0;
 		}
 	}
 
 	bool
-	Arena::owns(void* ptr)
+	Arena::owns(void* ptr) const
 	{
-		for (auto it = this->root; it != nullptr; it = it->next)
+		for (auto it = this->head; it != nullptr; it = it->next)
 		{
 			auto begin_ptr = (char*)it->mem.ptr;
 			auto end_ptr = begin_ptr + it->mem.size;
@@ -117,5 +117,33 @@ namespace mn::memory
 				return true;
 		}
 		return false;
+	}
+
+	Arena::State
+	Arena::checkpoint() const
+	{
+		State s{};
+		s.head = this->head;
+		s.alloc_head = this->head->alloc_head;
+		s.total_mem = this->total_mem;
+		s.used_mem = this->used_mem;
+		s.highwater_mem = this->highwater_mem;
+		return s;
+	}
+
+	void
+	Arena::restore(State s)
+	{
+		while (this->head != s.head)
+		{
+			Node* next = this->head->next;
+			meta->free(Block{ this->head, this->head->mem.size + sizeof(Node) });
+			this->head = next;
+		}
+		assert(this->head == s.head);
+		this->head = s.head;
+		this->head->alloc_head = s.alloc_head;
+		this->total_mem = s.total_mem;
+		this->used_mem = s.used_mem;
 	}
 }

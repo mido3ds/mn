@@ -1332,3 +1332,32 @@ TEST_CASE("executable path")
 {
 	mn::log_info("{}", mn::path_executable(mn::memory::tmp()));
 }
+
+TEST_CASE("arena scopes")
+{
+	mn::allocator_arena_free_all(mn::memory::tmp());
+
+	auto name = mn::str_tmpf("my name is {}", "mostafa");
+	auto empty_checkpoint = mn::allocator_arena_checkpoint(mn::memory::tmp());
+	mn::allocator_arena_restore(mn::memory::tmp(), empty_checkpoint);
+	CHECK(name == "my name is mostafa");
+
+	void* ptr = nullptr;
+	for (size_t i = 0; i < 10; ++i)
+	{
+		auto checkpoint = mn::allocator_arena_checkpoint(mn::memory::tmp());
+		auto name = mn::str_tmpf("my name is {}", 100 - i);
+		if (ptr == nullptr)
+			ptr = name.ptr;
+		CHECK(ptr == name.ptr);
+		mn::allocator_arena_restore(mn::memory::tmp(), checkpoint);
+	}
+
+	auto checkpoint = mn::allocator_arena_checkpoint(mn::memory::tmp());
+	for (size_t i = 0; i < 500; ++i)
+	{
+		auto name = mn::str_tmpf("my name is {}", i);
+	}
+	mn::allocator_arena_restore(mn::memory::tmp(), checkpoint);
+	CHECK(name == "my name is mostafa");
+}
