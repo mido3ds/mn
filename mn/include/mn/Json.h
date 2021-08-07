@@ -151,9 +151,16 @@ namespace mn::json
 		buf_push(*self.as_array, v);
 	}
 
-	// iterats over the given json array
+	// iterates over the given json array
 	inline static Buf<Value>&
 	value_array_iter(Value& self)
+	{
+		return *self.as_array;
+	}
+
+	// iterates over the given json array
+	inline static const Buf<Value>&
+	value_array_iter(const Value& self)
 	{
 		return *self.as_array;
 	}
@@ -172,6 +179,24 @@ namespace mn::json
 	value_object_lookup(Value& self, const Str& key)
 	{
 		if (auto it = map_lookup(*self.as_object, key))
+			return &it->value;
+		return nullptr;
+	}
+
+	// searches for a key inside the given json object, returns nullptr if the key doesn't exist
+	inline static const Value*
+	value_object_lookup(const Value& self, const char* key)
+	{
+		if (auto it = map_lookup(*self.as_object, mn::str_lit(key)))
+			return &it->value;
+		return nullptr;
+	}
+
+	// searches for a key inside the given json object, returns nullptr if the key doesn't exist
+	inline static Value*
+	value_object_lookup(Value& self, const char* key)
+	{
+		if (auto it = map_lookup(*self.as_object, mn::str_lit(key)))
 			return &it->value;
 		return nullptr;
 	}
@@ -198,9 +223,16 @@ namespace mn::json
 		map_insert(*self.as_object, str_from_c(key), v);
 	}
 
-	// iteratos over the given json object
+	// iterates over the given json object
 	inline static Map<Str, Value>&
 	value_object_iter(Value& self)
+	{
+		return *self.as_object;
+	}
+
+	// iterates over the given json object
+	inline static const Map<Str, Value>&
+	value_object_iter(const Value& self)
 	{
 		return *self.as_object;
 	}
