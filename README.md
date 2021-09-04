@@ -265,7 +265,7 @@ for(auto n: numbers)
 mn::buf_remove(numbers, 0);
 
 // remove all even integers
-mn::buf_remove_of(numbers, [](auto n){ return n % 2 == 0; });
+mn::buf_remove_if(numbers, [](auto n){ return n % 2 == 0; });
 
 //don't forget to free it
 mn::buf_free(numbers);
