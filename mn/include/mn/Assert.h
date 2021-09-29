@@ -10,8 +10,8 @@
 		_panic(const char* cause);
 	}
 
-    #define mn_assert(condition, description) (void)(                                        \
-            (!!(condition)) ||                                                               \
+    #define mn_assert(condition, description) (void)(                                    \
+            (!!(condition)) ||                                                           \
             (mn::_panic("Assertion failed, (" #condition ") is false, " description), 0) \
         )
 #endif
