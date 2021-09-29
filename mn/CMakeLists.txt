@@ -51,6 +51,7 @@ set(HEADER_FILES
 	include/mn/SIMD.h
 	include/mn/Json.h
 	include/mn/Regex.h
+	include/mn/Assert.h
 )
 
 # list the source files

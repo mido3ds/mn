@@ -16,6 +16,15 @@ namespace mn
 
 		::fprintf(stderr, "[PANIC]: %s\n", cause);
 		callstack_print_to(frames, frames_count, file_stderr());
+
+		#if defined(OS_WINDOWS)
+			__debugbreak();
+		#elif defined(OS_LINUX) || defined(OS_MACOS)
+			__builtin_trap();
+		#else
+			#warning Unrecognized platform, no panic debugging breakpoint
+		#endif
+
 		::exit(-1);
 	}
 }
