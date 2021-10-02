@@ -51,6 +51,7 @@ set(HEADER_FILES
 	include/mn/SIMD.h
 	include/mn/Json.h
 	include/mn/Regex.h
+	include/mn/Assert.h
 )
 
 # list the source files
@@ -77,6 +78,7 @@ set(SOURCE_FILES
 	src/mn/SIMD.cpp
 	src/mn/Json.cpp
 	src/mn/Regex.cpp
+	src/mn/Assert.cpp
 	src/utf8proc/utf8proc.cpp
 )
 
@@ -173,7 +175,11 @@ target_compile_definitions(mn
 	PUBLIC
 		$<$<PLATFORM_ID:Windows>:OS_WINDOWS=1>
 		$<$<PLATFORM_ID:Linux>:OS_LINUX=1>
-		$<$<PLATFORM_ID:Darwin>:OS_MACOS=1>)
+		$<$<PLATFORM_ID:Darwin>:OS_MACOS=1>
+		$<$<CXX_COMPILER_ID:Clang>:MN_COMPILER_CLANG=1>
+		$<$<CXX_COMPILER_ID:AppleClang>:MN_COMPILER_CLANG=1>
+		$<$<CXX_COMPILER_ID:GNU>:MN_COMPILER_GNU=1>
+		$<$<CXX_COMPILER_ID:MSVC>:MN_COMPILER_MSVC=1>)
 
 if (CMAKE_SYSTEM_PROCESSOR MATCHES "(x86)|(X86)|(amd64)|(AMD64)")
 	target_compile_definitions(mn
@@ -191,7 +197,8 @@ target_compile_options(mn
 	PRIVATE
 		$<$<CXX_COMPILER_ID:MSVC>:/W4>
 		$<$<CXX_COMPILER_ID:GNU>:-Wall>
-		$<$<CXX_COMPILER_ID:Clang>:-Wall>)
+		$<$<CXX_COMPILER_ID:Clang>:-Wall>
+		$<$<CXX_COMPILER_ID:AppleClang>:-Wall>)
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 	target_compile_options(mn PUBLIC /we4834)

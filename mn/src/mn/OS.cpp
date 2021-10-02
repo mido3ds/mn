@@ -1,6 +1,7 @@
 #include "mn/OS.h"
 #include "mn/Debug.h"
 #include "mn/File.h"
+#include "mn/Assert.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -16,6 +17,8 @@ namespace mn
 
 		::fprintf(stderr, "[PANIC]: %s\n", cause);
 		callstack_print_to(frames, frames_count, file_stderr());
-		::exit(-1);
+
+		mn_debug_break();
+		::abort();
 	}
 }

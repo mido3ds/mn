@@ -11,9 +11,8 @@ namespace mn
 	log_debug([[maybe_unused]] const char* fmt, [[maybe_unused]] TArgs&&... args)
 	{
 		#ifdef DEBUG
-		auto msg = mn::strf(fmt, args...);
+		auto msg = mn::str_tmpf(fmt, args...);
 		_log_debug_str(msg.ptr);
-		mn::str_free(msg);
 		#endif
 	}
 
@@ -22,9 +21,8 @@ namespace mn
 	inline static void
 	log_info(const char* fmt, TArgs&&... args)
 	{
-		auto msg = mn::strf(fmt, args...);
+		auto msg = mn::str_tmpf(fmt, args...);
 		_log_info_str(msg.ptr);
-		mn::str_free(msg);
 	}
 
 	// logs a message with warning level
@@ -32,9 +30,8 @@ namespace mn
 	inline static void
 	log_warning(const char* fmt, TArgs&&... args)
 	{
-		auto msg = mn::strf(fmt, args...);
+		auto msg = mn::str_tmpf(fmt, args...);
 		_log_warning_str(msg.ptr);
-		mn::str_free(msg);
 	}
 
 	// logs a message with error level
@@ -42,9 +39,8 @@ namespace mn
 	inline static void
 	log_error(const char* fmt, TArgs&&... args)
 	{
-		auto msg = mn::strf(fmt, args...);
+		auto msg = mn::str_tmpf(fmt, args...);
 		_log_error_str(msg.ptr);
-		mn::str_free(msg);
 	}
 
 	// logs a message with critical level, and terminates the program
@@ -52,10 +48,9 @@ namespace mn
 	[[noreturn]] inline static void
 	log_critical(const char* fmt, TArgs&&... args)
 	{
-		auto msg = mn::strf(fmt, args...);
+		auto msg = mn::str_tmpf(fmt, args...);
 		_log_critical_str(msg.ptr);
-		mn::str_free(msg);
-		abort();
+		::abort();
 	}
 
 	// checks the given boolean flag if it's false it will log the given message with critical level and exists the program
