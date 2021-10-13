@@ -17,7 +17,12 @@ namespace mn
 }
 
 #ifdef NDEBUG
-	#define mn_assert(expr, message) ((void)0)
+	#define mn_assert_msg(expr, message) ((void)0)
+	#define mn_assert(expr) ((void)0)
 #else
-	#define mn_assert(expr, message) { if (expr) {} else { mn::_report_assert_message(#expr, message, __FILE__, __LINE__); mn_debug_break(); } }
+	#define mn_assert_msg(expr, message) { if (expr) {} else { mn::_report_assert_message(#expr, message, __FILE__, __LINE__); mn_debug_break(); } }
+	#define mn_assert(expr) { if (expr) {} else { mn::_report_assert_message(#expr, nullptr, __FILE__, __LINE__); mn_debug_break(); } }
 #endif
+
+#define mn_unreachable() mn_assert_msg(false, "unreachable")
+#define mn_unreachable_msg(message) mn_assert_msg(false, message)
