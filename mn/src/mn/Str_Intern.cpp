@@ -1,6 +1,5 @@
 #include "mn/Str_Intern.h"
-
-#include <assert.h>
+#include "mn/Assert.h"
 
 namespace mn
 {
@@ -27,7 +26,7 @@ namespace mn
 	const char*
 	str_intern(Str_Intern& self, const char* begin, const char* end)
 	{
-		assert(end >= begin && "Invalid SubStr");
+		mn_assert_msg(end >= begin, "Invalid SubStr");
 		str_clear(self.tmp_str);
 		buf_resize(self.tmp_str, end - begin + 1);
 		--self.tmp_str.count;

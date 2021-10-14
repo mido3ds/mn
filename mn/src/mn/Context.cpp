@@ -6,8 +6,8 @@
 #include "mn/Reader.h"
 #include "mn/Memory_Stream.h"
 #include "mn/Fmt.h"
+#include "mn/Assert.h"
 
-#include <assert.h>
 #include <stdio.h>
 
 namespace mn
@@ -101,7 +101,7 @@ namespace mn
 	allocator_push(Allocator allocator)
 	{
 		Context* self = context_local();
-		assert(self->_allocator_stack_count < Context::ALLOCATOR_CAPACITY);
+		mn_assert(self->_allocator_stack_count < Context::ALLOCATOR_CAPACITY);
 		self->_allocator_stack[self->_allocator_stack_count++] = allocator;
 	}
 
@@ -109,7 +109,7 @@ namespace mn
 	allocator_pop()
 	{
 		Context* self = context_local();
-		assert(self->_allocator_stack_count > 0);
+		mn_assert(self->_allocator_stack_count > 0);
 		--self->_allocator_stack_count;
 	}
 

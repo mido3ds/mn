@@ -8,10 +8,10 @@
 #include "mn/Defer.h"
 #include "mn/OS.h"
 #include "mn/Stream.h"
+#include "mn/Assert.h"
 
 #include <atomic>
 #include <chrono>
-#include <assert.h>
 
 namespace mn
 {
@@ -310,7 +310,7 @@ namespace mn
 		int64_t
 		cursor_operation(STREAM_CURSOR_OP, int64_t) override
 		{
-			assert(false && "Chan_Stream doesn't support cursor operations");
+			mn_unreachable_msg("Chan_Stream doesn't support cursor operations");
 			return STREAM_CURSOR_ERROR;
 		}
 	};
@@ -452,7 +452,7 @@ namespace mn
 	inline static Chan<T>
 	chan_new(int32_t limit = 1)
 	{
-		assert(limit != 0);
+		mn_assert(limit != 0);
 		Chan<T> self = alloc<IChan<T>>();
 
 		self->r = ring_new<T>();

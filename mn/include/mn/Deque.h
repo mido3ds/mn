@@ -1,9 +1,9 @@
 #pragma once
 
 #include "mn/Memory.h"
+#include "mn/Assert.h"
 
 #include <string.h>
-#include <assert.h>
 
 namespace mn
 {
@@ -32,7 +32,7 @@ namespace mn
 		T&
 		operator[](size_t ix)
 		{
-			assert(ix < count);
+			mn_assert(ix < count);
 			size_t bucket_index = ix / bucket_size;
 			size_t element_index = ix % bucket_size;
 
@@ -47,7 +47,7 @@ namespace mn
 		const T&
 		operator[](size_t ix) const
 		{
-			assert(ix < count);
+			mn_assert(ix < count);
 			size_t bucket_index = ix / bucket_size;
 			size_t element_index = ix % bucket_size;
 

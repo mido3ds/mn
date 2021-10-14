@@ -29,7 +29,7 @@ namespace mn
 	inline static Rabin_Karp_State
 	_hash_str_rabin_karp_reverse(const Str& str)
 	{
-		assert(str.count > 0);
+		mn_assert(str.count > 0);
 
 		Rabin_Karp_State res{0, 1};
 
@@ -76,8 +76,7 @@ namespace mn
 	Str
 	str_from_substr(const char* begin, const char* end, Allocator allocator)
 	{
-		assert(end >= begin &&
-			   "Invalid substring");
+		mn_assert_msg(end >= begin, "Invalid substring");
 
 		Str self = str_with_allocator(allocator);
 
@@ -142,7 +141,7 @@ namespace mn
 		buf_resize(self, self.count + 5);
 
 		auto width = rune_encode(r, Block{ self.ptr + old_count, 4 });
-		assert(width <= 4);
+		mn_assert(width <= 4);
 		// adjust the size back
 		self.count -= (4 - width) + 1;
 		self.ptr[self.count] = '\0';
@@ -283,7 +282,7 @@ namespace mn
 	size_t
 	str_find(const Str& self, Rune r, size_t start_in_bytes)
 	{
-		assert(start_in_bytes < self.count);
+		mn_assert(start_in_bytes < self.count);
 		for(auto it = begin(self) + start_in_bytes; it != end(self); it = rune_next(it))
 		{
 			Rune c = rune_read(it);

@@ -67,7 +67,7 @@ namespace mn
 				this->cursor = this->data.size;
 				return this->cursor;
 			default:
-				assert(false && "unreachable");
+				mn_unreachable();
 				return STREAM_CURSOR_ERROR;
 			}
 		}

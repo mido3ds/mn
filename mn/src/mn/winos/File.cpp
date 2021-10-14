@@ -417,7 +417,7 @@ namespace mn
 	bool
 	file_write_try_lock(File self, int64_t offset, int64_t size)
 	{
-		assert(offset >= 0 && size >= 0);
+		mn_assert(offset >= 0 && size >= 0);
 
 		DWORD offset_low  = (DWORD)(offset & (0x00000000FFFFFFFF));
 		DWORD offset_high = (DWORD)(offset & (0xFFFFFFFF00000000));
@@ -442,7 +442,7 @@ namespace mn
 	bool
 	file_write_unlock(File self, int64_t offset, int64_t size)
 	{
-		assert(offset >= 0 && size >= 0);
+		mn_assert(offset >= 0 && size >= 0);
 
 		DWORD offset_low  = (DWORD)(offset & (0x00000000FFFFFFFF));
 		DWORD offset_high = (DWORD)(offset & (0xFFFFFFFF00000000));
@@ -459,7 +459,7 @@ namespace mn
 	bool
 	file_read_try_lock(File self, int64_t offset, int64_t size)
 	{
-		assert(offset >= 0 && size >= 0);
+		mn_assert(offset >= 0 && size >= 0);
 
 		DWORD offset_low  = (DWORD)(offset & (0x00000000FFFFFFFF));
 		DWORD offset_high = (DWORD)(offset & (0xFFFFFFFF00000000));
@@ -484,7 +484,7 @@ namespace mn
 	bool
 	file_read_unlock(File self, int64_t offset, int64_t size)
 	{
-		assert(offset >= 0 && size >= 0);
+		mn_assert(offset >= 0 && size >= 0);
 
 		DWORD offset_low  = (DWORD)(offset & (0x00000000FFFFFFFF));
 		DWORD offset_high = (DWORD)(offset & (0xFFFFFFFF00000000));
@@ -523,7 +523,7 @@ namespace mn
 			access = FILE_MAP_ALL_ACCESS;
 			break;
 		default:
-			assert(false && "unreachable");
+			mn_unreachable();
 			break;
 		}
 

@@ -4,12 +4,12 @@
 #include "mn/Rune.h"
 #include "mn/Buf.h"
 #include "mn/Map.h"
+#include "mn/Assert.h"
 
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <utility>
-#include <assert.h>
 
 namespace mn
 {
@@ -563,7 +563,7 @@ namespace mn
 		}
 		else
 		{
-			assert(false && "UNREACHABLE");
+			mn_unreachable();
 			return 0;
 		}
 	}

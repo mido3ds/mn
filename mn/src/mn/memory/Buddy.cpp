@@ -160,7 +160,7 @@ namespace mn::memory
 
 		heap_size = next_power_of_2(heap_size);
 		max_alloc = heap_size;
-		max_alloc_log2 = (size_t)log2(heap_size);
+		max_alloc_log2 = (size_t)log2((double)heap_size);
 
 		bucket_max = max_alloc_log2 - BUDDY_MIN_ALLOC_LOG2 + 1;
 		buckets = nullptr;

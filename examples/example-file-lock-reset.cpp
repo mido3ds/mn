@@ -3,6 +3,7 @@
 #include <mn/Defer.h>
 #include <mn/Thread.h>
 #include <mn/Path.h>
+#include <mn/Assert.h>
 
 int
 main()
@@ -15,7 +16,7 @@ main()
 
 	uint64_t v = 0;
 	auto r = mn::file_read(f, mn::block_from(v));
-	assert(r == 8);
+	mn_assert(r == 8);
 
 	mn::file_write_unlock(f, 0, 8);
 

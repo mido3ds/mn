@@ -2,6 +2,7 @@
 #include "mn/Str.h"
 #include "mn/Memory.h"
 #include "mn/Fabric.h"
+#include "mn/Assert.h"
 
 #include <errno.h>
 #include <fcntl.h>
@@ -10,7 +11,6 @@
 #include <sys/socket.h>
 #include <sys/un.h>
 #include <unistd.h>
-#include <assert.h>
 #include <poll.h>
 
 namespace mn::ipc
@@ -18,7 +18,7 @@ namespace mn::ipc
 	bool
 	_mutex_try_lock(Mutex self, int64_t offset, int64_t size)
 	{
-		assert(offset >= 0 && size >= 0);
+		mn_assert(offset >= 0 && size >= 0);
 		struct flock fl{};
 		fl.l_type = F_WRLCK;
 		fl.l_whence = SEEK_SET;
@@ -30,7 +30,7 @@ namespace mn::ipc
 	bool
 	_mutex_unlock(Mutex self, int64_t offset, int64_t size)
 	{
-		assert(offset >= 0 && size >= 0);
+		mn_assert(offset >= 0 && size >= 0);
 		struct flock fl{};
 		fl.l_type = F_UNLCK;
 		fl.l_whence = SEEK_SET;
@@ -111,7 +111,7 @@ namespace mn::ipc
 	{
 		sockaddr_un addr{};
 		addr.sun_family = AF_LOCAL;
-		assert(name.count < sizeof(addr.sun_path) && "name is too long");
+		mn_assert_msg(name.count < sizeof(addr.sun_path), "name is too long");
 		size_t name_length = name.count;
 		if(name.count >= sizeof(addr.sun_path))
 			name_length = sizeof(addr.sun_path);
@@ -139,7 +139,7 @@ namespace mn::ipc
 	{
 		sockaddr_un addr{};
 		addr.sun_family = AF_LOCAL;
-		assert(name.count < sizeof(addr.sun_path) && "name is too long");
+		mn_assert_msg(name.count < sizeof(addr.sun_path), "name is too long");
 		size_t name_length = name.count;
 		if(name.count >= sizeof(addr.sun_path))
 			name_length = sizeof(addr.sun_path);
@@ -312,7 +312,7 @@ namespace mn::ipc
 			remaining -= consumed2;
 			block = block + consumed2;
 		}
-		assert(remaining == 0);
+		mn_assert(remaining == 0);
 		return res;
 	}
 }

@@ -1,10 +1,10 @@
 #pragma once
 
 #include "mn/Exports.h"
+#include "mn/Assert.h"
 
 #include <stddef.h>
 #include <stdint.h>
-#include <assert.h>
 
 namespace mn
 {
@@ -54,7 +54,7 @@ namespace mn
 	inline static Block
 	operator+(const Block& block, size_t offset)
 	{
-		assert(block.size >= offset);
+		mn_assert(block.size >= offset);
 		return Block { (char*)block.ptr + offset, block.size - offset };
 	}
 
@@ -63,7 +63,7 @@ namespace mn
 	inline static Block
 	operator+(size_t offset, const Block& block)
 	{
-		assert(block.size >= offset);
+		mn_assert(block.size >= offset);
 		return Block { (char*)block.ptr + offset, block.size - offset };
 	}
 

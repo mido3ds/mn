@@ -2,9 +2,9 @@
 
 #include "mn/Base.h"
 #include "mn/Memory.h"
+#include "mn/Assert.h"
 
 #include <string.h>
-#include <assert.h>
 
 #include <initializer_list>
 
@@ -26,14 +26,14 @@ namespace mn
 		T&
 		operator[](size_t ix)
 		{
-			assert(ix < count);
+			mn_assert(ix < count);
 			return ptr[ix];
 		}
 
 		const T&
 		operator[](size_t ix) const
 		{
-			assert(ix < count);
+			mn_assert(ix < count);
 			return ptr[ix];
 		}
 	};
@@ -149,8 +149,8 @@ namespace mn
 	{
 		if(ix < 0)
 			ix = self.count + ix;
-		assert(ix >= 0);
-		assert(ix < self.count);
+		mn_assert(ix >= 0);
+		mn_assert(ix < self.count);
 		return self.ptr[ix];
 	}
 
@@ -165,8 +165,8 @@ namespace mn
 	{
 		if(ix < 0)
 			ix = self.count + ix;
-		assert(ix >= 0);
-		assert(ix < self.count);
+		mn_assert(ix >= 0);
+		mn_assert(ix < self.count);
 		return self.ptr[ix];
 	}
 
@@ -293,7 +293,7 @@ namespace mn
 	inline static T*
 	buf_insert(Buf<T>& self, size_t index, const R& value)
 	{
-		assert(index < self.count);
+		mn_assert(index < self.count);
 		if (self.count == self.cap)
 			buf_reserve(self, self.cap ? self.cap * 2 : 8);
 		::memmove(self.ptr + index + 1, self.ptr + index, (self.count - index) * sizeof(T));
@@ -307,7 +307,7 @@ namespace mn
 	inline static void
 	buf_remove_ordered(Buf<T>& self, size_t index)
 	{
-		assert(index < self.count);
+		mn_assert(index < self.count);
 		::memmove(self.ptr + index, self.ptr + index + 1, (self.count - index - 1) * sizeof(T));
 		--self.count;
 	}
@@ -336,7 +336,7 @@ namespace mn
 	inline static void
 	buf_pop(Buf<T>& self)
 	{
-		assert(self.count > 0);
+		mn_assert(self.count > 0);
 		--self.count;
 	}
 
@@ -366,7 +366,7 @@ namespace mn
 	inline static void
 	buf_remove(Buf<T>& self, size_t ix)
 	{
-		assert(ix < self.count);
+		mn_assert(ix < self.count);
 		if(ix + 1 != self.count)
 		{
 			T tmp = self.ptr[self.count - 1];
@@ -389,7 +389,7 @@ namespace mn
 	inline static const T&
 	buf_top(const Buf<T>& self)
 	{
-		assert(self.count > 0);
+		mn_assert(self.count > 0);
 		return self.ptr[self.count - 1];
 	}
 
@@ -398,7 +398,7 @@ namespace mn
 	inline static T&
 	buf_top(Buf<T>& self)
 	{
-		assert(self.count > 0);
+		mn_assert(self.count > 0);
 		return self.ptr[self.count - 1];
 	}
 

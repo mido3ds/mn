@@ -2,6 +2,7 @@
 #include "mn/OS.h"
 #include "mn/IO.h"
 #include "mn/Defer.h"
+#include "mn/Assert.h"
 
 #define _LARGEFILE64_SOURCE 1
 #include <sys/sysinfo.h>
@@ -14,8 +15,6 @@
 #include <dirent.h>
 #include <linux/limits.h>
 #include <libgen.h>
-
-#include <assert.h>
 
 #include <chrono>
 
@@ -34,7 +33,7 @@ namespace mn
 		str.ptr[str.count] = '\0';
 
 		[[maybe_unused]] size_t read_size = file_read(f, Block { str.ptr, str.count });
-		assert(read_size == str.count);
+		mn_assert(read_size == str.count);
 
 		file_close(f);
 		return str;
@@ -138,7 +137,7 @@ namespace mn
 	path_current_change(const char* path)
 	{
 		[[maybe_unused]] int result = ::chdir(path);
-		assert(result == 0 && "chdir failed");
+		mn_assert_msg(result == 0, "chdir failed");
 	}
 
 	Str
@@ -198,7 +197,7 @@ namespace mn
 				}
 				else
 				{
-					assert(false && "UNREACHABLE");
+					mn_unreachable();
 				}
 				entry.name = str_from_c(dir->d_name, allocator);
 				buf_push(res, entry);
@@ -218,10 +217,10 @@ namespace mn
 		::memset(absolute_path, 0, sizeof(absolute_path));
 
 		[[maybe_unused]] auto dir_length = readlink("/proc/self/exe", path, sizeof(path));
-		assert(dir_length > -1 && dir_length < (ssize_t)sizeof(path));
+		mn_assert(dir_length > -1 && dir_length < (ssize_t)sizeof(path));
 
 		[[maybe_unused]] auto realpath_res = realpath(path, absolute_path);
-		assert(realpath_res == absolute_path);
+		mn_assert(realpath_res == absolute_path);
 
 		return mn::str_from_c(absolute_path, allocator);
 	}
@@ -360,7 +359,7 @@ namespace mn
 			}
 			else
 			{
-				assert(false && "UNREACHABLE");
+				mn_unreachable();
 				return false;
 			}
 		}
@@ -411,7 +410,7 @@ namespace mn
 				}
 				else
 				{
-					assert(false && "UNREACHABLE");
+					mn_unreachable();
 					break;
 				}
 			}

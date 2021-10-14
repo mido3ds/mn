@@ -1,6 +1,5 @@
 #include "mn/Memory_Stream.h"
-
-#include <assert.h>
+#include "mn/Assert.h"
 
 namespace mn
 {
@@ -15,10 +14,8 @@ namespace mn
 	size_t
 	IMemory_Stream::read(Block data)
 	{
-		assert(cursor >= 0 &&
-			   "Memory_Stream cursor is not valid");
-		assert(cursor <= int64_t(str.count) &&
-			   "Memory_Stream cursor is not valid");
+		mn_assert_msg(cursor >= 0, "Memory_Stream cursor is not valid");
+		mn_assert_msg(cursor <= int64_t(str.count), "Memory_Stream cursor is not valid");
 		size_t available_size = str.count - size_t(cursor);
 		if(available_size)
 		{
@@ -32,8 +29,7 @@ namespace mn
 	size_t
 	IMemory_Stream::write(Block data)
 	{
-		assert(cursor >= 0 &&
-			   "Memory_Stream cursor is not valid");
+		mn_assert_msg(cursor >= 0, "Memory_Stream cursor is not valid");
 		buf_resize(str, cursor + data.size);
 		::memcpy(str.ptr + cursor, data.ptr, data.size);
 		str_null_terminate(str);
@@ -96,18 +92,16 @@ namespace mn
 	void
 	memory_stream_cursor_move(Memory_Stream self, int64_t offset)
 	{
-		assert(self->cursor + offset >= 0 &&
-			   "Memory_Stream cursor is not valid");
-		assert(size_t(self->cursor + offset) <= self->str.count &&
-			   "Memory_Stream cursor is not valid");
+		mn_assert_msg(self->cursor + offset >= 0, "Memory_Stream cursor is not valid");
+		mn_assert_msg(size_t(self->cursor + offset) <= self->str.count, "Memory_Stream cursor is not valid");
 		self->cursor += offset;
 	}
 
 	void
 	memory_stream_cursor_set(Memory_Stream self, int64_t abs)
 	{
-		assert(abs >= 0);
-		assert(size_t(abs) <= self->str.count);
+		mn_assert(abs >= 0);
+		mn_assert(size_t(abs) <= self->str.count);
 		self->cursor = abs;
 	}
 
@@ -147,7 +141,7 @@ namespace mn
 	{
 		if(size == 0)
 			size = self->str.count - self->cursor;
-		assert(size <= self->str.count - self->cursor);
+		mn_assert(size <= self->str.count - self->cursor);
 		return Block { self->str.ptr + self->cursor, size };
 	}
 
@@ -156,7 +150,7 @@ namespace mn
 	{
 		if(size == 0)
 			size = self->cursor;
-		assert(size <= size_t(self->cursor));
+		mn_assert(size <= size_t(self->cursor));
 		return Block { self->str.ptr, size };
 	}
 

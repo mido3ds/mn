@@ -1,6 +1,7 @@
 #include "mn/Path.h"
 #include "mn/File.h"
 #include "mn/OS.h"
+#include "mn/Assert.h"
 
 #define NOMINMAX
 #define WIN32_LEAN_AND_MEAN
@@ -14,8 +15,6 @@
 #include "mn/Defer.h"
 
 #include <chrono>
-
-#include <assert.h>
 
 namespace mn
 {
@@ -32,7 +31,7 @@ namespace mn
 		str.ptr[str.count] = '\0';
 
 		[[maybe_unused]] size_t read_size = file_read(f, Block { str.ptr, str.count });
-		assert(read_size == str.count);
+		mn_assert(read_size == str.count);
 
 		file_close(f);
 		return str;
@@ -165,7 +164,7 @@ namespace mn
 		Block os_str = alloc(required_size * sizeof(TCHAR), alignof(TCHAR));
 		mn_defer(free(os_str));
 		[[maybe_unused]] DWORD written_size = GetCurrentDirectory((DWORD)(os_str.size/sizeof(TCHAR)), (LPWSTR)os_str.ptr);
-		assert((size_t)(written_size+1) == (os_str.size / sizeof(TCHAR)) && "GetCurrentDirectory Failed");
+		mn_assert_msg((size_t)(written_size+1) == (os_str.size / sizeof(TCHAR)), "GetCurrentDirectory Failed");
 		Str res = from_os_encoding(os_str, allocator);
 		path_normalize(res);
 		return res;
@@ -181,7 +180,7 @@ namespace mn
 		mn_defer(mn::free(os_str));
 
 		[[maybe_unused]] bool result = SetCurrentDirectory((LPCWSTR)os_str.ptr);
-		assert(result && "SetCurrentDirectory Failed");
+		mn_assert_msg(result, "SetCurrentDirectory Failed");
 	}
 
 	Str
@@ -199,7 +198,7 @@ namespace mn
 		mn_defer(mn::free(full_path));
 
 		[[maybe_unused]] DWORD written_size = GetFullPathName((LPCWSTR)os_str.ptr, required_size, (LPWSTR)full_path.ptr, NULL);
-		assert(written_size != 0 && "GetFullPathName failed");
+		mn_assert_msg(written_size != 0, "GetFullPathName failed");
 
 		Block written_block{full_path.ptr, (written_size + 1) * sizeof(TCHAR)};
 		Str res = from_os_encoding(written_block, allocator);
@@ -270,7 +269,7 @@ namespace mn
 					break;
 			}
 			[[maybe_unused]] bool result = FindClose(search_handle);
-			assert(result && "FindClose failed");
+			mn_assert_msg(result, "FindClose failed");
 		}
 		return res;
 	}
@@ -459,7 +458,7 @@ namespace mn
 			}
 			else
 			{
-				assert(false && "UNREACHABLE");
+				mn_unreachable();
 				return false;
 			}
 		}
@@ -512,7 +511,7 @@ namespace mn
 				}
 				else
 				{
-					assert(false && "UNREACHABLE");
+					mn_unreachable();
 					break;
 				}
 			}
@@ -525,7 +524,7 @@ namespace mn
 	folder_tmp(Allocator allocator)
 	{
 		DWORD len = GetTempPath(0, NULL);
-		assert(len != 0);
+		mn_assert(len != 0);
 
 		auto os_str = alloc(len*sizeof(TCHAR)+1, alignof(TCHAR));
 		mn_defer(mn::free(os_str));
@@ -541,7 +540,7 @@ namespace mn
 
 		if (SHGetKnownFolderPath(FOLDERID_LocalAppData, 0, NULL, &config_str) != S_OK)
 		{
-			assert(false && "No local config directory.");
+			mn_assert_msg(false, "No local config directory.");
 			return str_with_allocator(allocator);
 		}
 

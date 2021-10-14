@@ -3,6 +3,7 @@
 #include "mn/Pool.h"
 #include "mn/Buf.h"
 #include "mn/Log.h"
+#include "mn/Assert.h"
 
 #include <atomic>
 #include <chrono>
@@ -131,12 +132,12 @@ namespace mn
 			}
 			else
 			{
-				assert(false && "unreachable");
+				mn_unreachable();
 			}
 		}
 
 		[[maybe_unused]] auto old_state = self->atomic_state.exchange(IWorker::STATE_STOP_ACKNOWLEDGED);
-		assert(old_state == IWorker::STATE_STOP_REQUEST);
+		mn_assert(old_state == IWorker::STATE_STOP_REQUEST);
 		LOCAL_WORKER = nullptr;
 	}
 
@@ -156,7 +157,7 @@ namespace mn
 		mutex_lock(self->mtx);
 		mn_defer(mutex_unlock(self->mtx));
 
-		assert(self->atomic_state == IWorker::STATE_RUNNING);
+		mn_assert(self->atomic_state == IWorker::STATE_RUNNING);
 
 		self->atomic_state = IWorker::STATE_PAUSED;
 		cond_var_notify(self->cv);
@@ -168,7 +169,7 @@ namespace mn
 		mutex_lock(self->mtx);
 		mn_defer(mutex_unlock(self->mtx));
 
-		assert(self->atomic_state == IWorker::STATE_PAUSED);
+		mn_assert(self->atomic_state == IWorker::STATE_PAUSED);
 
 		self->atomic_state = IWorker::STATE_RUNNING;
 		cond_var_notify(self->cv);
@@ -193,7 +194,7 @@ namespace mn
 	_worker_free(Worker self)
 	{
 		[[maybe_unused]] auto state = self->atomic_state.load();
-		assert(state == IWorker::STATE_STOP_REQUEST ||
+		mn_assert(state == IWorker::STATE_STOP_REQUEST ||
 			   state == IWorker::STATE_STOP_ACKNOWLEDGED);
 
 		thread_join(self->thread);
@@ -401,7 +402,7 @@ namespace mn
 				if (state == IWorker::STATE_STOP_REQUEST)
 					return false;
 
-				assert(state == IWorker::STATE_STOP_ACKNOWLEDGED);
+				mn_assert(state == IWorker::STATE_STOP_ACKNOWLEDGED);
 				_worker_free(worker);
 				return true;
 			});

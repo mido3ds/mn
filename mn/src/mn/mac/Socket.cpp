@@ -22,7 +22,7 @@ namespace mn
 		case SOCKET_FAMILY_UNSPEC:
 			return AF_UNSPEC;
 		default:
-			assert(false && "unreachable");
+			mn_unreachable();
 			return 0;
 		}
 	}
@@ -43,7 +43,7 @@ namespace mn
 				protocol = p->p_proto;
 			break;
 		default:
-			assert(false && "unreachable");
+			mn_unreachable();
 			break;
 		}
 	}

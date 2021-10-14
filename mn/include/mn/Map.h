@@ -3,8 +3,7 @@
 #include "mn/Base.h"
 #include "mn/Memory.h"
 #include "mn/Buf.h"
-
-#include <assert.h>
+#include "mn/Assert.h"
 
 namespace mn
 {
@@ -484,7 +483,7 @@ namespace mn
 				}
 				break;
 			}
-			default: assert(false && "unreachable"); return _Hash_Search_Result{};
+			default: mn_unreachable(); return _Hash_Search_Result{};
 			}
 
 			// the position is not empty and the key is not the same
@@ -659,7 +658,7 @@ namespace mn
 		}
 		default:
 		{
-			assert(false && "unreachable");
+			mn_unreachable();
 			return nullptr;
 		}
 		}

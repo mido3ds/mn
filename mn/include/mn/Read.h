@@ -2,13 +2,13 @@
 #include "mn/File.h"
 #include "mn/Memory_Stream.h"
 #include "mn/Reader.h"
+#include "mn/Assert.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
 #include <limits>
-#include <assert.h>
 
 namespace mn
 {
@@ -19,19 +19,19 @@ namespace mn
 	 * - **read**: reads values as strings from the buffered stdin
 	 * - **vreadb**: reads values as binary data from a specific Stream
 	 * - **vreads**: reads values as string values from a specific Stream
-	 * 
+	 *
 	 * ## Custom Read String Function
 	 * ```C++
 	 * inline static usize
 	 * read_str(Reader reader, Your_Type& value);
 	 * ```
 	 * If you define this function then it will be used when you use the `vreads` function
-	 * 
+	 *
 	 * ## Custom Read Binary Function
 	 * ```C++
 	 * inline static usize
 	 * read_bin(Stream stream, Your_Type& value)
-	 * 
+	 *
 	 * inline static usize
 	 * read_bin(Reader reader, Your_Type& value)
 	 * ```
@@ -210,7 +210,7 @@ namespace mn
 		if (tmp_value < std::numeric_limits<TYPE>::lowest() || \
 			tmp_value > std::numeric_limits<TYPE>::max()) \
 		{ \
-			assert(false && "signed integer overflow"); \
+			mn_unreachable_msg("signed integer overflow"); \
 			return 0; \
 		} \
 		value = static_cast<TYPE>(tmp_value); \
@@ -241,7 +241,7 @@ namespace mn
 			return 0;\
 		if (tmp_value > std::numeric_limits<TYPE>::max()) \
 		{ \
-			assert(false && "unsigned integer overflow"); \
+			mn_unreachable_msg("unsigned integer overflow"); \
 			return 0; \
 		} \
 		value = static_cast<TYPE>(tmp_value); \
@@ -264,7 +264,7 @@ namespace mn
 			return 0;
 		if(tmp_value > std::numeric_limits<size_t>::max())
 		{
-			assert(false && "pointer address overflow");
+			mn_unreachable_msg("pointer address overflow");
 			return 0;
 		}
 		value = reinterpret_cast<void*>(tmp_value);
@@ -278,7 +278,7 @@ namespace mn
 		size_t parsed_size = _read_float(reader, tmp_value);
 		if(parsed_size == 0)
 		{
-			assert(false && "float overflow");
+			mn_unreachable_msg("float overflow");
 			return 0;
 		}
 		value = tmp_value;
@@ -292,7 +292,7 @@ namespace mn
 		size_t parsed_size = _read_double(reader, tmp_value);
 		if(parsed_size == 0)
 		{
-			assert(false && "double overflow");
+			mn_unreachable_msg("double overflow");
 			return 0;
 		}
 		value = tmp_value;

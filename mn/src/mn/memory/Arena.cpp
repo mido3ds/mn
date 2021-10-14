@@ -1,12 +1,12 @@
 #include "mn/memory/Arena.h"
 #include "mn/IO.h"
-#include <assert.h>
+#include "mn/Assert.h"
 
 namespace mn::memory
 {
 	Arena::Arena(size_t block_size, Interface* meta)
 	{
-		assert(block_size != 0);
+		mn_assert(block_size != 0);
 		this->meta = meta;
 		this->head = nullptr;
 		this->block_size = block_size;
@@ -140,7 +140,7 @@ namespace mn::memory
 			meta->free(Block{ this->head, this->head->mem.size + sizeof(Node) });
 			this->head = next;
 		}
-		assert(this->head == s.head);
+		mn_assert(this->head == s.head);
 		this->head = s.head;
 		this->head->alloc_head = s.alloc_head;
 		this->total_mem = s.total_mem;

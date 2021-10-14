@@ -3,6 +3,7 @@
 #include "mn/Exports.h"
 #include "mn/Str.h"
 #include "mn/Stream.h"
+#include "mn/Assert.h"
 
 namespace mn::ipc
 {
@@ -73,7 +74,7 @@ namespace mn::ipc
 		virtual int64_t
 		cursor_operation(STREAM_CURSOR_OP, int64_t) override
 		{
-			assert(false && "sputnik doesn't support cursor operations");
+			mn_unreachable_msg("sputnik doesn't support cursor operations");
 			return STREAM_CURSOR_ERROR;
 		}
 	};

@@ -3,6 +3,7 @@
 #include "mn/Exports.h"
 #include "mn/Stream.h"
 #include "mn/Str.h"
+#include "mn/Assert.h"
 
 namespace mn
 {
@@ -67,7 +68,7 @@ namespace mn
 				file_cursor_move_to_end(this);
 				return file_cursor_pos(this);
 			default:
-				assert(false && "unreachable");
+				mn_unreachable();
 				return STREAM_CURSOR_ERROR;
 			}
 		}

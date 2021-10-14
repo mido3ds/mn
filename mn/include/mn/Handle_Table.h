@@ -1,6 +1,7 @@
 #pragma once
 
-#include <mn/Buf.h>
+#include "mn/Buf.h"
+#include "mn/Assert.h"
 
 namespace mn
 {
@@ -133,7 +134,7 @@ namespace mn
 	{
 		auto h = handle_table_index_from_uint64(v);
 		auto& entry = self._map[h.index];
-		assert(entry.generation == h.generation);
+		mn_assert(entry.generation == h.generation);
 		if (entry.generation != h.generation)
 			return;
 

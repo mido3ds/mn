@@ -2,8 +2,7 @@
 #include <mn/Fabric.h>
 #include <mn/IPC.h>
 #include <mn/Defer.h>
-
-#include <assert.h>
+#include <mn/Assert.h>
 
 void
 serve_client(mn::ipc::Sputnik client)
@@ -23,7 +22,7 @@ serve_client(mn::ipc::Sputnik client)
 		{
 			mn::str_resize(data, read_bytes);
 			write_bytes = mn::ipc::sputnik_write(client, mn::block_from(data));
-			assert(write_bytes == read_bytes && "sputnik_write failed");
+			mn_assert_msg(write_bytes == read_bytes, "sputnik_write failed");
 		}
 	} while(read_bytes > 0);
 }
@@ -52,7 +51,7 @@ main()
 	mn_defer(mn::fabric_free(f));
 
 	auto server = mn::ipc::sputnik_new("sputnik");
-	assert(server && "sputnik_new failed");
+	mn_assert_msg(server, "sputnik_new failed");
 	mn_defer({
 		mn::ipc::sputnik_disconnect(server);
 		mn::ipc::sputnik_free(server);

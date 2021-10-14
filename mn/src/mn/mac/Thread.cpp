@@ -6,12 +6,12 @@
 #include "mn/Defer.h"
 #include "mn/Debug.h"
 #include "mn/Log.h"
+#include "mn/Assert.h"
 
 #include <pthread.h>
 #include <unistd.h>
 #include <sys/types.h>
 
-#include <assert.h>
 #include <chrono>
 
 namespace mn
@@ -39,7 +39,7 @@ namespace mn
 			self.name = srcloc.name;
 			self.srcloc = &srcloc;
 			[[maybe_unused]] int result = pthread_mutex_init(&self.handle, NULL);
-			assert(result == 0);
+			mn_assert(result == 0);
 			self.profile_user_data = _mutex_new(&self, self.name);
 		}
 
@@ -125,7 +125,7 @@ namespace mn
 			map_free(self.shared);
 			break;
 		default:
-			assert(false && "unreachable");
+			mn_unreachable();
 			break;
 		}
 	}
@@ -161,7 +161,7 @@ namespace mn
 		case Mutex_Ownership::KIND_SHARED:
 			return map_lookup(self.shared, thread_id) != nullptr;
 		default:
-			assert(false && "unreachable");
+			mn_unreachable();
 			return false;
 		}
 	}
@@ -176,7 +176,7 @@ namespace mn
 		case Mutex_Ownership::KIND_SHARED:
 			return &map_lookup(self.shared, thread_id)->value;
 		default:
-			assert(false && "unreachable");
+			mn_unreachable();
 			return nullptr;
 		}
 	}
@@ -248,7 +248,7 @@ namespace mn
 				}
 				break;
 			default:
-				assert(false && "unreachable");
+				mn_unreachable();
 				break;
 			}
 		}
@@ -378,7 +378,7 @@ namespace mn
 			}
 			break;
 		default:
-			assert(false && "unreachable");
+			mn_unreachable();
 			break;
 		}
 		#endif
@@ -392,7 +392,7 @@ namespace mn
 		self->srcloc = srcloc;
 		self->name = srcloc->name;
 		[[maybe_unused]] int result = pthread_mutex_init(&self->handle, NULL);
-		assert(result == 0);
+		mn_assert(result == 0);
 
 		self->profile_user_data = _mutex_new(self, self->name);
 
@@ -406,7 +406,7 @@ namespace mn
 		self->srcloc = nullptr;
 		self->name = name;
 		[[maybe_unused]] int result = pthread_mutex_init(&self->handle, NULL);
-		assert(result == 0);
+		mn_assert(result == 0);
 
 		self->profile_user_data = _mutex_new(self, self->name);
 
@@ -431,7 +431,7 @@ namespace mn
 		worker_block_ahead();
 		_deadlock_detector_mutex_block(self);
 		[[maybe_unused]] int result = pthread_mutex_lock(&self->handle);
-		assert(result == 0);
+		mn_assert(result == 0);
 		_deadlock_detector_mutex_set_exclusive_owner(self);
 		worker_block_clear();
 	}
@@ -441,7 +441,7 @@ namespace mn
 	{
 		_deadlock_detector_mutex_unset_owner(self);
 		[[maybe_unused]] int result = pthread_mutex_unlock(&self->handle);
-		assert(result == 0);
+		mn_assert(result == 0);
 		_mutex_after_unlock(self, self->profile_user_data);
 	}
 
@@ -450,7 +450,7 @@ namespace mn
 	{
 		_mutex_free(self, self->profile_user_data);
 		[[maybe_unused]] int result = pthread_mutex_destroy(&self->handle);
-		assert(result == 0);
+		mn_assert(result == 0);
 		free(self);
 	}
 
@@ -596,7 +596,7 @@ namespace mn
 		self->user_data = arg;
 		self->name = name;
 		[[maybe_unused]] int result = pthread_create(&self->handle, NULL, _thread_start, self);
-		assert(result == 0 && "pthread_create failed");
+		mn_assert_msg(result == 0, "pthread_create failed");
 		return self;
 	}
 
@@ -611,7 +611,7 @@ namespace mn
 	{
 		worker_block_ahead();
 		[[maybe_unused]] int result = pthread_join(self->handle, NULL);
-		assert(result == 0 && "pthread_join failed");
+		mn_assert_msg(result == 0, "pthread_join failed");
 		worker_block_clear();
 	}
 
@@ -641,7 +641,7 @@ namespace mn
 	{
 		auto self = alloc<ICond_Var>();
 		[[maybe_unused]] auto res = pthread_cond_init(&self->cv, NULL);
-		assert(res == 0);
+		mn_assert(res == 0);
 		return self;
 	}
 
@@ -649,7 +649,7 @@ namespace mn
 	cond_var_free(Cond_Var self)
 	{
 		[[maybe_unused]] auto res = pthread_cond_destroy(&self->cv);
-		assert(res == 0);
+		mn_assert(res == 0);
 		mn::free(self);
 	}
 
@@ -710,9 +710,9 @@ namespace mn
 		auto self = alloc<IWaitgroup>();
 		self->count = 0;
 		[[maybe_unused]] auto res = pthread_mutex_init(&self->mtx, NULL);
-		assert(res == 0);
+		mn_assert(res == 0);
 		res = pthread_cond_init(&self->cv, NULL);
-		assert(res == 0);
+		mn_assert(res == 0);
 		return self;
 	}
 
@@ -720,9 +720,9 @@ namespace mn
 	waitgroup_free(Waitgroup self)
 	{
 		[[maybe_unused]] auto res = pthread_mutex_destroy(&self->mtx);
-		assert(res == 0);
+		mn_assert(res == 0);
 		res = pthread_cond_destroy(&self->cv);
-		assert(res == 0);
+		mn_assert(res == 0);
 		free(self);
 	}
 
@@ -738,13 +738,13 @@ namespace mn
 		while(self->count > 0)
 			pthread_cond_wait(&self->cv, &self->mtx);
 
-		assert(self->count == 0);
+		mn_assert(self->count == 0);
 	}
 
 	void
 	waitgroup_add(Waitgroup self, int c)
 	{
-		assert(c > 0);
+		mn_assert(c > 0);
 
 		pthread_mutex_lock(&self->mtx);
 		mn_defer(pthread_mutex_unlock(&self->mtx));
@@ -759,7 +759,7 @@ namespace mn
 		mn_defer(pthread_mutex_unlock(&self->mtx));
 
 		--self->count;
-		assert(self->count >= 0);
+		mn_assert(self->count >= 0);
 
 		if (self->count == 0)
 			pthread_cond_broadcast(&self->cv);

@@ -6,6 +6,7 @@
 #include "mn/Map.h"
 #include "mn/Result.h"
 #include "mn/Fmt.h"
+#include "mn/Assert.h"
 
 namespace mn::json
 {
@@ -118,7 +119,7 @@ namespace mn::json
 			free(self.as_object);
 			break;
 		default:
-			assert(false && "unreachable");
+			mn_unreachable();
 			break;
 		}
 	}
@@ -297,7 +298,7 @@ namespace fmt
 				break;
 			}
 			default:
-				assert(false && "unreachable");
+				mn_unreachable();
 				break;
 			}
 			return ctx.out();

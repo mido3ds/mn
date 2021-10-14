@@ -3,6 +3,7 @@
 #include "mn/Stream.h"
 #include "mn/Str.h"
 #include "mn/Result.h"
+#include "mn/Assert.h"
 
 namespace mn
 {
@@ -57,7 +58,7 @@ namespace mn
 		case MN_SOCKET_ERROR_TIMEOUT:
 			return "error due to timeout";
 		default:
-			assert(false && "unreachable");
+			mn_unreachable();
 			return "something went wrong, this shouldn't happen!!!!!!";
 		}
 	}
@@ -86,7 +87,7 @@ namespace mn
 		virtual int64_t
 		cursor_operation(STREAM_CURSOR_OP, int64_t) override
 		{
-			assert(false && "sockets doesn't support cursor operations");
+			mn_unreachable_msg("sockets doesn't support cursor operations");
 			return STREAM_CURSOR_ERROR;
 		}
 	};

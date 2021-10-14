@@ -2,9 +2,9 @@
 
 #include "mn/Memory.h"
 #include "mn/Buf.h"
+#include "mn/Assert.h"
 
 #include <string.h>
-#include <assert.h>
 
 namespace mn
 {
@@ -21,14 +21,14 @@ namespace mn
 		inline T&
 		operator[](size_t ix)
 		{
-			assert(ix < count);
+			mn_assert(ix < count);
 			return ptr[(head + ix) % cap];
 		}
 
 		inline const T&
 		operator[](size_t ix) const
 		{
-			assert(ix < count);
+			mn_assert(ix < count);
 			return ptr[(head + ix) % cap];
 		}
 	};
@@ -131,7 +131,7 @@ namespace mn
 	inline static T&
 	ring_back(Ring<T>& self)
 	{
-		assert(self.count > 0);
+		mn_assert(self.count > 0);
 		const size_t ix = (self.head + self.count - 1) % self.cap;
 		return self.ptr[ix];
 	}
@@ -141,7 +141,7 @@ namespace mn
 	inline static const T&
 	ring_back(const Ring<T>& self)
 	{
-		assert(self.count > 0);
+		mn_assert(self.count > 0);
 		const size_t ix = (self.head + self.count - 1) % self.cap;
 		return self.ptr[ix];
 	}
@@ -151,7 +151,7 @@ namespace mn
 	inline static T&
 	ring_front(Ring<T>& self)
 	{
-		assert(self.count > 0);
+		mn_assert(self.count > 0);
 		return self.ptr[self.head];
 	}
 
@@ -160,7 +160,7 @@ namespace mn
 	inline static const T&
 	ring_front(const Ring<T>& self)
 	{
-		assert(self.count > 0);
+		mn_assert(self.count > 0);
 		return self.ptr[self.head];
 	}
 
@@ -169,7 +169,7 @@ namespace mn
 	inline static void
 	ring_pop_back(Ring<T>& self)
 	{
-		assert(self.count > 0);
+		mn_assert(self.count > 0);
 		--self.count;
 	}
 
@@ -178,7 +178,7 @@ namespace mn
 	inline static void
 	ring_pop_front(Ring<T>& self)
 	{
-		assert(self.count > 0);
+		mn_assert(self.count > 0);
 		self.head = (self.head + 1) % self.cap;
 		--self.count;
 	}

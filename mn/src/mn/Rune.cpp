@@ -1,8 +1,7 @@
 #include "mn/Rune.h"
+#include "mn/Assert.h"
 
 #include "utf8proc/utf8proc.h"
-
-#include <assert.h>
 
 namespace mn
 {
@@ -110,7 +109,7 @@ namespace mn
 	size_t
 	rune_encode(Rune c, Block b)
 	{
-		assert(b.size >= 4);
+		mn_assert(b.size >= 4);
 		return utf8proc_encode_char(c, (utf8proc_uint8_t*)b.ptr);
 	}
 }

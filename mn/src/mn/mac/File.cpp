@@ -1,6 +1,7 @@
 #include "mn/File.h"
 #include "mn/OS.h"
 #include "mn/Fabric.h"
+#include "mn/Assert.h"
 
 #define _LARGEFILE64_SOURCE 1
 #include <sys/stat.h>
@@ -12,8 +13,6 @@
 #include <errno.h>
 #include <dirent.h>
 #include <limits.h>
-
-#include <assert.h>
 
 namespace mn
 {
@@ -280,7 +279,7 @@ namespace mn
 	bool
 	file_write_try_lock(File self, int64_t offset, int64_t size)
 	{
-		assert(offset >= 0 && size >= 0);
+		mn_assert(offset >= 0 && size >= 0);
 		struct flock fl{};
 		fl.l_type = F_WRLCK;
 		fl.l_whence = SEEK_SET;
@@ -300,7 +299,7 @@ namespace mn
 	bool
 	file_write_unlock(File self, int64_t offset, int64_t size)
 	{
-		assert(offset >= 0 && size >= 0);
+		mn_assert(offset >= 0 && size >= 0);
 		struct flock fl{};
 		fl.l_type = F_UNLCK;
 		fl.l_whence = SEEK_SET;
@@ -312,7 +311,7 @@ namespace mn
 	bool
 	file_read_try_lock(File self, int64_t offset, int64_t size)
 	{
-		assert(offset >= 0 && size >= 0);
+		mn_assert(offset >= 0 && size >= 0);
 		struct flock fl{};
 		fl.l_type = F_RDLCK;
 		fl.l_whence = SEEK_SET;
@@ -332,7 +331,7 @@ namespace mn
 	bool
 	file_read_unlock(File self, int64_t offset, int64_t size)
 	{
-		assert(offset >= 0 && size >= 0);
+		mn_assert(offset >= 0 && size >= 0);
 		struct flock fl{};
 		fl.l_type = F_UNLCK;
 		fl.l_whence = SEEK_SET;
@@ -368,7 +367,7 @@ namespace mn
 			flags = MAP_SHARED;
 			break;
 		default:
-			assert(false && "unreachable");
+			mn_unreachable();
 			break;
 		}
 

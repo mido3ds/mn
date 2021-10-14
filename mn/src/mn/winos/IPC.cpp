@@ -30,7 +30,7 @@ namespace mn::ipc
 	mutex_free(Mutex self)
 	{
 		[[maybe_unused]] auto res = CloseHandle((HANDLE)self);
-		assert(res == TRUE);
+		mn_assert(res == TRUE);
 	}
 
 	void
@@ -62,7 +62,7 @@ namespace mn::ipc
 	{
 		auto self = (HANDLE)mtx;
 		[[maybe_unused]] BOOL res = ReleaseMutex(self);
-		assert(res == TRUE);
+		mn_assert(res == TRUE);
 	}
 
 
@@ -140,7 +140,7 @@ namespace mn::ipc
 	sputnik_free(Sputnik self)
 	{
 		[[maybe_unused]] auto res = CloseHandle((HANDLE)self->winos_named_pipe);
-		assert(res == TRUE);
+		mn_assert(res == TRUE);
 		mn::str_free(self->name);
 		mn::free_destruct(self);
 	}
@@ -320,7 +320,7 @@ namespace mn::ipc
 			remaining -= consumed2;
 			block = block + consumed2;
 		}
-		assert(remaining == 0);
+		mn_assert(remaining == 0);
 		return res;
 	}
 }

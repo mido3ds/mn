@@ -1,9 +1,8 @@
 #pragma once
 
-#include <mn/Str.h>
-#include <mn/Fmt.h>
-
-#include <assert.h>
+#include "mn/Str.h"
+#include "mn/Fmt.h"
+#include "mn/Assert.h"
 
 namespace mn
 {
@@ -104,7 +103,7 @@ namespace mn
 		T val;
 		Err err;
 
-		Result(Err e):err(e) { assert(err.msg.count > 0); }
+		Result(Err e):err(e) { mn_assert(err.msg.count > 0); }
 
 		template<typename... TArgs>
 		Result(TArgs&& ... args)

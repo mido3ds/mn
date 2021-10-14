@@ -5,12 +5,12 @@
 #include "mn/Defer.h"
 #include "mn/Debug.h"
 #include "mn/Log.h"
+#include "mn/Assert.h"
 
 #define NOMINMAX
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 
-#include <assert.h>
 #include <chrono>
 
 namespace mn
@@ -116,7 +116,7 @@ namespace mn
 			map_free(self.shared);
 			break;
 		default:
-			assert(false && "unreachable");
+			mn_unreachable();
 			break;
 		}
 	}
@@ -152,7 +152,7 @@ namespace mn
 		case Mutex_Ownership::KIND_SHARED:
 			return map_lookup(self.shared, thread_id) != nullptr;
 		default:
-			assert(false && "unreachable");
+			mn_unreachable();
 			return false;
 		}
 	}
@@ -167,7 +167,7 @@ namespace mn
 		case Mutex_Ownership::KIND_SHARED:
 			return &map_lookup(self.shared, thread_id)->value;
 		default:
-			assert(false && "unreachable");
+			mn_unreachable();
 			return nullptr;
 		}
 	}
@@ -240,7 +240,7 @@ namespace mn
 				}
 				break;
 			default:
-				assert(false && "unreachable");
+				mn_unreachable();
 				break;
 			}
 		}
@@ -370,7 +370,7 @@ namespace mn
 			}
 			break;
 		default:
-			assert(false && "unreachable");
+			mn_unreachable();
 			break;
 		}
 		#endif
@@ -630,7 +630,7 @@ namespace mn
 		if(self->handle)
 		{
 			[[maybe_unused]] BOOL result = CloseHandle(self->handle);
-			assert(result == TRUE);
+			mn_assert(result == TRUE);
 		}
 		free(self);
 	}
@@ -642,7 +642,7 @@ namespace mn
 		if(self->handle)
 		{
 			[[maybe_unused]] DWORD result = WaitForSingleObject(self->handle, INFINITE);
-			assert(result == WAIT_OBJECT_0);
+			mn_assert(result == WAIT_OBJECT_0);
 		}
 		worker_block_clear();
 	}
@@ -766,13 +766,13 @@ namespace mn
 		while(self->count > 0)
 			SleepConditionVariableCS(&self->cv, &self->cs, INFINITE);
 
-		assert(self->count == 0);
+		mn_assert(self->count == 0);
 	}
 
 	void
 	waitgroup_add(Waitgroup self, int c)
 	{
-		assert(c > 0);
+		mn_assert(c > 0);
 
 		EnterCriticalSection(&self->cs);
 		mn_defer(LeaveCriticalSection(&self->cs));
@@ -787,7 +787,7 @@ namespace mn
 		mn_defer(LeaveCriticalSection(&self->cs));
 
 		--self->count;
-		assert(self->count >= 0);
+		mn_assert(self->count >= 0);
 
 		if (self->count == 0)
 			WakeAllConditionVariable(&self->cv);

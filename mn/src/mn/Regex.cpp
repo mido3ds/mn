@@ -1,5 +1,6 @@
 #include "mn/Regex.h"
 #include "mn/Defer.h"
+#include "mn/Assert.h"
 
 namespace mn
 {
@@ -272,7 +273,7 @@ namespace mn
 		case REGEX_OPERATOR_PLUS_NON_GREEDY: return regex_compiler_plus(compiler, false);
 		case REGEX_OPERATOR_OPTIONAL: return regex_compiler_optional(compiler, true);
 		case REGEX_OPERATOR_OPTIONAL_NON_GREEDY: return regex_compiler_optional(compiler, false);
-		default: assert(false && "unreachable"); return false;
+		default: mn_unreachable(); return false;
 		}
 	}
 
@@ -558,7 +559,7 @@ namespace mn
 			--new_res_thread_depth_level;
 		}
 
-		assert(new_res_thread_depth_level == old_res_thread_depth_level);
+		mn_assert(new_res_thread_depth_level == old_res_thread_depth_level);
 		return new_res_thread_id < old_res_thread_id;
 	}
 
@@ -573,7 +574,7 @@ namespace mn
 	inline static int
 	pop_int(const Regex& program, Regex_Thread& thread)
 	{
-		assert(thread.ip + sizeof(int) <= program.bytes.count);
+		mn_assert(thread.ip + sizeof(int) <= program.bytes.count);
 		int res = *(int*)(program.bytes.ptr + thread.ip);
 		thread.ip += sizeof(int);
 		return res;
@@ -718,7 +719,7 @@ namespace mn
 							break;
 						}
 						default:
-							assert(false && "unreachable");
+							mn_unreachable();
 							break;
 						}
 					}
@@ -757,7 +758,7 @@ namespace mn
 					break;
 				}
 				default:
-					assert(false && "unknown opcode");
+					mn_unreachable_msg("unknown opcode");
 					return Match_Result { str, it, false, false, 0};
 				}
 			}

@@ -17,10 +17,8 @@ namespace mn
 			wVersionRequested = MAKEWORD(2, 2);
 			err = WSAStartup(wVersionRequested, &wsaData);
 
-			assert(err == 0 && "WSAStartup failed");
-
-			assert(LOBYTE(wsaData.wVersion) == 2 && HIBYTE(wsaData.wVersion) == 2 &&
-				"Could not find a usable version of Winsock.dll");
+			mn_assert_msg(err == 0, "WSAStartup failed");
+			mn_assert_msg(LOBYTE(wsaData.wVersion) == 2 && HIBYTE(wsaData.wVersion) == 2, "Could not find a usable version of Winsock.dll");
 		}
 
 		~_WIN_NET_INIT()
@@ -42,7 +40,7 @@ namespace mn
 		case SOCKET_FAMILY_UNSPEC:
 			return AF_UNSPEC;
 		default:
-			assert(false && "unreachable");
+			mn_unreachable();
 			return 0;
 		}
 	}
@@ -61,7 +59,7 @@ namespace mn
 			protocol = IPPROTO_UDP;
 			break;
 		default:
-			assert(false && "unreachable");
+			mn_unreachable();
 			break;
 		}
 	}

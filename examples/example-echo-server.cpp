@@ -2,8 +2,7 @@
 #include <mn/Fabric.h>
 #include <mn/Socket.h>
 #include <mn/Defer.h>
-
-#include <assert.h>
+#include <mn/Assert.h>
 
 void
 serve_client(mn::Socket client)
@@ -30,7 +29,7 @@ serve_client(mn::Socket client)
 		{
 			mn::str_resize(data, read_bytes);
 			write_bytes = mn::socket_write(client, mn::block_from(data));
-			assert(write_bytes == read_bytes && "socket_write failed");
+			mn_assert_msg(write_bytes == read_bytes, "socket_write failed");
 		}
 		else if (read_bytes == 0)
 		{
@@ -46,11 +45,11 @@ main()
 	mn_defer(mn::fabric_free(f));
 
 	auto socket = mn::socket_open(mn::SOCKET_FAMILY_IPV4, mn::SOCKET_TYPE_TCP);
-	assert(socket && "socket_open failed");
+	mn_assert_msg(socket, "socket_open failed");
 	mn_defer(mn::socket_close(socket));
 
 	bool status = mn::socket_bind(socket, "4000");
-	assert(status && "socket_bind failed");
+	mn_assert_msg(status, "socket_bind failed");
 	mn_defer(mn::socket_disconnect(socket));
 
 	while(socket_listen(socket))

@@ -1,18 +1,17 @@
 #include <mn/IO.h>
 #include <mn/IPC.h>
 #include <mn/Defer.h>
-
-#include <assert.h>
+#include <mn/Assert.h>
 
 void
 byte_client(mn::ipc::Sputnik client, mn::Str& line)
 {
 	auto write_bytes = mn::ipc::sputnik_write(client, mn::block_from(line));
-	assert(write_bytes == line.count && "sputnik_write failed");
+	mn_assert_msg(write_bytes == line.count, "sputnik_write failed");
 
 	mn::str_resize(line, 1024);
 	auto read_bytes = mn::ipc::sputnik_read(client, mn::block_from(line), mn::INFINITE_TIMEOUT);
-	assert(read_bytes == write_bytes);
+	mn_assert(read_bytes == write_bytes);
 
 	mn::str_resize(line, read_bytes);
 	mn::print("server: '{}'\n", line);
@@ -31,7 +30,7 @@ int
 main()
 {
 	auto client = mn::ipc::sputnik_connect("sputnik");
-	assert(client && "sputnik_connect failed");
+	mn_assert_msg(client, "sputnik_connect failed");
 	mn_defer(mn::ipc::sputnik_free(client));
 
 	auto line = mn::str_new();

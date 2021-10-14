@@ -54,7 +54,7 @@ namespace mn
 	{
 		#ifdef DEBUG
 		auto arena = (memory::Arena*) self->arena;
-		assert(arena->owns(ptr) && "pool does not own this pointer, you can only call pool_put on pointers returned by this instance's pool_get");
+		mn_assert_msg(arena->owns(ptr), "pool does not own this pointer, you can only call pool_put on pointers returned by this instance's pool_get");
 		#endif
 
 		#if MN_POOL_DOUBLE_FREE

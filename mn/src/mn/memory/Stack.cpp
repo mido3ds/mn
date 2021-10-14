@@ -1,12 +1,12 @@
 #include "mn/memory/Stack.h"
 #include "mn/OS.h"
-#include <assert.h>
+#include "mn/Assert.h"
 
 namespace mn::memory
 {
 	Stack::Stack(size_t stack_size, Interface* meta)
 	{
-		assert(stack_size != 0);
+		mn_assert(stack_size != 0);
 		this->meta = meta;
 		this->memory = meta->alloc(stack_size, alignof(uint8_t));
 		this->alloc_head = (uint8_t*)this->memory.ptr;
@@ -35,7 +35,7 @@ namespace mn::memory
 	void
 	Stack::free(Block)
 	{
-		assert(this->allocations_count > 0);
+		mn_assert(this->allocations_count > 0);
 		--this->allocations_count;
 		if (this->allocations_count == 0)
 			this->alloc_head = (uint8_t*)this->memory.ptr;
