@@ -2,7 +2,6 @@
 #include "mn/Str.h"
 #include "mn/Memory.h"
 #include "mn/Fabric.h"
-#include "mn/Assert.h"
 
 #include <errno.h>
 #include <fcntl.h>

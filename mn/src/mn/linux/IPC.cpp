@@ -2,7 +2,6 @@
 #include "mn/Str.h"
 #include "mn/Memory.h"
 #include "mn/Fabric.h"
-#include "mn/Assert.h"
 
 #include <errno.h>
 #include <fcntl.h>
@@ -140,7 +139,7 @@ namespace mn::ipc
 	{
 		sockaddr_un addr{};
 		addr.sun_family = AF_LOCAL;
-		mn_assert(name.count < sizeof(addr.sun_path), "name is too long");
+		mn_assert_msg(name.count < sizeof(addr.sun_path), "name is too long");
 		size_t name_length = name.count;
 		if(name.count >= sizeof(addr.sun_path))
 			name_length = sizeof(addr.sun_path);
