@@ -342,6 +342,13 @@ namespace mn
 		auto os_str = to_os_encoding(os_path, allocator_top());
 		mn_defer(mn::free(os_str));
 
+		auto attributes = GetFileAttributes((LPCWSTR)os_str.ptr);
+		if (attributes & FILE_ATTRIBUTE_READONLY)
+		{
+			[[maybe_unused]] auto res = SetFileAttributes((LPCWSTR)os_str.ptr, attributes & ~FILE_ATTRIBUTE_READONLY);
+			mn_assert(SUCCEEDED(res));
+		}
+
 		return DeleteFile((LPCWSTR)os_str.ptr);
 	}
 
