@@ -15,27 +15,97 @@
 
 namespace mn
 {
-	// represents the type of the task submitted to fabric
-	enum FABRIC_TASK_FLAGS
+	// represents the compute interface dimensions which is used to specify
+	// how many tasks you need along x, y, and z axis
+	// similar to graphics compute dispatch interface
+	struct Compute_Dims
 	{
-		// default flags
-		FABRIC_TASK_FLAG_NONE = 0,
-		// used to flag the compute tasks which have special handling
-		FABRIC_TASK_FLAG_COMPUTE = 1,
+		size_t x, y, z;
+	};
+
+	// represents the parameter for each compute job, it contains the same
+	// info as the graphics compute dispatch interface
+	struct Compute_Args
+	{
+		// the size of local workgroup (potentially the size which a single thread will handle)
+		// this is the local dimension input passed to the compute interface
+		Compute_Dims workgroup_size;
+		// the number of the local workgroups in this compute dispatch call
+		// this is the global dimension input passed to the compute interface
+		Compute_Dims workgroup_num;
+		// current global id of the local workgroup (indexes of the workgroup_num)
+		Compute_Dims workgroup_id;
+		// current local id of within the local workgroup (indexed of the workgroup_size)
+		Compute_Dims local_invocation_id;
+		// global id of the current compute invokation (workgroup_id * workgroup_size + local_invocation_id)
+		// index within both local + global indices of the compute dispatch
+		Compute_Dims global_invocation_id;
+		// tile size, this is usually equal to workgroup_size, but if the workgroup_num is not divisible
+		// by workgroup_size this will contain the exact tile size which should fit within workgroup_num
+		Compute_Dims tile_size;
 	};
 
 	// represents a single task in the fabric's worker task queue
 	struct Fabric_Task
 	{
-		Task<void()> task;
-		FABRIC_TASK_FLAGS flags;
+		enum KIND
+		{
+			// a oneshot task, usually invoked via go function
+			KIND_ONESHOT,
+			// a compute task, usually invoked via compute function
+			KIND_COMPUTE,
+		};
+
+		KIND kind;
+		union
+		{
+			struct
+			{
+				Task<void()> task;
+			} as_oneshot;
+
+			struct
+			{
+				Task<void(Compute_Args)> task;
+				Compute_Args args;
+				Waitgroup wg;
+			} as_compute;
+		};
 	};
+
+	// runs the given fabric task instance
+	inline static void
+	fabric_task_run(Fabric_Task& self)
+	{
+		switch (self.kind)
+		{
+		case Fabric_Task::KIND_ONESHOT:
+			self.as_oneshot.task();
+			break;
+		case Fabric_Task::KIND_COMPUTE:
+			self.as_compute.task(self.as_compute.args);
+			if (self.as_compute.wg) waitgroup_done(self.as_compute.wg);
+			break;
+		default:
+			break;
+		}
+	}
 
 	// frees the given fabric task
 	inline static void
 	fabric_task_free(Fabric_Task& self)
 	{
-		task_free(self.task);
+		switch (self.kind)
+		{
+		case Fabric_Task::KIND_ONESHOT:
+			task_free(self.as_oneshot.task);
+			break;
+		case Fabric_Task::KIND_COMPUTE:
+			task_free(self.as_compute.task);
+			break;
+		default:
+			break;
+		}
 	}
 
 	// destruct overload for the fabric task free function
@@ -78,7 +148,7 @@ namespace mn
 	worker_do(Worker self, TFunc&& f)
 	{
 		Fabric_Task entry{};
-		entry.task = Task<void()>::make(std::forward<TFunc>(f));
+		entry.as_oneshot.task = Task<void()>::make(std::forward<TFunc>(f));
 		worker_task_do(self, entry);
 	}
 
@@ -134,6 +204,11 @@ namespace mn
 		}
 		worker_block_clear();
 	}
+
+	// returns the current worker index within its fabric, returns 0 if it doesn't belong to a fabric, and -1 if this
+	// function is called from non-worker thread
+	MN_EXPORT int
+	local_worker_index();
 
 
 	// fabric is a job queue system with multiple workers which it uses to execute jobs effieciently
@@ -195,7 +270,7 @@ namespace mn
 	fabric_do(Fabric self, TFunc&& f)
 	{
 		Fabric_Task entry{};
-		entry.task = Task<void()>::make(std::forward<TFunc>(f));
+		entry.as_oneshot.task = Task<void()>::make(std::forward<TFunc>(f));
 		fabric_task_do(self, entry);
 	}
 
@@ -203,32 +278,9 @@ namespace mn
 	MN_EXPORT Fabric
 	fabric_local();
 
-	// represents the compute interface dimensions which is used to specify
-	// how many tasks you need along x, y, and z axis
-	// similar to graphics compute dispatch interface
-	struct Compute_Dims
-	{
-		size_t x, y, z;
-	};
-
-	// represents the parameter for each compute job, it contains the same
-	// info as the graphics compute dispatch interface
-	struct Compute_Args
-	{
-		// the size of local workgroup (potentially the size which a single thread will handle)
-		// this is the local dimension input passed to the compute interface
-		Compute_Dims workgroup_size;
-		// the number of the local workgroups in this compute dispatch call
-		// this is the global dimension input passed to the compute interface
-		Compute_Dims workgroup_num;
-		// current global id of the local workgroup (indexes of the workgroup_num)
-		Compute_Dims workgroup_id;
-		// current local id of within the local workgroup (indexed of the workgroup_size)
-		Compute_Dims local_invocation_id;
-		// global id of the current compute invokation (workgroup_id * workgroup_size + local_invocation_id)
-		// index within both local + global indices of the compute dispatch
-		Compute_Dims global_invocation_id;
-	};
+	// returns the number of workers of the given fabric instance
+	MN_EXPORT size_t
+	fabric_workers_count(Fabric self);
 
 	// schedules the given callable into the given fabric
 	template<typename TFunc>
@@ -236,7 +288,7 @@ namespace mn
 	go(Fabric f, TFunc&& fn)
 	{
 		Fabric_Task entry{};
-		entry.task = Task<void()>::make(std::forward<TFunc>(fn));
+		entry.as_oneshot.task = Task<void()>::make(std::forward<TFunc>(fn));
 		fabric_task_do(f, entry);
 	}
 
@@ -246,7 +298,7 @@ namespace mn
 	go(Worker worker, TFunc&& fn)
 	{
 		Fabric_Task entry{};
-		entry.task = Task<void()>::make(std::forward<TFunc>(fn));
+		entry.as_oneshot.task = Task<void()>::make(std::forward<TFunc>(fn));
 		worker_task_do(worker, entry);
 	}
 
@@ -259,13 +311,13 @@ namespace mn
 		if (Fabric f = fabric_local())
 		{
 			Fabric_Task entry{};
-			entry.task = Task<void()>::make(std::forward<TFunc>(fn));
+			entry.as_oneshot.task = Task<void()>::make(std::forward<TFunc>(fn));
 			fabric_task_do(f, entry);
 		}
 		else if (Worker w = worker_local())
 		{
 			Fabric_Task entry{};
-			entry.task = Task<void()>::make(std::forward<TFunc>(fn));
+			entry.as_oneshot.task = Task<void()>::make(std::forward<TFunc>(fn));
 			worker_task_do(w, entry);
 		}
 		else
@@ -861,7 +913,7 @@ namespace mn
 
 	template<typename TFunc>
 	inline static void
-	_single_threaded_compute(Compute_Dims global, Compute_Dims local, TFunc&& fn)
+	_single_threaded_compute(Compute_Dims workgroup_num, Compute_Dims total_size, Compute_Dims tile_size, TFunc&& fn)
 	{
 		auto tmp = allocator_arena_new();
 		auto old = _memory_tmp_set(tmp);
@@ -869,157 +921,15 @@ namespace mn
 			_memory_tmp_set(old);
 			allocator_free(tmp);
 		});
-		for (size_t global_z = 0; global_z < global.z; ++global_z)
+		for (size_t global_z = 0; global_z < workgroup_num.z; ++global_z)
 		{
-			for (size_t global_y = 0; global_y < global.y; ++global_y)
+			for (size_t global_y = 0; global_y < workgroup_num.y; ++global_y)
 			{
-				for (size_t global_x = 0; global_x < global.x; ++global_x)
-				{
-					for (size_t local_z = 0; local_z < local.z; ++local_z)
-					{
-						for (size_t local_y = 0; local_y < local.y; ++local_y)
-						{
-							for (size_t local_x = 0; local_x < local.x; ++local_x)
-							{
-								Compute_Args args;
-								args.workgroup_size = local;
-								args.workgroup_num = global;
-								args.workgroup_id = Compute_Dims{ global_x, global_y, global_z };
-								args.local_invocation_id = Compute_Dims{ local_x, local_y, local_z };
-								// workgroup_id * workgroup_size + local_invocation_id
-								args.global_invocation_id = Compute_Dims{
-									global_x * local.x + local_x,
-									global_y * local.y + local_y,
-									global_z * local.z + local_z,
-								};
-								fn(args);
-								memory::tmp()->clear_all();
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-
-	MN_EXPORT void
-	_multi_threaded_compute(Fabric self, Compute_Dims global, Compute_Dims local, Task<void(Compute_Args)> fn);
-
-	// dispatches a compute task with the given global and local dimensions using the given fabric
-	// this interface is similar to compute shaders interface which means that fabric will execute
-	// global * local number of tasks using the given function
-	template<typename TFunc>
-	inline static void
-	compute(Fabric f, Compute_Dims global, Compute_Dims local, TFunc&& fn)
-	{
-		if (f == nullptr)
-			_single_threaded_compute(global, local, std::forward<TFunc>(fn));
-		else
-			_multi_threaded_compute(f, global, local, mn::Task<void(Compute_Args)>::make(std::forward<TFunc>(fn)));
-	}
-
-	// single threaded overload/interface of fabric compute
-	template<typename TFunc>
-	inline static void
-	compute(Compute_Dims global, Compute_Dims local, TFunc&& fn)
-	{
-		compute(fabric_local(), global, local, std::forward<TFunc>(fn));
-	}
-
-	template<typename TFunc>
-	inline static void
-	_single_threaded_compute_sized(Compute_Dims global, Compute_Dims size, Compute_Dims local, TFunc&& fn)
-	{
-		auto tmp = allocator_arena_new();
-		auto old = _memory_tmp_set(tmp);
-		mn_defer({
-			_memory_tmp_set(old);
-			allocator_free(tmp);
-		});
-		for (size_t global_z = 0; global_z < global.z; ++global_z)
-		{
-			for (size_t global_y = 0; global_y < global.y; ++global_y)
-			{
-				for (size_t global_x = 0; global_x < global.x; ++global_x)
-				{
-					for (size_t local_z = 0; local_z < local.z; ++local_z)
-					{
-						for (size_t local_y = 0; local_y < local.y; ++local_y)
-						{
-							for (size_t local_x = 0; local_x < local.x; ++local_x)
-							{
-								Compute_Args args;
-								args.workgroup_size = local;
-								args.workgroup_num = global;
-								args.workgroup_id = Compute_Dims{ global_x, global_y, global_z };
-								args.local_invocation_id = Compute_Dims{ local_x, local_y, local_z };
-								// workgroup_id * workgroup_size + local_invocation_id
-								args.global_invocation_id = Compute_Dims{
-									global_x * local.x + local_x,
-									global_y * local.y + local_y,
-									global_z * local.z + local_z,
-								};
-								if (args.global_invocation_id.x >= size.x || args.global_invocation_id.y >= size.y || args.global_invocation_id.z >= size.z)
-									continue;
-								fn(args);
-								memory::tmp()->clear_all();
-							}
-						}
-					}
-				}
-			}
-		}
-	}
-
-	MN_EXPORT void
-	_multi_threaded_compute_sized(Fabric self, Compute_Dims global, Compute_Dims size, Compute_Dims local, Task<void(Compute_Args)> fn);
-
-	// dispatches a compute task with the given total and local sizes using the given fabric
-	// this interface is similar to compute shaders interface which means that fabric will execute
-	// total * local number of tasks using the given function, it will also take care not to exceed
-	// the given total_size which means it will handle if total % local != 0
-	template<typename TFunc>
-	inline static void
-	compute_sized(Fabric f, Compute_Dims total_size, Compute_Dims local, TFunc&& fn)
-	{
-		Compute_Dims global{
-			1 + ((total_size.x - 1) / local.x),
-			1 + ((total_size.y - 1) / local.y),
-			1 + ((total_size.z - 1) / local.z)
-		};
-		if (f == nullptr)
-			_single_threaded_compute_sized(global, total_size, local, std::forward<TFunc>(fn));
-		else
-			_multi_threaded_compute_sized(f, global, total_size, local, mn::Task<void(Compute_Args)>::make(std::forward<TFunc>(fn)));
-	}
-
-	// single threaded overload/interface of fabric compute sized
-	template<typename TFunc>
-	inline static void
-	compute_sized(Compute_Dims total_size, Compute_Dims local, TFunc&& fn)
-	{
-		compute_sized(fabric_local(), total_size, local, std::forward<TFunc>(fn));
-	}
-
-	template<typename TFunc>
-	inline static void
-	_single_threaded_compute_tiled(Compute_Dims total_size, Compute_Dims tile_size, TFunc&& fn)
-	{
-		auto tmp = allocator_arena_new();
-		auto old = _memory_tmp_set(tmp);
-		mn_defer({
-			_memory_tmp_set(old);
-			allocator_free(tmp);
-		});
-		for (size_t global_z = 0; global_z < total_size.z; ++global_z)
-		{
-			for (size_t global_y = 0; global_y < total_size.y; ++global_y)
-			{
-				for (size_t global_x = 0; global_x < total_size.x; ++global_x)
+				for (size_t global_x = 0; global_x < workgroup_num.x; ++global_x)
 				{
 					Compute_Args args{};
 					args.workgroup_size = tile_size;
-					args.workgroup_num = total_size;
+					args.workgroup_num = workgroup_num;
 					args.workgroup_id = Compute_Dims{ global_x, global_y, global_z };
 					// workgroup_id * workgroup_size + local_invocation_id
 					args.global_invocation_id = Compute_Dims{
@@ -1027,6 +937,13 @@ namespace mn
 						global_y * tile_size.y,
 						global_z * tile_size.z
 					};
+					args.tile_size = tile_size;
+					if (args.tile_size.x + args.global_invocation_id.x >= total_size.x)
+						args.tile_size.x = total_size.x - args.global_invocation_id.x;
+					if (args.tile_size.y + args.global_invocation_id.y >= total_size.y)
+						args.tile_size.y = total_size.y - args.global_invocation_id.y;
+					if (args.tile_size.z + args.global_invocation_id.z >= total_size.z)
+						args.tile_size.z = total_size.z - args.global_invocation_id.z;
 					fn(args);
 					memory::tmp()->clear_all();
 				}
@@ -1034,8 +951,48 @@ namespace mn
 		}
 	}
 
-	MN_EXPORT void
-	_multi_threaded_compute_tiled(Fabric self, Compute_Dims total_size, Compute_Dims tile_size, Task<void(Compute_Args)> fn);
+	template<typename TFunc>
+	inline static void
+	_multi_threaded_compute(Fabric self, Compute_Dims workgroup_num, Compute_Dims total_size, Compute_Dims tile_size, TFunc&& fn)
+	{
+		auto batch = buf_with_allocator<Fabric_Task>(memory::tmp());
+
+		Auto_Waitgroup wg;
+		for (size_t global_z = 0; global_z < workgroup_num.z; ++global_z)
+		{
+			for (size_t global_y = 0; global_y < workgroup_num.y; ++global_y)
+			{
+				for (size_t global_x = 0; global_x < workgroup_num.x; ++global_x)
+				{
+					Fabric_Task entry{};
+					entry.kind = Fabric_Task::KIND_COMPUTE;
+					entry.as_compute.args.workgroup_size = tile_size;
+					entry.as_compute.args.workgroup_num = workgroup_num;
+					entry.as_compute.args.workgroup_id = Compute_Dims{ global_x, global_y, global_z };
+					// workgroup_id * workgroup_size + local_invocation_id
+					entry.as_compute.args.global_invocation_id = Compute_Dims{
+						global_x * tile_size.x,
+						global_y * tile_size.y,
+						global_z * tile_size.z
+					};
+					entry.as_compute.args.tile_size = tile_size;
+					if (entry.as_compute.args.tile_size.x + entry.as_compute.args.global_invocation_id.x >= total_size.x)
+						entry.as_compute.args.tile_size.x = total_size.x - entry.as_compute.args.global_invocation_id.x;
+					if (entry.as_compute.args.tile_size.y + entry.as_compute.args.global_invocation_id.y >= total_size.y)
+						entry.as_compute.args.tile_size.y = total_size.y - entry.as_compute.args.global_invocation_id.y;
+					if (entry.as_compute.args.tile_size.z + entry.as_compute.args.global_invocation_id.z >= total_size.z)
+						entry.as_compute.args.tile_size.z = total_size.z - entry.as_compute.args.global_invocation_id.z;
+					entry.as_compute.task = Task<void(Compute_Args)>::make(fn);
+					entry.as_compute.wg = wg.handle;
+					buf_push(batch, entry);
+				}
+			}
+		}
+
+		wg.add((int)batch.count);
+		fabric_task_batch_do(self, batch.ptr, batch.count);
+		wg.wait();
+	}
 
 	// performs the compute function in tiles so if you have a total size of
 	// (100, 100, 100) and tile size of (10, 10, 10) you get (10, 10, 10) = 1000 workgroups
@@ -1045,16 +1002,16 @@ namespace mn
 	// to process the entire tile in the single call
 	template<typename TFunc>
 	inline static void
-	compute_tiled(Fabric f, Compute_Dims total_size, Compute_Dims tile_size, TFunc&& fn)
+	compute(Fabric f, Compute_Dims total_size, Compute_Dims tile_size, TFunc&& fn)
 	{
-		Compute_Dims global{
+		Compute_Dims workgroup_num{
 			1 + ((total_size.x - 1) / tile_size.x),
 			1 + ((total_size.y - 1) / tile_size.y),
 			1 + ((total_size.z - 1) / tile_size.z)
 		};
 		if (f == nullptr)
-			_single_threaded_compute_tiled(global, tile_size, std::forward<TFunc>(fn));
+			_single_threaded_compute(workgroup_num, total_size, tile_size, std::forward<TFunc>(fn));
 		else
-			_multi_threaded_compute_tiled(f, global, tile_size, mn::Task<void(Compute_Args)>::make(std::forward<TFunc>(fn)));
+			_multi_threaded_compute(f, workgroup_num, total_size, tile_size, std::forward<TFunc>(fn));
 	}
 }

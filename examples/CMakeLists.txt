@@ -110,3 +110,9 @@ target_link_libraries(example-deadlock-recursive
 	PRIVATE
 		MoustaphaSaad::mn
 )
+
+add_executable(example-parallel-reduce example-parallel-reduce.cpp)
+target_link_libraries(example-parallel-reduce
+	PRIVATE
+		MoustaphaSaad::mn
+)
