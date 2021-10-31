@@ -52,15 +52,15 @@ namespace mn
 		str_intern_free(self);
 	}
 
-	// interns the given a string and returns ta string pointer to the interned string
+	// interns the given a string and returns the string pointer to the interned string
 	MN_EXPORT const char*
 	str_intern(Str_Intern& self, const char* str);
 
-	// interns the given a string and returns ta string pointer to the interned string
+	// interns the given a string and returns the string pointer to the interned string
 	MN_EXPORT const char*
 	str_intern(Str_Intern& self, const Str& str);
 
-	// interns the given a string and returns ta string pointer to the interned string
+	// interns the given a string and returns the string pointer to the interned string
 	MN_EXPORT const char*
 	str_intern(Str_Intern& self, const char* begin, const char* end);
 }
