@@ -111,19 +111,6 @@ namespace mn
 	}
 
 	void
-	str_push(Str& self, const char* str)
-	{
-		if (str == nullptr)
-			return;
-		size_t str_len = ::strlen(str);
-		size_t self_len = self.count;
-		buf_resize(self, self.count + str_len + 1);
-		--self.count;
-		::memcpy(self.ptr + self_len, str, str_len);
-		self.ptr[self.count] = '\0';
-	}
-
-	void
 	str_block_push(Str& self, Block block)
 	{
 		size_t self_len = self.count;

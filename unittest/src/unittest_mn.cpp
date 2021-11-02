@@ -1366,3 +1366,10 @@ TEST_CASE("arena scopes")
 	mn::allocator_arena_restore(mn::memory::tmp(), checkpoint);
 	CHECK(name == "my name is mostafa");
 }
+
+TEST_CASE("str push blobs")
+{
+	auto str1 = mn::str_tmp("hello ");
+	mn::str_push(str1, mn::Str {nullptr, "w\0rld", 5, 5});
+	CHECK(str1 == mn::Str {nullptr, "hello w\0rld", 11, 11});
+}
