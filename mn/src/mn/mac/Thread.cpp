@@ -621,6 +621,12 @@ namespace mn
 		usleep(milliseconds * 1000);
 	}
 
+	void*
+	thread_id()
+	{
+		return (void*)pthread_self();
+	}
+
 
 	uint64_t
 	time_in_millis()

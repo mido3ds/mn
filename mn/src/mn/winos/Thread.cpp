@@ -653,6 +653,12 @@ namespace mn
 		Sleep(DWORD(milliseconds));
 	}
 
+	void*
+	thread_id()
+	{
+		return (void*)(uintptr_t)GetCurrentThreadId();
+	}
+
 
 	// time
 	uint64_t

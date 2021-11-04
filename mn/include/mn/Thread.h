@@ -124,6 +124,10 @@ namespace mn
 	MN_EXPORT void
 	thread_sleep(uint32_t milliseconds);
 
+	// returns the id of the calling thread
+	MN_EXPORT void*
+	thread_id();
+
 
 	// returns time in milliseonds
 	MN_EXPORT uint64_t
