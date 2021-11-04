@@ -707,6 +707,8 @@ namespace mn
 		mn_defer(mutex_unlock(self->mtx));
 
 		size_t increment = count / self->workers.count;
+		if (increment == 0)
+			increment = count;
 		size_t added = 0;
 		while (added < count)
 		{
