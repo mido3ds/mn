@@ -1366,3 +1366,10 @@ TEST_CASE("arena scopes")
 	mn::allocator_arena_restore(mn::memory::tmp(), checkpoint);
 	CHECK(name == "my name is mostafa");
 }
+
+TEST_CASE("fmt str with null byte")
+{
+	CHECK(mn::str_tmpf("{}", mn::Str {nullptr, "\0",   1, 1}).count == 1);
+	CHECK(mn::str_tmpf("{}", mn::Str {nullptr, "\0B",  2, 2}).count == 2);
+	CHECK(mn::str_tmpf("{}", mn::Str {nullptr, "A\0B", 3, 3}).count == 3);
+}

@@ -2,6 +2,9 @@
 
 #include <fmt/format.h>
 #include <fmt/ostream.h>
+#include <fmt/chrono.h>
+
+#include <string_view>
 
 #include "mn/Str.h"
 #include "mn/Buf.h"
@@ -19,7 +22,7 @@ namespace fmt
 		auto format(const mn::Str &str, FormatContext &ctx) {
 			if (str.count == 0)
 				return ctx.out();
-			return format_to(ctx.out(), "{}", str.ptr);
+			return format_to(ctx.out(), "{}", std::string_view{str.ptr, str.count});
 		}
 	};
 
