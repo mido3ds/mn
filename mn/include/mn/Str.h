@@ -64,20 +64,25 @@ namespace mn
 		return 0;
 	}
 
-	// pushes the second string into the first one
+	// pushes the given block of bytes into the string
 	MN_EXPORT void
-	str_push(Str& self, const char* str);
+	str_block_push(Str& self, Block block);
+
+	// pushes the second string into the first one
+	inline static void
+	str_push(Str& self, const char* str)
+	{
+		if (str == nullptr)
+			return;
+		str_block_push(self, Block {(void*) str, ::strlen(str)});
+	}
 
 	// pushes the second string into the first one
 	inline static void
 	str_push(Str& self, const Str& str)
 	{
-		str_push(self, str.ptr);
+		str_block_push(self, Block {str.ptr, str.count});
 	}
-
-	// pushes the given block of bytes into the string
-	MN_EXPORT void
-	str_block_push(Str& self, Block block);
 
 	// pushes a rune into the back of the string
 	MN_EXPORT void
@@ -537,29 +542,28 @@ namespace mn
 
 	// compares two strings and returns 0 if they are equal, 1 if a > b, and -1 if a < b
 	inline static int
-	str_cmp(const char* a, const char* b)
+	str_cmp(const Str& a, const Str& b)
 	{
-		if (a != nullptr && b != nullptr)
+		if (a.count > 0 && b.count > 0)
 		{
-			return ::strcmp(a, b);
+			if (a.count > b.count)
+				return 1;
+			else if (a.count < b.count)
+				return -1;
+			else
+				return ::memcmp(a.ptr, b.ptr, a.count);
 		}
-		else if (a == nullptr && b == nullptr)
+		else if (a.count == 0 && b.count == 0)
 		{
 			return 0;
 		}
-		else if (a != nullptr && b == nullptr)
+		else if (a.count > 0 && b.count == 0)
 		{
-			if (::strlen(a) == 0)
-				return 0;
-			else
-				return 1;
+			return 1;
 		}
-		else if (a == nullptr && b != nullptr)
+		else if (a.count == 0 && b.count > 0)
 		{
-			if (::strlen(b) == 0)
-				return 0;
-			else
-				return -1;
+			return -1;
 		}
 		else
 		{
@@ -571,110 +575,120 @@ namespace mn
 	inline static bool
 	operator==(const Str& a, const Str& b)
 	{
-		return str_cmp(a.ptr, b.ptr) == 0;
+		return str_cmp(a, b) == 0;
 	}
 
 	inline static bool
 	operator!=(const Str& a, const Str& b)
 	{
-		return str_cmp(a.ptr, b.ptr) != 0;
+		return str_cmp(a, b) != 0;
 	}
 
 	inline static bool
 	operator<(const Str& a, const Str& b)
 	{
-		return str_cmp(a.ptr, b.ptr) < 0;
+		return str_cmp(a, b) < 0;
 	}
 
 	inline static bool
 	operator<=(const Str& a, const Str& b)
 	{
-		return str_cmp(a.ptr, b.ptr) <= 0;
+		return str_cmp(a, b) <= 0;
 	}
 
 	inline static bool
 	operator>(const Str& a, const Str& b)
 	{
-		return str_cmp(a.ptr, b.ptr) > 0;
+		return str_cmp(a, b) > 0;
 	}
 
 	inline static bool
 	operator>=(const Str& a, const Str& b)
 	{
-		return str_cmp(a.ptr, b.ptr) >= 0;
+		return str_cmp(a, b) >= 0;
 	}
 
 
 	inline static bool
 	operator==(const Str& a, const char* b)
 	{
-		return str_cmp(a.ptr, b) == 0;
+		return str_cmp(a, str_lit(b)) == 0;
 	}
 
 	inline static bool
 	operator!=(const Str& a, const char* b)
 	{
-		return str_cmp(a.ptr, b) != 0;
+		return str_cmp(a, str_lit(b)) != 0;
 	}
 
 	inline static bool
 	operator<(const Str& a, const char* b)
 	{
-		return str_cmp(a.ptr, b) < 0;
+		return str_cmp(a, str_lit(b)) < 0;
 	}
 
 	inline static bool
 	operator<=(const Str& a, const char* b)
 	{
-		return str_cmp(a.ptr, b) <= 0;
+		return str_cmp(a, str_lit(b)) <= 0;
 	}
 
 	inline static bool
 	operator>(const Str& a, const char* b)
 	{
-		return str_cmp(a.ptr, b) > 0;
+		return str_cmp(a, str_lit(b)) > 0;
 	}
 
 	inline static bool
 	operator>=(const Str& a, const char* b)
 	{
-		return str_cmp(a.ptr, b) >= 0;
+		return str_cmp(a, str_lit(b)) >= 0;
 	}
 
 
 	inline static bool
 	operator==(const char* a, const Str& b)
 	{
-		return str_cmp(a, b.ptr) == 0;
+		return str_cmp(str_lit(a), b) == 0;
 	}
 
 	inline static bool
 	operator!=(const char* a, const Str& b)
 	{
-		return str_cmp(a, b.ptr) != 0;
+		return str_cmp(str_lit(a), b) != 0;
 	}
 
 	inline static bool
 	operator<(const char* a, const Str& b)
 	{
-		return str_cmp(a, b.ptr) < 0;
+		return str_cmp(str_lit(a), b) < 0;
 	}
 
 	inline static bool
 	operator<=(const char* a, const Str& b)
 	{
-		return str_cmp(a, b.ptr) <= 0;
+		return str_cmp(str_lit(a), b) <= 0;
 	}
 
 	inline static bool
 	operator>(const char* a, const Str& b)
 	{
-		return str_cmp(a, b.ptr) > 0;
+		return str_cmp(str_lit(a), b) > 0;
 	}
 
 	inline static bool
 	operator>=(const char* a, const Str& b)
 	{
-		return str_cmp(a, b.ptr) >= 0;
+		return str_cmp(str_lit(a), b) >= 0;
 	}
+}
+
+inline static mn::Str
+operator "" _mnstr(const char* ptr, size_t count)
+{
+	mn::Str res{};
+	res.ptr = (char*)ptr;
+	res.count = count;
+	res.cap = res.count + 1;
+	return res;
 }

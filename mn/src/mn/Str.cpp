@@ -98,8 +98,8 @@ namespace mn
 		self.ptr = (char*)lit;
 		if(lit)
 		{
-			self.cap = ::strlen(lit) + 1;
-			self.count = self.cap - 1;
+			self.count = ::strlen(lit);
+			self.cap = self.count + 1;
 		}
 		return self;
 	}
@@ -108,19 +108,6 @@ namespace mn
 	str_free(Str& self)
 	{
 		buf_free(self);
-	}
-
-	void
-	str_push(Str& self, const char* str)
-	{
-		if (str == nullptr)
-			return;
-		size_t str_len = ::strlen(str);
-		size_t self_len = self.count;
-		buf_resize(self, self.count + str_len + 1);
-		--self.count;
-		::memcpy(self.ptr + self_len, str, str_len);
-		self.ptr[self.count] = '\0';
 	}
 
 	void

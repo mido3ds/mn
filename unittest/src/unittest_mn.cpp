@@ -78,7 +78,7 @@ TEST_CASE("tmp allocator")
 	{
 		auto name = mn::str_with_allocator(mn::memory::tmp());
 		name = mn::strf(name, "Name: {}", "Mostafa");
-		CHECK(name == mn::str_lit("Name: Mostafa"));
+		CHECK(name == "Name: Mostafa");
 	}
 
 	mn::memory::tmp()->free_all();
@@ -86,7 +86,7 @@ TEST_CASE("tmp allocator")
 	{
 		auto name = mn::str_with_allocator(mn::memory::tmp());
 		name = mn::strf(name, "Name: {}", "Mostafa");
-		CHECK(name == mn::str_lit("Name: Mostafa"));
+		CHECK(name == "Name: Mostafa");
 	}
 
 	mn::memory::tmp()->free_all();
@@ -148,10 +148,10 @@ TEST_CASE("str push")
 	CHECK("Mostafa" == str);
 
 	mn::str_push(str, " Saad");
-	CHECK(str == mn::str_lit("Mostafa Saad"));
+	CHECK(str == "Mostafa Saad");
 
 	mn::str_push(str, " Abdel-Hameed");
-	CHECK(str == mn::str_lit("Mostafa Saad Abdel-Hameed"));
+	CHECK(str == "Mostafa Saad Abdel-Hameed");
 
 	str = mn::strf(str, " age: {}", 25);
 	CHECK(str == "Mostafa Saad Abdel-Hameed age: 25");
@@ -487,7 +487,7 @@ TEST_CASE("reads")
 
 TEST_CASE("reader")
 {
-	auto reader = mn::reader_wrap_str(nullptr, mn::str_lit("Mostafa Saad"));
+	auto reader = mn::reader_wrap_str(nullptr, "Mostafa Saad");
 	auto str = mn::str_new();
 	size_t read_count = mn::readln(reader, str);
 	CHECK(read_count == 12);
@@ -658,7 +658,7 @@ TEST_CASE("Fmt")
 {
 	SUBCASE("str formatting")
 	{
-		auto n = mn::strf("{}", mn::str_lit("mostafa"));
+		auto n = mn::strf("{}", "mostafa"_mnstr);
 		CHECK(n == "mostafa");
 		mn::str_free(n);
 	}
@@ -1367,9 +1367,16 @@ TEST_CASE("arena scopes")
 	CHECK(name == "my name is mostafa");
 }
 
+TEST_CASE("str push blobs")
+{
+	auto str1 = mn::str_tmp("hello ");
+	mn::str_push(str1, "w\0rld"_mnstr);
+	CHECK(str1 == mn::Str {nullptr, "hello w\0rld", 11, 11});
+}
+
 TEST_CASE("fmt str with null byte")
 {
-	CHECK(mn::str_tmpf("{}", mn::Str {nullptr, "\0",   1, 1}).count == 1);
-	CHECK(mn::str_tmpf("{}", mn::Str {nullptr, "\0B",  2, 2}).count == 2);
-	CHECK(mn::str_tmpf("{}", mn::Str {nullptr, "A\0B", 3, 3}).count == 3);
+	CHECK(mn::str_tmpf("{}", "\0"_mnstr).count == 1);
+	CHECK(mn::str_tmpf("{}", "\0B"_mnstr).count == 2);
+	CHECK(mn::str_tmpf("{}", "A\0B"_mnstr).count == 3);
 }
