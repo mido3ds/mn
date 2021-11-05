@@ -546,12 +546,10 @@ namespace mn
 	{
 		if (a.count > 0 && b.count > 0)
 		{
-			if (a.count > b.count)
-				return 1;
-			else if (a.count < b.count)
-				return -1;
-			else
-				return ::memcmp(a.ptr, b.ptr, a.count);
+			size_t count = a.count;
+			if (count > b.count)
+				count = b.count;
+			return ::memcmp(a.ptr, b.ptr, count);
 		}
 		else if (a.count == 0 && b.count == 0)
 		{

@@ -1380,3 +1380,10 @@ TEST_CASE("fmt str with null byte")
 	CHECK(mn::str_tmpf("{}", "\0B"_mnstr).count == 2);
 	CHECK(mn::str_tmpf("{}", "A\0B"_mnstr).count == 3);
 }
+
+TEST_CASE("str_cmp")
+{
+	CHECK("AF"_mnstr > "AEF"_mnstr);
+	CHECK("ABC"_mnstr < "DEF"_mnstr);
+	CHECK("AB\0C"_mnstr < "AB\0D"_mnstr);
+}
