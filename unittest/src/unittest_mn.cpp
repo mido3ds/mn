@@ -1386,4 +1386,9 @@ TEST_CASE("str_cmp")
 	CHECK("AF"_mnstr > "AEF"_mnstr);
 	CHECK("ABC"_mnstr < "DEF"_mnstr);
 	CHECK("AB\0C"_mnstr < "AB\0D"_mnstr);
+	CHECK("AB\0C"_mnstr > "AB"_mnstr);
+	CHECK("AB"_mnstr < "AB\0\0"_mnstr);
+	CHECK(""_mnstr < "AB\0\0"_mnstr);
+	CHECK("AB\0\0"_mnstr > ""_mnstr);
+	CHECK(""_mnstr == ""_mnstr);
 }
