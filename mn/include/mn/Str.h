@@ -544,29 +544,21 @@ namespace mn
 	inline static int
 	str_cmp(const Str& a, const Str& b)
 	{
-		if (a.count > 0 && b.count > 0)
+		size_t min_count = a.count < b.count ? a.count : b.count;
+		int res = ::memcmp(a.ptr, b.ptr, min_count);
+		// NOTE: Possible that a[:min_count] == b[:min_count] but a>b, or vice versa, like "ABC" and "AB"
+		if (res == 0)
 		{
-			size_t count = a.count;
-			if (count > b.count)
-				count = b.count;
-			return ::memcmp(a.ptr, b.ptr, count);
-		}
-		else if (a.count == 0 && b.count == 0)
-		{
-			return 0;
-		}
-		else if (a.count > 0 && b.count == 0)
-		{
-			return 1;
-		}
-		else if (a.count == 0 && b.count > 0)
-		{
-			return -1;
+			if (a.count == b.count)
+				return 0;
+			else if (a.count > b.count)
+				return 1;
+			else
+				return -1;
 		}
 		else
 		{
-			mn_unreachable();
-			return 0;
+			return res;
 		}
 	}
 
