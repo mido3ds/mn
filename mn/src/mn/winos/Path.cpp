@@ -550,16 +550,9 @@ namespace mn
 			mn_assert_msg(false, "No local config directory.");
 			return str_with_allocator(allocator);
 		}
-
 		auto len = wcslen(config_str);
-
-		auto os_str = alloc(len*(sizeof(WCHAR)+1), alignof(WCHAR));
-		mn_defer(mn::free(os_str));
-
-		// Sadly, SHGetKnownFolderPath allocates the memory for the config_str on its own, forcing me to do this.
-		::memcpy(os_str.ptr, config_str, len*(sizeof(WCHAR)+1));
+		auto res = path_normalize(from_os_encoding({config_str, (len + 1) * sizeof(WCHAR)}, allocator));
 		CoTaskMemFree((LPVOID)config_str);
-
-		return path_normalize(from_os_encoding(os_str, allocator));
+		return res;
 	}
 }

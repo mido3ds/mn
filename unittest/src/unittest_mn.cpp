@@ -1392,3 +1392,9 @@ TEST_CASE("str_cmp")
 	CHECK("AB\0\0"_mnstr > ""_mnstr);
 	CHECK(""_mnstr == ""_mnstr);
 }
+
+TEST_CASE("config folder")
+{
+	auto config = mn::folder_config(mn::memory::tmp());
+	mn::log_info("{}/file.txt", config);
+}
