@@ -991,6 +991,38 @@ TEST_CASE("stress")
 	mn::chan_free(c);
 }
 
+TEST_CASE("future")
+{
+	auto f = mn::fabric_new({});
+
+	auto async_int_func = [](int x){
+		mn::thread_sleep(200);
+		return x;
+	};
+
+	int global_var = 0;
+	auto async_void_func = [&]() {
+		mn::thread_sleep(200);
+		global_var = 62;
+	};
+
+	auto fu = mn::future_go(f, async_int_func, 42);
+	mn::future_wait(fu);
+	CHECK(fu == 42);
+
+	CHECK(mn::xchg(*fu, {}) == 42);
+	CHECK(fu == 0);
+
+	mn::future_free(fu);
+
+	auto fu2 = mn::future_go(f, async_void_func);
+	mn::future_wait(fu2);
+	CHECK(global_var == 62);
+	mn::future_free(fu2);
+
+	mn::fabric_free(f);
+}
+
 TEST_CASE("buddy")
 {
 	auto buddy = mn::allocator_buddy_new();
@@ -1397,4 +1429,50 @@ TEST_CASE("config folder")
 {
 	auto config = mn::folder_config(mn::memory::tmp());
 	mn::log_info("{}/file.txt", config);
+}
+
+TEST_CASE("json unpack")
+{
+	auto root = mn::json::value_object_new();
+	mn::json::value_object_insert(root, "package", mn::json::value_string_new("sabre"));
+
+	auto uniform = mn::json::value_object_new();
+	mn::json::value_object_insert(uniform, "name", mn::json::value_string_new("camera"));
+	mn::json::value_object_insert(uniform, "size", mn::json::value_number_new(16));
+
+	mn::json::value_object_insert(root, "uniform", uniform);
+
+	const char* package_name = "";
+	const char* uniform_name = "";
+	size_t uniform_size = 0;
+
+	auto err = mn::json::unpack(root, {
+		{&package_name, "package"},
+		{&uniform_name, "uniform.name"},
+		{&uniform_size, "uniform.size"}
+	});
+	CHECK(err == false);
+	CHECK(package_name == "sabre"_mnstr);
+	CHECK(uniform_name == "camera"_mnstr);
+	CHECK(uniform_size == 16);
+
+	auto should_err = mn::json::unpack(root, {
+		{&package_name, "name"},
+		{&uniform_name, "uniform.name"},
+		{&uniform_size, "uniform.size"}
+	});
+	CHECK(should_err == true);
+
+	mn::json::value_free(root);
+}
+
+TEST_CASE("map")
+{
+	auto set = mn::set_new<mn::Str>();
+	mn::set_reserve(set, 6);
+	mn::set_insert(set, "source"_mnstr);
+	mn::set_insert(set, "jwt"_mnstr);
+	mn::set_insert(set, "access"_mnstr);
+	mn::set_insert(set, "refresh"_mnstr);
+	mn::set_free(set);
 }

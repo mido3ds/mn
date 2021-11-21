@@ -616,6 +616,33 @@ namespace mn
 		new_cap = new_cap / 3 + 1;
 		if (new_cap > self._used_count_threshold)
 		{
+			// round up to next power of 2
+			if (new_cap > 0)
+			{
+				--new_cap;
+				if constexpr (sizeof(size_t) == 4)
+				{
+					new_cap |= new_cap >> 1;
+					new_cap |= new_cap >> 2;
+					new_cap |= new_cap >> 4;
+					new_cap |= new_cap >> 8;
+					new_cap |= new_cap >> 16;
+				}
+				else if constexpr (sizeof(size_t) == 8)
+				{
+					new_cap |= new_cap >> 1;
+					new_cap |= new_cap >> 2;
+					new_cap |= new_cap >> 4;
+					new_cap |= new_cap >> 8;
+					new_cap |= new_cap >> 16;
+					new_cap |= new_cap >> 32;
+				}
+				else
+				{
+					static_assert("unexpected sizeof(size_t)");
+				}
+				++new_cap;
+			}
 			_set_reserve_exact(self, new_cap);
 		}
 	}

@@ -770,4 +770,13 @@ namespace mn
 		if (self->count == 0)
 			pthread_cond_broadcast(&self->cv);
 	}
+
+	int
+	waitgroup_count(Waitgroup self)
+	{
+		pthread_mutex_lock(&self->mtx);
+		mn_defer(pthread_mutex_unlock(&self->mtx));
+
+		return self->count;
+	}
 }

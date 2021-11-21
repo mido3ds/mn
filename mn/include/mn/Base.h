@@ -5,6 +5,7 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include <utility>
 
 namespace mn
 {
@@ -108,4 +109,14 @@ namespace mn
 		uint32_t line;
 		uint32_t color;
 	};
+
+	// exchanges the value in dst with the new value then returns the old value
+	template<typename T, typename R = T>
+	inline static auto
+	xchg(T& dst, R&& new_value)
+	{
+		auto old_value = std::move(dst);
+		dst = std::forward<R>(new_value);
+		return old_value;
+	}
 }

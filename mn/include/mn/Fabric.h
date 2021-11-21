@@ -12,6 +12,7 @@
 
 #include <atomic>
 #include <chrono>
+#include <type_traits>
 
 namespace mn
 {
@@ -484,6 +485,141 @@ namespace mn
 		return res;
 	}
 
+	template<typename T>
+	struct _IFuture
+	{
+		Waitgroup _wg;
+		T result;
+	};
+
+	template<>
+	struct _IFuture<void>
+	{
+		Waitgroup _wg;
+	};
+
+	// future is a wrapper around the result of any function which called in an async way using fabric
+	// it's useful in case you want to track the completion of this function
+	template<typename T>
+	struct Future
+	{
+		_IFuture<T>* _internal_future;
+
+		const T* operator->() const { return &_internal_future->result; }
+		T* operator->() { return &_internal_future->result; }
+
+		operator const T&() const { return _internal_future->result; }
+		operator T&() { return _internal_future->result; }
+
+		const T& operator*() const { return _internal_future->result; }
+		T& operator*() { return _internal_future->result; }
+	};
+
+	template<>
+	struct Future<void>
+	{
+		_IFuture<void>* _internal_future;
+	};
+
+	// schedules a function with the given arguments to be run on fabric, and returns the future of this
+	// operation
+	template<typename TFunc, typename ... TArgs>
+	inline static Future<std::invoke_result_t<TFunc, TArgs...>>
+	future_go(Fabric f, TFunc&& fn, TArgs&& ... args)
+	{
+		using return_type = std::invoke_result_t<TFunc, TArgs...>;
+		Future<return_type> self{};
+		self._internal_future = mn::alloc_zerod<_IFuture<return_type>>();
+		self._internal_future->_wg = waitgroup_new();
+		waitgroup_add(self._internal_future->_wg, 1);
+
+		Fabric_Task entry{};
+		entry.as_oneshot.task = Task<void()>::make([=]{
+			if constexpr (std::is_same_v<return_type, void>)
+				fn(args...);
+			else
+				self._internal_future->result = fn(args...);
+			waitgroup_done(self._internal_future->_wg);
+		});
+		fabric_task_do(f, entry);
+
+		return self;
+	}
+
+	// schedules a function with the given arguments to be run on worker, and returns the future of this
+	// operation
+	template<typename TFunc, typename ... TArgs>
+	inline static Future<std::invoke_result_t<TFunc, TArgs...>>
+	future_go(Worker w, TFunc&& fn, TArgs&& ... args)
+	{
+		using return_type = std::invoke_result_t<TFunc, TArgs...>;
+		Future<return_type> self{};
+		self._internal_future = mn::alloc_zerod<_IFuture<return_type>>();
+		self._internal_future->_wg = waitgroup_new();
+		waitgroup_add(self._internal_future->_wg, 1);
+
+		Fabric_Task entry{};
+		entry.as_oneshot.task = Task<void()>::make([=]{
+			if constexpr (std::is_same_v<return_type, void>)
+				fn(args...);
+			else
+				self._internal_future->result = fn(args...);
+			waitgroup_done(self._internal_future->_wg);
+		});
+		worker_task_do(w, entry);
+
+		return self;
+	}
+
+	// frees the given future, if it's not done yet we wait before freeing it
+	template<typename T>
+	inline static void
+	future_free(Future<T>& self)
+	{
+		if (self._internal_future == nullptr)
+			return;
+
+		waitgroup_wait(self._internal_future->_wg);
+		waitgroup_free(self._internal_future->_wg);
+
+		if constexpr (std::is_same_v<T, void> == false)
+			destruct(self._internal_future->result);
+
+		free(self._internal_future);
+		self._internal_future = nullptr;
+	}
+
+	// destruct overload for future
+	template<typename T>
+	inline static void
+	destruct(Future<T>& self)
+	{
+		future_free(self);
+	}
+
+	// returns whether the given future has finished
+	template<typename T>
+	inline static bool
+	future_is_done(Future<T> self)
+	{
+		return waitgroup_count(self._internal_future->_wg) == 0;
+	}
+
+	// waits for the given future to be done, in case it's done already we don't sleep/wait
+	template<typename T>
+	inline static void
+	future_wait(Future<T> self)
+	{
+		waitgroup_wait(self._internal_future->_wg);
+	}
+
+	// returns whether the future is null/empty
+	template<typename T>
+	inline static bool
+	future_is_null(Future<T> self)
+	{
+		return self._internal_future == nullptr;
+	}
 
 	// a generic message passing primitive used to communicate between fabric tasks
 	template<typename T>

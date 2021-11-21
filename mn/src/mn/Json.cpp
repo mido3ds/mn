@@ -335,7 +335,11 @@ namespace mn::json
 		}
 		else if (auto string_tkn = _parser_eat_kind(self, Token::KIND_STRING))
 		{
-			return value_string_new(str_from_substr(string_tkn.begin, string_tkn.end));
+			Value res{};
+			res.kind = Value::KIND_STRING;
+			res.as_string = alloc<Str>();
+			*res.as_string = str_from_substr(string_tkn.begin, string_tkn.end);
+			return res;
 		}
 		else if (auto bracket_tkn = _parser_eat_kind(self, Token::KIND_OPEN_BRACKET))
 		{

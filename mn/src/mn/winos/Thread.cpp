@@ -798,4 +798,12 @@ namespace mn
 		if (self->count == 0)
 			WakeAllConditionVariable(&self->cv);
 	}
+
+	int
+	waitgroup_count(Waitgroup self)
+	{
+		EnterCriticalSection(&self->cs);
+		mn_defer(LeaveCriticalSection(&self->cs));
+		return self->count;
+	}
 }

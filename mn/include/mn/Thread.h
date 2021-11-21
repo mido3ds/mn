@@ -237,6 +237,10 @@ namespace mn
 	MN_EXPORT void
 	waitgroup_done(Waitgroup self);
 
+	// returns the waitgroup count, >0 means it's not done yet, 0 done, <0 shouldn't happen
+	MN_EXPORT int
+	waitgroup_count(Waitgroup self);
+
 	// automatic waitgroup which uses RAII to manage its memory
 	// useful in case you want a quick scoped waitgroup
 	struct Auto_Waitgroup

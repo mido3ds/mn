@@ -56,12 +56,12 @@ namespace mn::json
 
 	// creates a new json value from a string
 	inline static Value
-	value_string_new(Str v)
+	value_string_new(const Str& v)
 	{
 		Value self{};
 		self.kind = Value::KIND_STRING;
 		self.as_string = alloc<Str>();
-		*self.as_string = v;
+		*self.as_string = clone(v);
 		return self;
 	}
 
@@ -188,7 +188,7 @@ namespace mn::json
 	inline static const Value*
 	value_object_lookup(const Value& self, const char* key)
 	{
-		if (auto it = map_lookup(*self.as_object, mn::str_lit(key)))
+		if (auto it = map_lookup(*self.as_object, str_lit(key)))
 			return &it->value;
 		return nullptr;
 	}
@@ -197,7 +197,7 @@ namespace mn::json
 	inline static Value*
 	value_object_lookup(Value& self, const char* key)
 	{
-		if (auto it = map_lookup(*self.as_object, mn::str_lit(key)))
+		if (auto it = map_lookup(*self.as_object, str_lit(key)))
 			return &it->value;
 		return nullptr;
 	}
@@ -247,6 +247,299 @@ namespace mn::json
 	parse(const char* content)
 	{
 		return parse(str_lit(content));
+	}
+
+	// clones the given json value
+	inline static Value
+	value_clone(const Value& other)
+	{
+		switch (other.kind)
+		{
+		case Value::KIND_NULL:
+		case Value::KIND_BOOL:
+		case Value::KIND_NUMBER:
+			return other;
+		case Value::KIND_STRING:
+			return value_string_new(*other.as_string);
+		case Value::KIND_ARRAY:
+		{
+			auto self = value_array_new();
+			buf_reserve(*self.as_array, other.as_array->count);
+			for (auto v: value_array_iter(other))
+				buf_push(*self.as_array, value_clone(v));
+			return self;
+		}
+		case Value::KIND_OBJECT:
+		{
+			auto self = value_object_new();
+			map_reserve(*self.as_object, other.as_object->count);
+			for (const auto& [k, v]: value_object_iter(other))
+				map_insert(*self.as_object, clone(k), value_clone(v));
+			return self;
+		}
+		default:
+			mn_unreachable();
+			return Value{};
+		}
+	}
+
+	// clone overload for json value
+	inline static Value
+	clone(const Value& other)
+	{
+		return value_clone(other);
+	}
+
+	template<typename T>
+	inline static Err
+	unpack(Value v, T* self, Value::KIND kind);
+
+	template<typename T>
+	inline static Err
+	_extract_string(Value, T*)
+	{
+		return Err{"the provided element pointer is not of type const char* or Str"};
+	}
+
+	inline static Err
+	_extract_string(Value v, const char** self)
+	{
+		if (self)
+			*self = v.as_string->ptr;
+		return Err{};
+	}
+
+	inline static Err
+	_extract_string(Value v, Str* self)
+	{
+		if (self)
+		{
+			str_clear(*self);
+			str_push(*self, *v.as_string);
+		}
+		return Err{};
+	}
+
+	template<typename T>
+	inline static Err
+	_extract_buf_from_array(Value, T*)
+	{
+		return Err{"the provided element pointer is not of type Buf<T>"};
+	}
+
+	template<typename T>
+	inline static Err
+	_extract_buf_from_array(Value v, Buf<T>* buf)
+	{
+		auto count = v.as_array->count;
+		if (count == 0)
+		{
+			buf_resize(*buf, 0);
+			return Err{};
+		}
+
+		auto first_type = (*v.as_array)[0].kind;
+		for (size_t i = 1; i < count; ++i)
+		{
+			if (first_type != (*v.as_array)[i].kind)
+				return Err{"can't read non uniform dyno array into a uniform Buf<T>"};
+		}
+
+		buf_resize(*buf, count);
+		for (size_t i = 0; i < count; ++i)
+		{
+			(*buf)[i] = {0};
+			auto err = unpack((*v.as_array)[i], buf->ptr + i, first_type);
+			if (err)
+				return err;
+		}
+		return Err{};
+	}
+
+	template<typename T>
+	inline static Err
+	unpack(Value v, T* self, Value::KIND kind)
+	{
+		if (v.kind == Value::KIND_NULL)
+			return Err{"Value is null"};
+
+		if (v.kind != kind)
+			return Err{"mismatched value type"};
+
+		auto err = Err{};
+		switch (kind)
+		{
+		case Value::KIND_BOOL:
+			if constexpr (std::is_same_v<bool, T>)
+			{
+				if (self)
+					*self = T(v.as_bool);
+			}
+			else
+			{
+				err = Err{"the provided element pointer is not of type bool"};
+			}
+			break;
+		case Value::KIND_NUMBER:
+			if constexpr (std::is_integral_v<T> || std::is_floating_point_v<T>)
+			{
+				if (self)
+				{
+					*self = T(v.as_number);
+					if ((double)*self != (double)v.as_number)
+					{
+						err = Err{"loss of percision while unpacking a value"};
+					}
+				}
+			}
+			else
+			{
+				err = Err{"the provided element pointer is not of signed integral type"};
+			}
+			break;
+		case Value::KIND_STRING:
+			err = _extract_string(v, self);
+			break;
+		case Value::KIND_ARRAY:
+			err = _extract_buf_from_array(v, self);
+			break;
+		default:
+			err = Err{"unsupported unpack type"};
+			break;
+		}
+		return err;
+	}
+
+	template<typename T>
+	inline static constexpr bool
+	_is_buf(T*)
+	{
+		return false;
+	}
+
+	template<typename T>
+	inline static constexpr bool
+	_is_buf(Buf<T>*)
+	{
+		return true;
+	}
+
+	template<typename T>
+	inline static Err
+	unpack(Value v, T* self)
+	{
+		if constexpr (std::is_same_v<T, bool>)
+			return unpack(v, self, Value::KIND_BOOL);
+		else if constexpr (std::is_integral_v<T> || std::is_floating_point_v<T>)
+			return unpack(v, self, Value::KIND_NUMBER);
+		else if constexpr (std::is_same_v<T, Str> || std::is_same_v<T, const char *>)
+			return unpack(v, self, Value::KIND_STRING);
+		else if constexpr (_is_buf<T>)
+			return unpack(v, self, v.kind);
+		else
+			static_assert(sizeof(T) == 0, "unsupported primitive type");
+	}
+
+	struct Struct_Element
+	{
+		void *ptr;
+		Err (*unpack)(Value, void*, Value::KIND);
+		Value::KIND kind;
+		const char* name;
+
+		Struct_Element(const char* field_name, Value::KIND field_kind)
+			: ptr(nullptr), unpack(nullptr), kind(field_kind), name(field_name)
+		{
+		}
+
+		template<typename T>
+		Struct_Element(T* data, const char* field_name, Value::KIND field_kind)
+			: ptr(data), unpack(nullptr), kind(field_kind), name(field_name)
+		{
+			unpack = [](Value v, void *ptr, Value::KIND type) { return mn::json::unpack<T>(v, (T *)ptr, type); };
+		}
+
+#define SMART_CONSTRUCTOR(ctype, valuetype)                                                                             \
+	Struct_Element(ctype* data, const char* field_name) : ptr(data), unpack(nullptr), kind(valuetype), name(field_name) \
+	{                                                                                                                  \
+		unpack = [](Value v, void *ptr, Value::KIND type) { return mn::json::unpack<ctype>(v, (ctype *)ptr, type); };   \
+	}
+
+		SMART_CONSTRUCTOR(bool, Value::KIND_BOOL)
+		SMART_CONSTRUCTOR(int8_t, Value::KIND_NUMBER)
+		SMART_CONSTRUCTOR(int16_t, Value::KIND_NUMBER)
+		SMART_CONSTRUCTOR(int32_t, Value::KIND_NUMBER)
+		SMART_CONSTRUCTOR(int64_t, Value::KIND_NUMBER)
+		SMART_CONSTRUCTOR(uint8_t, Value::KIND_NUMBER)
+		SMART_CONSTRUCTOR(uint16_t, Value::KIND_NUMBER)
+		SMART_CONSTRUCTOR(uint32_t, Value::KIND_NUMBER)
+		SMART_CONSTRUCTOR(uint64_t, Value::KIND_NUMBER)
+		#if OS_MACOS
+		SMART_CONSTRUCTOR(size_t, Value::KIND_NUMBER)
+		#endif
+		SMART_CONSTRUCTOR(float, Value::KIND_NUMBER)
+		SMART_CONSTRUCTOR(double, Value::KIND_NUMBER)
+		SMART_CONSTRUCTOR(const char *, Value::KIND_STRING)
+		SMART_CONSTRUCTOR(Str, Value::KIND_STRING)
+#undef SMART_CONSTRUCTOR
+	};
+
+	// given a list of pointers to data and their json path, we unpack the data
+	// into the given pointers and return error in case we don't find any
+	// example usage:
+	// if you have the following json value:
+	// {"package": "sabre", "uniform": {"name": camera, "size": 16}}
+	// you can unpack it like this
+	// auto err = mn::json::unpack(value, {
+	// 	{&package_name, "package"},
+	// 	{&uniform_name, "uniform.name"},
+	// 	{&uniform_size, "uniform.size"}
+	// });
+	inline static Err
+	unpack(Value v, std::initializer_list<Struct_Element> elements)
+	{
+		if (v.kind == Value::KIND_NULL)
+			return Err{"value is null"};
+
+		if (v.kind != Value::KIND_OBJECT)
+			return Err{"value is not a struct"};
+
+		auto values = buf_with_allocator<Value>(memory::tmp());
+		buf_resize(values, elements.size());
+
+		auto elements_it = elements.begin();
+		for (size_t i = 0; i < elements.size(); ++i)
+		{
+			const auto &e	 = *elements_it;
+			auto path		 = str_split(e.name, ".", true);
+			Value field = v;
+			for (auto field_name : path)
+				if (auto subfield = value_object_lookup(field, field_name))
+					field = *subfield;
+				else
+					return Err{"struct doesn't have a '{}' field", e.name};
+			values[i] = field;
+			++elements_it;
+		}
+
+		elements_it = elements.begin();
+		for (size_t i = 0; i < elements.size(); ++i)
+		{
+			const auto &e = *elements_it;
+			if (e.unpack)
+			{
+				if (auto err = e.unpack(values[i], e.ptr, e.kind); err)
+					return err;
+			}
+			else
+			{
+				if (values[i].kind != e.kind)
+					return Err{"dyno type mismatch in field '{}'", e.name};
+			}
+			++elements_it;
+		}
+
+		return Err{};
 	}
 }
 
