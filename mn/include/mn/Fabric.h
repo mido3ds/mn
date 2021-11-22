@@ -534,7 +534,7 @@ namespace mn
 		waitgroup_add(self._internal_future->_wg, 1);
 
 		Fabric_Task entry{};
-		entry.as_oneshot.task = Task<void()>::make([=]{
+		entry.as_oneshot.task = Task<void()>::make([=]() mutable {
 			if constexpr (std::is_same_v<return_type, void>)
 				fn(args...);
 			else
@@ -559,7 +559,7 @@ namespace mn
 		waitgroup_add(self._internal_future->_wg, 1);
 
 		Fabric_Task entry{};
-		entry.as_oneshot.task = Task<void()>::make([=]{
+		entry.as_oneshot.task = Task<void()>::make([=]() mutable {
 			if constexpr (std::is_same_v<return_type, void>)
 				fn(args...);
 			else
