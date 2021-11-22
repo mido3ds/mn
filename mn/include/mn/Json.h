@@ -501,9 +501,6 @@ namespace mn::json
 		if (v.kind == Value::KIND_NULL)
 			return Err{"value is null"};
 
-		if (v.kind != Value::KIND_OBJECT)
-			return Err{"value is not a struct"};
-
 		auto values = buf_with_allocator<Value>(memory::tmp());
 		buf_resize(values, elements.size());
 
@@ -512,12 +509,19 @@ namespace mn::json
 		{
 			const auto &e	 = *elements_it;
 			auto path		 = str_split(e.name, ".", true);
+
 			Value field = v;
 			for (auto field_name : path)
+			{
+				if (field.kind != Value::KIND_OBJECT)
+					return mn::Err{"accessing a non-object value while traversing key '{}'", field_name};
+
 				if (auto subfield = value_object_lookup(field, field_name))
 					field = *subfield;
 				else
 					return Err{"struct doesn't have a '{}' field", e.name};
+			}
+
 			values[i] = field;
 			++elements_it;
 		}

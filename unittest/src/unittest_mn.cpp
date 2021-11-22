@@ -1441,10 +1441,12 @@ TEST_CASE("json unpack")
 	mn::json::value_object_insert(uniform, "size", mn::json::value_number_new(16));
 
 	mn::json::value_object_insert(root, "uniform", uniform);
+	mn::json::value_object_insert(root, "leaf", mn::json::Value{});
 
 	const char* package_name = "";
 	const char* uniform_name = "";
 	size_t uniform_size = 0;
+	int sink = 0;
 
 	auto err = mn::json::unpack(root, {
 		{&package_name, "package"},
@@ -1461,6 +1463,9 @@ TEST_CASE("json unpack")
 		{&uniform_name, "uniform.name"},
 		{&uniform_size, "uniform.size"}
 	});
+	CHECK(should_err == true);
+
+	should_err = mn::json::unpack(root, {{&sink, "leaf.non_existing_key.another_non_existing_key"}});
 	CHECK(should_err == true);
 
 	mn::json::value_free(root);
