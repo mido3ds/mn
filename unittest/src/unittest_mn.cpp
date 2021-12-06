@@ -617,7 +617,7 @@ TEST_CASE("Rune")
 	CHECK(mn::rune_lower('A') == 'a');
 	CHECK(mn::rune_lower('a') == 'a');
 	#if defined(OS_WINDOWS)
-		CHECK(mn::rune_lower('\u0645') == '\u0645');
+		CHECK(mn::rune_lower(U'\u0645') == U'\u0645');
 	#elif defined(OS_LINUX)
 		CHECK(mn::rune_lower('U+0645') == 'U+0645');
 	#elif defined(OS_MACOS)
