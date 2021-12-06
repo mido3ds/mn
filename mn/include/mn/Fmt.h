@@ -97,7 +97,8 @@ namespace mn
 	strf(Str out, const char* format_str, const Args& ... args)
 	{
 		fmt::memory_buffer buf;
-		fmt::format_to(buf, format_str, args...);
+		// TODO: maybe implement back inserter iterator for stream or string
+		fmt::format_to(std::back_inserter(buf), format_str, args...);
 		str_block_push(out, Block{buf.data(), buf.size()});
 		return out;
 	}
@@ -132,7 +133,8 @@ namespace mn
 	print_to(Stream stream, const char* format_str, const Args& ... args)
 	{
 		fmt::memory_buffer buf;
-		fmt::format_to(buf, format_str, args...);
+		// TODO: maybe implement back inserter iterator for stream or string
+		fmt::format_to(std::back_inserter(buf), format_str, args...);
 		return stream_write(stream, Block{buf.data(), buf.size()});
 	}
 
