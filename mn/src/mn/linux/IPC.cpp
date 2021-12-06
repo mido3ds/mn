@@ -199,7 +199,7 @@ namespace mn::ipc
 
 		{
 			worker_block_ahead();
-			mn_defer(worker_block_clear());
+			mn_defer{worker_block_clear();};
 
 			int ready = poll(&pfd_read, 1, milliseconds);
 			if(ready == 0)

@@ -265,7 +265,7 @@ namespace mn
 		auto thread_id = GetCurrentThreadId();
 
 		EnterCriticalSection(&self->mtx.cs);
-		mn_defer(LeaveCriticalSection(&self->mtx.cs));
+		mn_defer{LeaveCriticalSection(&self->mtx.cs);};
 
 		map_insert(self->thread_mutex_block, thread_id, mtx);
 
@@ -309,7 +309,7 @@ namespace mn
 		auto thread_id = GetCurrentThreadId();
 
 		EnterCriticalSection(&self->mtx.cs);
-		mn_defer(LeaveCriticalSection(&self->mtx.cs));
+		mn_defer{LeaveCriticalSection(&self->mtx.cs);};
 
 		if (auto it = map_lookup(self->mutex_thread_owner, mtx))
 		{
@@ -329,7 +329,7 @@ namespace mn
 		auto thread_id = GetCurrentThreadId();
 
 		EnterCriticalSection(&self->mtx.cs);
-		mn_defer(LeaveCriticalSection(&self->mtx.cs));
+		mn_defer{LeaveCriticalSection(&self->mtx.cs);};
 
 		map_remove(self->thread_mutex_block, thread_id);
 		if (auto it = map_lookup(self->mutex_thread_owner, mtx))
@@ -353,7 +353,7 @@ namespace mn
 		auto thread_id = GetCurrentThreadId();
 
 		EnterCriticalSection(&self->mtx.cs);
-		mn_defer(LeaveCriticalSection(&self->mtx.cs));
+		mn_defer{LeaveCriticalSection(&self->mtx.cs);};
 
 		auto it = map_lookup(self->mutex_thread_owner, mtx);
 		switch(it->value.kind)
@@ -405,10 +405,10 @@ namespace mn
 	mutex_lock(Mutex self)
 	{
 		auto call_after_lock = _mutex_before_lock(self, self->profile_user_data);
-		mn_defer({
+		mn_defer{
 			if (call_after_lock)
 				_mutex_after_lock(self, self->profile_user_data);
-		});
+		};
 
 		if (TryEnterCriticalSection(&self->cs))
 		{
@@ -488,10 +488,10 @@ namespace mn
 	mutex_read_lock(Mutex_RW self)
 	{
 		auto call_after_lock = _mutex_before_read_lock(self, self->profile_user_data);
-		mn_defer({
+		mn_defer{
 			if (call_after_lock)
 				_mutex_after_read_lock(self, self->profile_user_data);
-		});
+		};
 
 		if (TryAcquireSRWLockShared(&self->lock))
 		{
@@ -518,10 +518,10 @@ namespace mn
 	mutex_write_lock(Mutex_RW self)
 	{
 		auto call_after_lock = _mutex_before_write_lock(self, self->profile_user_data);
-		mn_defer({
+		mn_defer{
 			if (call_after_lock)
 				_mutex_after_write_lock(self, self->profile_user_data);
-		});
+		};
 
 		if (TryAcquireSRWLockExclusive(&self->lock))
 		{
@@ -604,7 +604,7 @@ namespace mn
 			HMODULE kernel = LoadLibrary(L"kernel32.dll");
 			if (kernel != nullptr)
 			{
-				mn_defer(FreeLibrary(kernel));
+				mn_defer{FreeLibrary(kernel);};
 
 				using prototype = HRESULT(*)(HANDLE, PCWSTR);
 				auto set_thread_description = (prototype)GetProcAddress(kernel, "SetThreadDescription");
@@ -612,7 +612,7 @@ namespace mn
 				{
 					int buffer_size = MultiByteToWideChar(CP_UTF8, 0, name, -1, NULL, 0);
 					Block buffer = alloc(buffer_size * sizeof(WCHAR), alignof(WCHAR));
-					mn_defer(free(buffer));
+					mn_defer{free(buffer);};
 					MultiByteToWideChar(CP_UTF8, 0, name, -1, (LPWSTR)buffer.ptr, buffer_size);
 
 					set_thread_description(self->handle, (LPWSTR)buffer.ptr);
@@ -693,7 +693,7 @@ namespace mn
 	cond_var_wait(Cond_Var self, Mutex mtx)
 	{
 		_mutex_after_unlock(mtx, mtx->profile_user_data);
-		mn_defer(_mutex_after_lock(mtx, mtx->profile_user_data));
+		mn_defer{_mutex_after_lock(mtx, mtx->profile_user_data);};
 
 		worker_block_ahead();
 		_deadlock_detector_mutex_unset_owner(mtx);
@@ -706,7 +706,7 @@ namespace mn
 	cond_var_wait_timeout(Cond_Var self, Mutex mtx, uint32_t millis)
 	{
 		_mutex_after_unlock(mtx, mtx->profile_user_data);
-		mn_defer(_mutex_after_lock(mtx, mtx->profile_user_data));
+		mn_defer{_mutex_after_lock(mtx, mtx->profile_user_data);};
 
 		worker_block_ahead();
 		_deadlock_detector_mutex_unset_owner(mtx);
@@ -764,10 +764,10 @@ namespace mn
 	waitgroup_wait(Waitgroup self)
 	{
 		worker_block_ahead();
-		mn_defer(worker_block_clear());
+		mn_defer{worker_block_clear();};
 
 		EnterCriticalSection(&self->cs);
-		mn_defer(LeaveCriticalSection(&self->cs));
+		mn_defer{LeaveCriticalSection(&self->cs);};
 
 		while(self->count > 0)
 			SleepConditionVariableCS(&self->cv, &self->cs, INFINITE);
@@ -781,7 +781,7 @@ namespace mn
 		mn_assert(c > 0);
 
 		EnterCriticalSection(&self->cs);
-		mn_defer(LeaveCriticalSection(&self->cs));
+		mn_defer{LeaveCriticalSection(&self->cs);};
 
 		self->count += c;
 	}
@@ -790,7 +790,7 @@ namespace mn
 	waitgroup_done(Waitgroup self)
 	{
 		EnterCriticalSection(&self->cs);
-		mn_defer(LeaveCriticalSection(&self->cs));
+		mn_defer{LeaveCriticalSection(&self->cs);};
 
 		--self->count;
 		mn_assert(self->count >= 0);
@@ -803,7 +803,7 @@ namespace mn
 	waitgroup_count(Waitgroup self)
 	{
 		EnterCriticalSection(&self->cs);
-		mn_defer(LeaveCriticalSection(&self->cs));
+		mn_defer{LeaveCriticalSection(&self->cs);};
 		return self->count;
 	}
 }

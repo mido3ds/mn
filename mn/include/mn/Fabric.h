@@ -755,7 +755,7 @@ namespace mn
 	chan_send_try(Chan<T> self, const T& v)
 	{
 		mutex_lock(self->mtx);
-		mn_defer(mutex_unlock(self->mtx));
+		mn_defer{mutex_unlock(self->mtx);};
 
 		if (self->r.count < self->limit)
 		{
@@ -771,7 +771,7 @@ namespace mn
 	chan_send(Chan<T> self, const T& v)
 	{
 		chan_ref(self);
-		mn_defer(chan_unref(self));
+		mn_defer{chan_unref(self);};
 
 		mutex_lock(self->mtx);
 		cond_var_wait(self->write_cv, self->mtx, [self] {
@@ -815,7 +815,7 @@ namespace mn
 	chan_recv_try(Chan<T> self)
 	{
 		mutex_lock(self->mtx);
-		mn_defer(mutex_unlock(self->mtx));
+		mn_defer{mutex_unlock(self->mtx);};
 
 		if (self->r.count > 0)
 		{
@@ -832,7 +832,7 @@ namespace mn
 	chan_recv(Chan<T> self)
 	{
 		chan_ref(self);
-		mn_defer(chan_unref(self));
+		mn_defer{chan_unref(self);};
 
 		mutex_lock(self->mtx);
 		cond_var_wait(self->read_cv, self->mtx, [self] {
@@ -1053,10 +1053,10 @@ namespace mn
 	{
 		auto tmp = allocator_arena_new();
 		auto old = _memory_tmp_set(tmp);
-		mn_defer({
+		mn_defer{
 			_memory_tmp_set(old);
 			allocator_free(tmp);
-		});
+		};
 		for (size_t global_z = 0; global_z < workgroup_num.z; ++global_z)
 		{
 			for (size_t global_y = 0; global_y < workgroup_num.y; ++global_y)

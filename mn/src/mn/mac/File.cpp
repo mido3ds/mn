@@ -408,7 +408,7 @@ namespace mn
 		auto file = file_open(filename, io_mode, open_mode, share_mode);
 		if (file == nullptr)
 			return nullptr;
-		mn_defer(if (file) file_close(file));
+		mn_defer{if (file) file_close(file);};
 
 		auto res = file_mmap(file, offset, size, io_mode);
 		if (res == nullptr)

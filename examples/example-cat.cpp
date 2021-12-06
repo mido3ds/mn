@@ -20,7 +20,7 @@ main(int argc, char **argv)
 
 		// load file content
 		auto content = mn::file_content_str(argv[i]);
-		mn_defer(mn::str_free(content));
+		mn_defer{mn::str_free(content);};
 
 		// print it
 		mn::print("{}", content);

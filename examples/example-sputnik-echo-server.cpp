@@ -8,10 +8,11 @@ void
 serve_client(mn::ipc::Sputnik client)
 {
 	auto data = mn::str_new();
-	mn_defer({
+	mn_defer
+	{
 		mn::str_free(data);
 		mn::ipc::sputnik_free(client);
-	});
+	};
 	size_t read_bytes = 0, write_bytes = 0;
 
 	do
@@ -30,9 +31,7 @@ serve_client(mn::ipc::Sputnik client)
 void
 serve_client_msg(mn::ipc::Sputnik client)
 {
-	mn_defer({
-		mn::ipc::sputnik_free(client);
-	});
+	mn_defer{mn::ipc::sputnik_free(client);};
 
 	do
 	{
@@ -48,14 +47,14 @@ int
 main()
 {
 	auto f = mn::fabric_new({});
-	mn_defer(mn::fabric_free(f));
+	mn_defer{mn::fabric_free(f);};
 
 	auto server = mn::ipc::sputnik_new("sputnik");
 	mn_assert_msg(server, "sputnik_new failed");
-	mn_defer({
+	mn_defer{
 		mn::ipc::sputnik_disconnect(server);
 		mn::ipc::sputnik_free(server);
-	});
+	};
 
 	while(mn::ipc::sputnik_listen(server))
 	{

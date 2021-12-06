@@ -121,7 +121,7 @@ namespace mn
 				dynamic_buffer = alloc(data.size, alignof(WCHAR));
 				wide_ptr = (WCHAR*)dynamic_buffer.ptr;
 			}
-			mn_defer(free(dynamic_buffer));
+			mn_defer{free(dynamic_buffer);};
 
 			size_t wide_read = (data.size / sizeof(WCHAR)) < (BUFFER_SIZE / 2) ? (data.size / sizeof(WCHAR)) : (BUFFER_SIZE / 2);
 			DWORD read_chars_count = 0;
@@ -158,8 +158,7 @@ namespace mn
 			}
 			else
 			{
-				auto os_str = _to_os_encoding(data, allocator_top());
-				mn_defer(free(os_str));
+				auto os_str = _to_os_encoding(data, memory::tmp());
 				WriteConsoleW(winos_handle, os_str.ptr, (DWORD)(os_str.size / sizeof(WCHAR)), &bytes_written, NULL);
 			}
 		}
@@ -305,8 +304,7 @@ namespace mn
 			break;
 		}
 
-		Block os_str = to_os_encoding(filename, allocator_top());
-		mn_defer(mn::free(os_str));
+		Block os_str = to_os_encoding(filename, memory::tmp());
 
 		LPWSTR win_filename = (LPWSTR)os_str.ptr;
 		HANDLE windows_handle = CreateFile(
@@ -542,7 +540,7 @@ namespace mn
 
 		if (file_map == INVALID_HANDLE_VALUE)
 			return nullptr;
-		mn_defer(if (file_map != INVALID_HANDLE_VALUE) CloseHandle(file_map));
+		mn_defer{if (file_map != INVALID_HANDLE_VALUE) CloseHandle(file_map);};
 
 		auto ptr = MapViewOfFile(
 			file_map,
@@ -570,7 +568,7 @@ namespace mn
 		auto file = file_open(filename, io_mode, open_mode, share_mode);
 		if (file == nullptr)
 			return nullptr;
-		mn_defer(if (file) file_close(file));
+		mn_defer{if (file) file_close(file);};
 
 		auto res = file_mmap(file, offset, size, io_mode);
 		if (res == nullptr)

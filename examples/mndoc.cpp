@@ -43,7 +43,7 @@ inline static void
 folder_list_headers(const mn::Str& path, mn::Buf<mn::Str>& out)
 {
 	auto entries = mn::path_entries(path);
-	mn_defer(destruct(entries));
+	mn_defer{destruct(entries);};
 
 	for(auto entry: entries)
 	{
@@ -72,13 +72,13 @@ header_doc(const mn::Str& path, mn::Buf<Doc_Element>& out)
 		mn::printerr("could not open header file '{}'", path);
 		return;
 	}
-	mn_defer(mn::file_close(f));
+	mn_defer{mn::file_close(f);};
 
 	auto r = mn::reader_new(f);
-	mn_defer(mn::reader_free(r));
+	mn_defer{mn::reader_free(r);};
 
 	auto element = doc_element_new();
-	mn_defer(doc_element_free(element));
+	mn_defer{doc_element_free(element);};
 
 	auto line = mn::str_tmp();
 	size_t paren_count = 0;
@@ -118,7 +118,7 @@ int
 main(int argc, char **argv)
 {
 	auto headers = mn::buf_new<mn::Str>();
-	mn_defer(destruct(headers));
+	mn_defer{destruct(headers);};
 
 	for(int i = 1; i < argc; ++i)
 	{
@@ -131,7 +131,7 @@ main(int argc, char **argv)
 	mn::memory::tmp()->clear_all();
 
 	auto docs = mn::buf_new<Doc_Element>();
-	mn_defer(destruct(docs));
+	mn_defer{destruct(docs);};
 
 	for (auto header : headers)
 		header_doc(header, docs);

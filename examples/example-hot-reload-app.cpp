@@ -15,7 +15,7 @@ int main(int argc, char** argv)
 
 	RAD_Settings settings{};
 	auto rad = rad_new(settings);
-	mn_defer(rad_free(rad));
+	mn_defer{rad_free(rad);};
 
 	// load
 	if(rad_register(rad, HOT_RELOAD_LIB_NAME, "hot_reload_lib.dll") == false)

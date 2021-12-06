@@ -272,7 +272,7 @@ namespace mn
 		auto thread_id = gettid();
 
 		pthread_mutex_lock(&self->mtx);
-		mn_defer(pthread_mutex_unlock(&self->mtx));
+		mn_defer{pthread_mutex_unlock(&self->mtx);};
 
 		map_insert(self->thread_mutex_block, thread_id, mtx);
 
@@ -316,7 +316,7 @@ namespace mn
 		auto thread_id = gettid();
 
 		pthread_mutex_lock(&self->mtx);
-		mn_defer(pthread_mutex_unlock(&self->mtx));
+		mn_defer{pthread_mutex_unlock(&self->mtx);};
 
 		if (auto it = map_lookup(self->mutex_thread_owner, mtx))
 		{
@@ -336,7 +336,7 @@ namespace mn
 		auto thread_id = gettid();
 
 		pthread_mutex_lock(&self->mtx);
-		mn_defer(pthread_mutex_unlock(&self->mtx));
+		mn_defer{pthread_mutex_unlock(&self->mtx);};
 
 		map_remove(self->thread_mutex_block, thread_id);
 		if (auto it = map_lookup(self->mutex_thread_owner, mtx))
@@ -360,7 +360,7 @@ namespace mn
 		auto thread_id = gettid();
 
 		pthread_mutex_lock(&self->mtx);
-		mn_defer(pthread_mutex_unlock(&self->mtx));
+		mn_defer{pthread_mutex_unlock(&self->mtx);};
 
 		auto it = map_lookup(self->mutex_thread_owner, mtx);
 		switch(it->value.kind)
@@ -416,10 +416,10 @@ namespace mn
 	mutex_lock(Mutex self)
 	{
 		auto call_after_lock = _mutex_before_lock(self, self->profile_user_data);
-		mn_defer({
+		mn_defer{
 			if (call_after_lock)
 				_mutex_after_lock(self, self->profile_user_data);
-		});
+		};
 
 		if (pthread_mutex_trylock(&self->handle) == 0)
 		{
@@ -502,10 +502,10 @@ namespace mn
 	mutex_read_lock(Mutex_RW self)
 	{
 		auto call_after_lock = _mutex_before_read_lock(self, self->profile_user_data);
-		mn_defer({
+		mn_defer{
 			if (call_after_lock)
 				_mutex_after_read_lock(self, self->profile_user_data);
-		});
+		};
 
 		if (pthread_rwlock_tryrdlock(&self->lock) == 0)
 		{
@@ -532,10 +532,10 @@ namespace mn
 	mutex_write_lock(Mutex_RW self)
 	{
 		auto call_after_lock = _mutex_before_write_lock(self, self->profile_user_data);
-		mn_defer({
+		mn_defer{
 			if (call_after_lock)
 				_mutex_after_write_lock(self, self->profile_user_data);
-		});
+		};
 
 		if (pthread_rwlock_trywrlock(&self->lock) == 0)
 		{
@@ -734,10 +734,10 @@ namespace mn
 	waitgroup_wait(Waitgroup self)
 	{
 		worker_block_ahead();
-		mn_defer(worker_block_clear());
+		mn_defer{worker_block_clear();};
 
 		pthread_mutex_lock(&self->mtx);
-		mn_defer(pthread_mutex_unlock(&self->mtx));
+		mn_defer{pthread_mutex_unlock(&self->mtx);};
 
 		while(self->count > 0)
 			pthread_cond_wait(&self->cv, &self->mtx);
@@ -751,7 +751,7 @@ namespace mn
 		mn_assert(c > 0);
 
 		pthread_mutex_lock(&self->mtx);
-		mn_defer(pthread_mutex_unlock(&self->mtx));
+		mn_defer{pthread_mutex_unlock(&self->mtx);};
 
 		self->count += c;
 	}
@@ -760,7 +760,7 @@ namespace mn
 	waitgroup_done(Waitgroup self)
 	{
 		pthread_mutex_lock(&self->mtx);
-		mn_defer(pthread_mutex_unlock(&self->mtx));
+		mn_defer{pthread_mutex_unlock(&self->mtx);};
 
 		--self->count;
 		mn_assert(self->count >= 0);
@@ -773,7 +773,7 @@ namespace mn
 	waitgroup_count(Waitgroup self)
 	{
 		pthread_mutex_lock(&self->mtx);
-		mn_defer(pthread_mutex_unlock(&self->mtx));
+		mn_defer{pthread_mutex_unlock(&self->mtx);};
 
 		return self->count;
 	}

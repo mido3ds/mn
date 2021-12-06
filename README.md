@@ -517,7 +517,7 @@ You'll notice from the above code that we put `buf_new` at the start and `buf_fr
 ```C++
 {
     auto numbers = mn::buf_with_count<int>(10);
-    mn_defer(mn::buf_free(numbers));
+    mn_defer{mn::buf_free(numbers);};
 
     // do stuff with numbers
     
@@ -657,7 +657,7 @@ main()
 {
 	// create tmp string
 	auto line	 = mn::str_new();
-	mn_defer(mn::str_free(line));
+	mn_defer{mn::str_free(line);};
 
 	// while we can read line
 	while (mn::readln(line))
@@ -711,7 +711,7 @@ main(int argc, char **argv)
 
 		// load file content
 		auto content = mn::file_content_str(argv[i]);
-		mn_defer(mn::str_free(content));
+		mn_defer{mn::str_free(content);};
 
 		// print it
 		mn::print("{}", content);
@@ -736,10 +736,10 @@ main()
 {
 	// create tmp string
 	auto line	 = mn::str_new();
-	mn_defer(mn::str_free(line));
+	mn_defer{mn::str_free(line);};
 
 	auto freq = mn::map_new<mn::Str, size_t>();
-	mn_defer(destruct(freq));
+	mn_defer{destruct(freq);};
 
 	// while we can read line
 	while (mn::readln(line))

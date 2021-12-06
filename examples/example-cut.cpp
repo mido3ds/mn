@@ -7,7 +7,7 @@ main()
 {
 	// create tmp string
 	auto line	 = mn::str_new();
-	mn_defer(mn::str_free(line));
+	mn_defer{mn::str_free(line);};
 
 	// while we can read line
 	while (mn::readln(line))

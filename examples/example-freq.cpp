@@ -8,10 +8,10 @@ main()
 {
 	// create tmp string
 	auto line	 = mn::str_new();
-	mn_defer(mn::str_free(line));
+	mn_defer{mn::str_free(line);};
 
 	auto freq = mn::map_new<mn::Str, size_t>();
-	mn_defer(destruct(freq));
+	mn_defer{destruct(freq);};
 
 	// while we can read line
 	while (mn::readln(line))

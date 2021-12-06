@@ -291,7 +291,7 @@ namespace mn
 	file_name(const Str& path, Allocator allocator)
 	{
 		Str path_copy = str_clone(path);
-		mn_defer(str_free(path_copy));
+		mn_defer{str_free(path_copy);};
 
 		char* filename = ::basename(path_copy.ptr);
 		return str_from_c(filename, allocator);
@@ -305,7 +305,7 @@ namespace mn
 			_base = path_normalize(str_clone(base));
 		else
 			_base = folder_tmp();
-		mn_defer(str_free(_base));
+		mn_defer{str_free(_base);};
 
 		Str res = str_clone(_base, allocator);
 		while (true)
@@ -336,10 +336,10 @@ namespace mn
 	folder_remove(const char* path)
 	{
 		Buf<Path_Entry> files = path_entries(path);
-		mn_defer(destruct(files));
+		mn_defer{destruct(files);};
 
 		auto tmp_path = str_new();
-		mn_defer(str_free(tmp_path));
+		mn_defer{str_free(tmp_path);};
 
 		for(size_t i = 0; i < files.count; ++i)
 		{
@@ -373,7 +373,7 @@ namespace mn
 	folder_copy(const char* src, const char* dst)
 	{
 		Buf<Path_Entry> files = path_entries(src);
-		mn_defer(destruct(files));
+		mn_defer{destruct(files);};
 
 		//create the folder no matter what
 		if(folder_make(dst) == false)
@@ -385,10 +385,10 @@ namespace mn
 
 		size_t i = 0;
 		auto tmp_src = str_new();
-		mn_defer(str_free(tmp_src));
+		mn_defer{str_free(tmp_src);};
 
 		auto tmp_dst = str_new();
-		mn_defer(str_free(tmp_dst));
+		mn_defer{str_free(tmp_dst);};
 
 		for(i = 0; i < files.count; ++i)
 		{

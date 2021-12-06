@@ -17,7 +17,7 @@ namespace mn::ipc
 	mutex_new(const Str& name)
 	{
 		auto os_str = to_os_encoding(name, allocator_top());
-		mn_defer(mn::free(os_str));
+		mn_defer{mn::free(os_str);};
 
 		auto handle = CreateMutex(0, false, (LPCWSTR)os_str.ptr);
 		if (handle == INVALID_HANDLE_VALUE)
@@ -160,10 +160,10 @@ namespace mn::ipc
 		{
 			OVERLAPPED overlapped{};
 			overlapped.hEvent = CreateEvent(NULL, TRUE, FALSE, NULL);
-			mn_defer(CloseHandle(overlapped.hEvent));
+			mn_defer{CloseHandle(overlapped.hEvent);};
 
 			worker_block_ahead();
-			mn_defer(worker_block_clear());
+			mn_defer{worker_block_clear();};
 
 			auto connected = ConnectNamedPipe((HANDLE)self->winos_named_pipe, &overlapped);
 			auto last_error = GetLastError();

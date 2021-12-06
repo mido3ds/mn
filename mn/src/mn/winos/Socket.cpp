@@ -150,11 +150,11 @@ namespace mn
 		_socket_type_to_os(self->type, hints.ai_socktype, hints.ai_protocol);
 
 		worker_block_ahead();
-		mn_defer(worker_block_clear());
+		mn_defer{worker_block_clear();};
 		int res = ::getaddrinfo(address.ptr, port.ptr, &hints, &info);
 		if (res != 0)
 			return false;
-		mn_defer(::freeaddrinfo(info));
+		mn_defer{::freeaddrinfo(info);};
 
 		for(auto it = info; it; it = it->ai_next)
 		{
@@ -217,7 +217,7 @@ namespace mn
 
 		{
 			worker_block_ahead();
-			mn_defer(worker_block_clear());
+			mn_defer{worker_block_clear();};
 
 			int ready = WSAPoll(&pfd_read, 1, milliseconds);
 			if (ready == 0)
@@ -262,7 +262,7 @@ namespace mn
 			milliseconds = INT(timeout.milliseconds);
 
 		worker_block_ahead();
-		mn_defer(worker_block_clear());
+		mn_defer{worker_block_clear();};
 		int ready = ::WSAPoll(&pfd_read, 1, milliseconds);
 		if (ready > 0)
 		{

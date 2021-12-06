@@ -131,7 +131,7 @@ namespace mn
 
 		auto B = buf_top(compiler.operands_stack);
 		buf_pop(compiler.operands_stack);
-		mn_defer(regex_free(B));
+		mn_defer{regex_free(B);};
 
 		auto& A = buf_top(compiler.operands_stack);
 		push_program(A, B);
@@ -147,11 +147,11 @@ namespace mn
 
 		auto B = buf_top(compiler.operands_stack);
 		buf_pop(compiler.operands_stack);
-		mn_defer(regex_free(B));
+		mn_defer{regex_free(B);};
 
 		auto A = buf_top(compiler.operands_stack);
 		buf_pop(compiler.operands_stack);
-		mn_defer(regex_free(A));
+		mn_defer{regex_free(A);};
 
 		auto C = regex_new();
 		buf_reserve(C.bytes, B.bytes.count + A.bytes.count + 14);
@@ -176,7 +176,7 @@ namespace mn
 
 		auto A = buf_top(compiler.operands_stack);
 		buf_pop(compiler.operands_stack);
-		mn_defer(regex_free(A));
+		mn_defer{regex_free(A);};
 
 		auto C = regex_new();
 		buf_reserve(C.bytes, A.bytes.count + 14);
@@ -232,7 +232,7 @@ namespace mn
 
 		auto A = buf_top(compiler.operands_stack);
 		buf_pop(compiler.operands_stack);
-		mn_defer(regex_free(A));
+		mn_defer{regex_free(A);};
 
 		auto C = regex_new();
 		buf_reserve(C.bytes, A.bytes.count + 9); // +9 for the split instruction
@@ -591,7 +591,7 @@ namespace mn
 	regex_compile(Regex_Compile_Unit unit)
 	{
 		auto compiler = regex_compiler_new(unit.str);
-		mn_defer(regex_compiler_free(compiler));
+		mn_defer{regex_compiler_free(compiler);};
 
 		while (regex_compiler_eof(compiler) == false)
 		{
@@ -609,7 +609,7 @@ namespace mn
 
 		auto last_fragment = buf_top(compiler.operands_stack);
 		buf_pop(compiler.operands_stack);
-		mn_defer(regex_free(last_fragment));
+		mn_defer{regex_free(last_fragment);};
 		if (unit.enable_payload)
 		{
 			push_op(last_fragment, RGX_OP_MATCH2);

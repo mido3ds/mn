@@ -51,7 +51,7 @@ RAD*
 rad_new(RAD_Settings settings)
 {
 	mn::allocator_push(mn::memory::clib());
-	mn_defer(mn::allocator_pop());
+	mn_defer{mn::allocator_pop();};
 
 	auto self = mn::alloc<RAD>();
 	self->mtx = mn_mutex_new_with_srcloc("RAD Mutex");
@@ -65,7 +65,7 @@ void
 rad_free(RAD* self)
 {
 	mn::allocator_push(mn::memory::clib());
-	mn_defer(mn::allocator_pop());
+	mn_defer{mn::allocator_pop();};
 
 	for (auto& [name, module]: self->modules)
 		_rad_module_free(self, module);
@@ -79,7 +79,7 @@ bool
 rad_register(RAD* self, const char* name, const char* filepath)
 {
 	mn::allocator_push(mn::memory::clib());
-	mn_defer(mn::allocator_pop());
+	mn_defer{mn::allocator_pop();};
 
 	auto os_filepath = mn::str_new();
 	#if OS_WINDOWS
@@ -98,7 +98,7 @@ rad_register(RAD* self, const char* name, const char* filepath)
 		else
 			os_filepath = mn::strf("{}.dylib", filepath);
 	#endif
-	mn_defer(mn::str_free(os_filepath));
+	mn_defer{mn::str_free(os_filepath);};
 
 	if (mn::path_is_file(os_filepath) == false)
 		return false;
@@ -128,10 +128,10 @@ rad_register(RAD* self, const char* name, const char* filepath)
 		#if OS_LINUX
 		auto os_filepath2 = mn::strf("./{}", os_filepath);
 		auto loaded_filepath2 = mn::strf("./{}", loaded_filepath);
-		mn_defer({
+		mn_defer{
 			mn::str_free(os_filepath2);
 			mn::str_free(loaded_filepath2);
-		});
+		};
 		library = mn::library_open(loaded_filepath2);
 		if (library == nullptr)
 			return false;
@@ -165,7 +165,7 @@ rad_register(RAD* self, const char* name, const char* filepath)
 	module.load_counter = 0;
 	{
 		mn::mutex_lock(self->mtx);
-		mn_defer(mn::mutex_unlock(self->mtx));
+		mn_defer{mn::mutex_unlock(self->mtx);};
 
 		if (auto it = mn::map_lookup(self->modules, module.name))
 		{
@@ -187,7 +187,7 @@ void*
 rad_ptr(RAD* self, const char* name)
 {
 	mn::mutex_lock(self->mtx);
-	mn_defer(mn::mutex_unlock(self->mtx));
+	mn_defer{mn::mutex_unlock(self->mtx);};
 
 	if (auto it = mn::map_lookup(self->modules, mn::str_lit(name)))
 		return it->value.api;
@@ -201,10 +201,10 @@ rad_update(RAD* self)
 		return false;
 
 	mn::allocator_push(mn::memory::clib());
-	mn_defer(mn::allocator_pop());
+	mn_defer{mn::allocator_pop();};
 
 	mn::mutex_lock(self->mtx);
-	mn_defer(mn::mutex_unlock(self->mtx));
+	mn_defer{mn::mutex_unlock(self->mtx);};
 
 	// hey hey trying to update
 	bool overall_result = true;

@@ -31,10 +31,10 @@ main()
 {
 	auto client = mn::ipc::sputnik_connect("sputnik");
 	mn_assert_msg(client, "sputnik_connect failed");
-	mn_defer(mn::ipc::sputnik_free(client));
+	mn_defer{mn::ipc::sputnik_free(client);};
 
 	auto line = mn::str_new();
-	mn_defer(mn::str_free(line));
+	mn_defer{mn::str_free(line);};
 	size_t read_bytes = 0, write_bytes = 0;
 	do
 	{

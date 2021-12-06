@@ -79,7 +79,7 @@ namespace mn
 				Fabric_Task job{};
 				{
 					mutex_lock(self->mtx);
-					mn_defer(mutex_unlock(self->mtx));
+					mn_defer{mutex_unlock(self->mtx);};
 
 					if (self->job_q.count == 0)
 					{
@@ -116,7 +116,7 @@ namespace mn
 			else if (state == IWorker::STATE_PAUSED)
 			{
 				mutex_lock(self->mtx);
-				mn_defer(mutex_unlock(self->mtx));
+				mn_defer{mutex_unlock(self->mtx);};
 
 				if (self->atomic_state.load() == IWorker::STATE_PAUSED)
 				{
@@ -144,7 +144,7 @@ namespace mn
 	_worker_stop(Worker self)
 	{
 		mutex_lock(self->mtx);
-		mn_defer(mutex_unlock(self->mtx));
+		mn_defer{mutex_unlock(self->mtx);};
 
 		self->atomic_state = IWorker::STATE_STOP_REQUEST;
 		cond_var_notify(self->cv);
@@ -154,7 +154,7 @@ namespace mn
 	_worker_pause(Worker self)
 	{
 		mutex_lock(self->mtx);
-		mn_defer(mutex_unlock(self->mtx));
+		mn_defer{mutex_unlock(self->mtx);};
 
 		mn_assert(self->atomic_state == IWorker::STATE_RUNNING);
 
@@ -166,7 +166,7 @@ namespace mn
 	_worker_resume(Worker self)
 	{
 		mutex_lock(self->mtx);
-		mn_defer(mutex_unlock(self->mtx));
+		mn_defer{mutex_unlock(self->mtx);};
 
 		mn_assert(self->atomic_state == IWorker::STATE_PAUSED);
 
@@ -242,7 +242,7 @@ namespace mn
 			Ring<Fabric_Task> job_q{};
 			{
 				mutex_lock(blocking_worker->mtx);
-				mn_defer(mutex_unlock(blocking_worker->mtx));
+				mn_defer{mutex_unlock(blocking_worker->mtx);};
 
 				job_q = blocking_worker->job_q;
 				blocking_worker->job_q = ring_new<Fabric_Task>();
@@ -250,7 +250,7 @@ namespace mn
 
 			{
 				mutex_lock(self->mtx);
-				mn_defer(mutex_unlock(self->mtx));
+				mn_defer{mutex_unlock(self->mtx);};
 
 				// find a suitable worker
 				if (self->ready_side_workers.count > 0)
@@ -316,7 +316,7 @@ namespace mn
 			Ring<Fabric_Task> job_q{};
 			{
 				mutex_lock(blocking_worker->mtx);
-				mn_defer(mutex_unlock(blocking_worker->mtx));
+				mn_defer{mutex_unlock(blocking_worker->mtx);};
 
 				job_q = blocking_worker->job_q;
 				blocking_worker->job_q = ring_new<Fabric_Task>();
@@ -324,7 +324,7 @@ namespace mn
 
 			{
 				mutex_lock(self->mtx);
-				mn_defer(mutex_unlock(self->mtx));
+				mn_defer{mutex_unlock(self->mtx);};
 
 				// find a suitable worker
 				if (self->ready_side_workers.count > 0)
@@ -371,17 +371,17 @@ namespace mn
 
 		// workers who exceeded the coop blocking threshold
 		auto blocking_workers = buf_with_capacity<Worker>(self->workers.count);
-		mn_defer(buf_free(blocking_workers));
+		mn_defer{buf_free(blocking_workers);};
 
 		// workers who exceeded the external blocking threshold
 		auto long_running_workers = buf_with_capacity<Worker>(self->workers.count);
-		mn_defer(buf_free(long_running_workers));
+		mn_defer{buf_free(long_running_workers);};
 
 		auto dead_workers = buf_with_capacity<Worker>(self->workers.count);
-		mn_defer(destruct(dead_workers));
+		mn_defer{destruct(dead_workers);};
 
 		auto tmp_jobs = buf_new<Fabric_Task>();
-		mn_defer(destruct(tmp_jobs));
+		mn_defer{destruct(tmp_jobs);};
 
 		auto timeslice = self->settings.coop_blocking_threshold_in_ms;
 		if (timeslice > self->settings.external_blocking_threshold_in_ms)
@@ -409,7 +409,7 @@ namespace mn
 
 			{
 				mutex_lock(self->mtx);
-				mn_defer(mutex_unlock(self->mtx));
+				mn_defer{mutex_unlock(self->mtx);};
 
 				if (self->atomic_available_jobs.load() == 0 &&
 					self->sleepy_side_workers.count == 0)
@@ -440,7 +440,7 @@ namespace mn
 				auto worker = self->workers[i];
 
 				mutex_lock(worker->mtx);
-				mn_defer(mutex_unlock(worker->mtx));
+				mn_defer{mutex_unlock(worker->mtx);};
 
 				if (worker->job_q.count > max_jobs)
 				{
@@ -462,7 +462,7 @@ namespace mn
 					auto max_worker = self->workers[busiest_worker];
 
 					mutex_lock(max_worker->mtx);
-					mn_defer(mutex_unlock(max_worker->mtx));
+					mn_defer{mutex_unlock(max_worker->mtx);};
 
 					max_jobs = max_worker->job_q.count;
 					size_t job_steal_count = max_jobs;
@@ -482,7 +482,7 @@ namespace mn
 					auto min_worker = self->workers[idle_worker];
 
 					mutex_lock(min_worker->mtx);
-					mn_defer(mutex_unlock(min_worker->mtx));
+					mn_defer{mutex_unlock(min_worker->mtx);};
 
 					for (auto job: tmp_jobs)
 						ring_push_back(min_worker->job_q, job);
@@ -535,7 +535,7 @@ namespace mn
 	worker_task_do(Worker self, const Fabric_Task& task)
 	{
 		mutex_lock(self->mtx);
-		mn_defer(mutex_unlock(self->mtx));
+		mn_defer{mutex_unlock(self->mtx);};
 
 		ring_push_back(self->job_q, task);
 		cond_var_notify(self->cv);
@@ -545,7 +545,7 @@ namespace mn
 	worker_task_batch_do(Worker self, const Fabric_Task* ptr, size_t count)
 	{
 		mutex_lock(self->mtx);
-		mn_defer(mutex_unlock(self->mtx));
+		mn_defer{mutex_unlock(self->mtx);};
 
 		ring_reserve(self->job_q, count);
 		for (size_t i = 0; i < count; ++i)
@@ -645,7 +645,7 @@ namespace mn
 	{
 		{
 			mutex_lock(self->mtx);
-			mn_defer(mutex_unlock(self->mtx));
+			mn_defer{mutex_unlock(self->mtx);};
 
 			self->is_running = false;
 			cond_var_notify(self->cv);
@@ -688,7 +688,7 @@ namespace mn
 	fabric_task_do(Fabric self, const Fabric_Task& task)
 	{
 		mutex_lock(self->mtx);
-		mn_defer(mutex_unlock(self->mtx));
+		mn_defer{mutex_unlock(self->mtx);};
 
 		auto next_worker = self->next_worker++;
 		next_worker %= self->workers.count;
@@ -704,7 +704,7 @@ namespace mn
 	fabric_task_batch_do(Fabric self, const Fabric_Task* ptr, size_t count)
 	{
 		mutex_lock(self->mtx);
-		mn_defer(mutex_unlock(self->mtx));
+		mn_defer{mutex_unlock(self->mtx);};
 
 		size_t increment = count / self->workers.count;
 		if (increment == 0)
@@ -763,7 +763,7 @@ namespace mn
 	IChan_Stream::read(Block data_out)
 	{
 		chan_stream_ref(this);
-		mn_defer(chan_stream_unref(this));
+		mn_defer{chan_stream_unref(this);};
 
 		mutex_lock(this->mtx);
 		if (this->data_blob.size == 0)
@@ -802,7 +802,7 @@ namespace mn
 	IChan_Stream::write(Block data_in)
 	{
 		chan_stream_ref(this);
-		mn_defer(chan_stream_unref(this));
+		mn_defer{chan_stream_unref(this);};
 
 		// wait until there's available space
 		mutex_lock(this->mtx);

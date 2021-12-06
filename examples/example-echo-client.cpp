@@ -8,14 +8,14 @@ main()
 {
 	auto socket = mn::socket_open(mn::SOCKET_FAMILY_IPV4, mn::SOCKET_TYPE_TCP);
 	mn_assert_msg(socket, "socket_open failed");
-	mn_defer(mn::socket_close(socket));
+	mn_defer{mn::socket_close(socket);};
 
 	bool status = mn::socket_connect(socket, "localhost", "4000");
 	mn_assert_msg(status, "socket_connect failed");
-	mn_defer(mn::socket_disconnect(socket));
+	mn_defer{mn::socket_disconnect(socket);};
 
 	auto line = mn::str_new();
-	mn_defer(mn::str_free(line));
+	mn_defer{mn::str_free(line);};
 	size_t read_bytes = 0, write_bytes = 0;
 	do
 	{

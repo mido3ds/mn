@@ -1118,7 +1118,7 @@ TEST_CASE("zero init map")
 TEST_CASE("uuid uniqueness")
 {
 	auto ids = mn::map_new<mn::UUID, size_t>();
-	mn_defer(mn::map_free(ids));
+	mn_defer{mn::map_free(ids);};
 
 	for (size_t i = 0; i < 1000000; ++i)
 	{
@@ -1474,6 +1474,7 @@ TEST_CASE("json unpack")
 TEST_CASE("map")
 {
 	auto set = mn::set_new<mn::Str>();
+
 	mn::set_reserve(set, 6);
 	mn::set_insert(set, "source"_mnstr);
 	mn::set_insert(set, "jwt"_mnstr);

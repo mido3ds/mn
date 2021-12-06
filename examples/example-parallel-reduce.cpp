@@ -40,11 +40,11 @@ histo3(const mn::Buf<uint8_t>& pixels, mn::Fabric f)
 	mn::buf_resize_fill(histogram, UINT8_MAX + 1, 0);
 
 	auto mtx = mn::mutex_new();
-	mn_defer(mn::mutex_free(mtx));
+	mn_defer{mn::mutex_free(mtx);};
 
 	mn::compute(f, {pixels.count, 1, 1}, {262144, 1, 1}, [&](mn::Compute_Args args){
 		mn::mutex_lock(mtx);
-		mn_defer(mn::mutex_unlock(mtx));
+		mn_defer{mn::mutex_unlock(mtx);};
 
 		for (size_t i = 0; i < args.tile_size.x; ++i)
 			++histogram[pixels[args.global_invocation_id.x + i]];
@@ -62,7 +62,7 @@ histo4(const mn::Buf<uint8_t>& pixels, mn::Fabric f)
 	auto mtxs = mn::buf_with_count<mn::Mutex>(histogram.count);
 	for (size_t i = 0; i < mtxs.count; ++i)
 		mtxs[i] = mn::mutex_new();
-	mn_defer(destruct(mtxs));
+	mn_defer{destruct(mtxs);};
 
 	mn::compute(f, {pixels.count, 1, 1}, {262144, 1, 1}, [&](mn::Compute_Args args){
 		for (size_t i = 0; i < args.tile_size.x; ++i)
@@ -100,7 +100,7 @@ histo6(const mn::Buf<uint8_t>& pixels, mn::Fabric f)
 	mn::buf_resize_fill(histograms, mn::fabric_workers_count(f), mn::buf_with_allocator<int>(mn::memory::tmp()));
 	for (size_t i = 0; i < histograms.count; ++i)
 		mn::buf_resize_fill(histograms[i], (UINT8_MAX + 1) * 2, 0);
-	mn_defer(mn::buf_free(histograms));
+	mn_defer{mn::buf_free(histograms);};
 
 	mn::compute(f, {pixels.count, 1, 1}, {262144, 1, 1}, [&](mn::Compute_Args args){
 		auto histogram = histograms[mn::local_worker_index()];
@@ -124,7 +124,7 @@ histo6(const mn::Buf<uint8_t>& pixels, mn::Fabric f)
 int main()
 {
 	auto f = mn::fabric_new({});
-	mn_defer(mn::fabric_free(f));
+	mn_defer{mn::fabric_free(f);};
 
 	auto pixels = mn::buf_with_allocator<uint8_t>(mn::memory::tmp());
 	mn::buf_resize(pixels, 512ULL * 512ULL * 512ULL);
