@@ -1,6 +1,7 @@
 #pragma once
 
 #include "mn/Exports.h"
+#include "mn/memory/Arena.h"
 
 #include <stddef.h>
 
@@ -9,7 +10,6 @@ namespace mn
 	namespace memory
 	{
 		struct Interface;
-		struct Arena;
 	}
 
 	using Allocator = memory::Interface*;
@@ -24,7 +24,7 @@ namespace mn
 		size_t _allocator_stack_count;
 
 		//tmp allocator
-		memory::Arena* _allocator_tmp;
+		memory::Arena _allocator_tmp = {4ULL * 1024ULL * 1024ULL, memory::clib()};
 
 		//Local tmp stream
 		Reader reader_tmp;
@@ -65,9 +65,6 @@ namespace mn
 		MN_EXPORT Arena*
 		tmp();
 	}
-
-	MN_EXPORT memory::Arena*
-	_memory_tmp_set(memory::Arena* a);
 
 	// returns the current thread's tmp reader, useful for quick parsing of string
 	MN_EXPORT Reader

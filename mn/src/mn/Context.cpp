@@ -30,7 +30,7 @@ namespace mn
 		{
 			#if DEBUG
 				fprintf(stderr, "Temp Allocator %p: %zu bytes used at exit, %zu bytes highwater mark\n",
-					(void*)self._allocator_tmp, self._allocator_tmp->used_mem, self._allocator_tmp->highwater_mem);
+					(void*)&self._allocator_tmp, self._allocator_tmp.used_mem, self._allocator_tmp.highwater_mem);
 			#endif
 
 			context_free(&self);
@@ -64,15 +64,13 @@ namespace mn
 			#endif
 		self->_allocator_stack_count = 1;
 
-		self->_allocator_tmp = alloc_construct_from<memory::Arena>(memory::clib(), 4ULL * 1024ULL * 1024ULL, memory::clib());
-
 		self->reader_tmp = reader_new(nullptr, memory::clib());
 	}
 
 	void
 	context_free(Context* self)
 	{
-		free_destruct_from(memory::clib(), self->_allocator_tmp);
+		self->_allocator_tmp.free_all();
 		reader_free(self->reader_tmp);
 	}
 
@@ -118,17 +116,8 @@ namespace mn
 		Arena*
 		tmp()
 		{
-			return context_local()->_allocator_tmp;
+			return &context_local()->_allocator_tmp;
 		}
-	}
-
-	memory::Arena*
-	_memory_tmp_set(memory::Arena* a)
-	{
-		auto self = context_local();
-		auto res = self->_allocator_tmp;
-		self->_allocator_tmp = a;
-		return res;
 	}
 
 	Reader

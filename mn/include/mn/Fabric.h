@@ -1051,18 +1051,15 @@ namespace mn
 	inline static void
 	_single_threaded_compute(Compute_Dims workgroup_num, Compute_Dims total_size, Compute_Dims tile_size, TFunc&& fn)
 	{
-		auto tmp = allocator_arena_new();
-		auto old = _memory_tmp_set(tmp);
-		mn_defer{
-			_memory_tmp_set(old);
-			allocator_free(tmp);
-		};
 		for (size_t global_z = 0; global_z < workgroup_num.z; ++global_z)
 		{
 			for (size_t global_y = 0; global_y < workgroup_num.y; ++global_y)
 			{
 				for (size_t global_x = 0; global_x < workgroup_num.x; ++global_x)
 				{
+					auto checkpoint = mn::memory::tmp()->checkpoint();
+					mn_defer{mn::memory::tmp()->restore(checkpoint);};
+
 					Compute_Args args{};
 					args.workgroup_size = tile_size;
 					args.workgroup_num = workgroup_num;
@@ -1081,7 +1078,6 @@ namespace mn
 					if (args.tile_size.z + args.global_invocation_id.z >= total_size.z)
 						args.tile_size.z = total_size.z - args.global_invocation_id.z;
 					fn(args);
-					memory::tmp()->clear_all();
 				}
 			}
 		}
