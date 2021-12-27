@@ -103,7 +103,7 @@ namespace mn
 		T val;
 		Err err;
 
-		Result(Err e):err(e) { mn_assert(err.msg.count > 0); }
+		Result(Err e):err(e) { mn_assert(err.msg.count > 0); ::memset(&val, 0, sizeof(val));}
 
 		template<typename... TArgs>
 		Result(TArgs&& ... args)
@@ -124,6 +124,17 @@ namespace mn
 		bool operator==(bool v) const { return !bool(err) == v; }
 		bool operator!=(bool v) const { return !operator==(v); }
 	};
+
+	// destruct overload for result
+	template<typename T, typename TErr>
+	inline static void
+	destruct(Result<T, TErr>& self)
+	{
+		// TODO: encode which value you're currently holding instead of assuming you either have error
+		// or value becaue you can have neither
+		if (self.err == false)
+			destruct(self.val);
+	}
 }
 
 namespace fmt
