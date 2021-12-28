@@ -1482,3 +1482,21 @@ TEST_CASE("map")
 	mn::set_insert(set, "refresh"_mnstr);
 	mn::set_free(set);
 }
+
+TEST_CASE("strs_join")
+{
+	{
+		auto strs = mn::buf_lit({"5", "6", "8"});
+		mn::log_debug("{}", mn::strs_join(strs, "|"));
+		CHECK(mn::strs_join(strs, "|") == "5|6|8");
+	}
+	{
+		auto strs = mn::buf_lit({"8"_mnstr, "6"_mnstr, "11"_mnstr});
+		CHECK(mn::strs_join(strs, ", ") == "8, 6, 11");
+	}
+	{
+		auto strs = mn::buf_lit({"true"_mnstr, "false"_mnstr, "false"_mnstr});
+		mn::log_debug("{}", mn::strs_join(strs, " or "));
+		CHECK(mn::strs_join(strs, " or ") == "true or false or false");
+	}
+}

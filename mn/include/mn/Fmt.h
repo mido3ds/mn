@@ -153,4 +153,42 @@ namespace mn
 	{
 		return print_to(file_stderr(), format_str, args...);
 	}
+
+	inline static Str
+	strs_join(const Buf<Str> &str_buf, const Str &delimiter, mn::Allocator allocator = mn::allocator_top())
+	{
+		auto out = mn::str_with_allocator(allocator);
+		if (str_buf.count > 0)
+		{
+			mn::str_push(out, str_buf[0]);
+			for (size_t i = 1; i < str_buf.count; i++)
+				out = mn::strf(out, "{}{}", delimiter, str_buf[i]);
+		}
+		return out;
+	}
+
+	inline static Str
+	strs_join(const Buf<Str> &str_buf, const char *delimiter, mn::Allocator allocator = mn::allocator_top())
+	{
+		return strs_join(str_buf, mn::str_lit(delimiter), allocator);
+	}
+
+	inline static Str
+	strs_join(const Buf<const char *> &str_buf, const Str &delimiter, mn::Allocator allocator = mn::allocator_top())
+	{
+		auto out = mn::str_with_allocator(allocator);
+		if (str_buf.count > 0)
+		{
+			out = mn::strf(out, "{}", str_buf[0]);
+			for (size_t i = 1; i < str_buf.count; i++)
+				out = mn::strf(out, "{}{}", delimiter, str_buf[i]);
+		}
+		return out;
+	}
+
+	inline static Str
+	strs_join(const Buf<const char *> &str_buf, const char *delimiter, mn::Allocator allocator = mn::allocator_top())
+	{
+		return strs_join(str_buf, mn::str_lit(delimiter), allocator);
+	}
 }
