@@ -1482,3 +1482,14 @@ TEST_CASE("map")
 	mn::set_insert(set, "refresh"_mnstr);
 	mn::set_free(set);
 }
+
+TEST_CASE("str_join")
+{
+	auto numbers = {"5"_mnstr, "6"_mnstr, "7"_mnstr};
+	auto result = mn::str_join(mn::memory::tmp(), begin(numbers), end(numbers), "|"_mnstr);
+	CHECK(result == "5|6|7");
+	result = mn::str_join(mn::memory::tmp(), begin(numbers), end(numbers), ","_mnstr);
+	CHECK(result == "5,6,7");
+	result = mn::str_join(mn::memory::tmp(), begin(numbers), end(numbers), " or "_mnstr);
+	CHECK(result == "5 or 6 or 7");
+}

@@ -153,4 +153,31 @@ namespace mn
 	{
 		return print_to(file_stderr(), format_str, args...);
 	}
+
+	// joins the given strings with the delimiter and appends the result to the given str
+	inline static Str
+	str_join(Str str, const Str* begin, const Str* end, const Str& delimiter)
+	{
+		if (begin != end)
+		{
+			str = strf(str, "{}", *begin);
+			for (auto it = begin + 1; it != end; ++it)
+				str = strf(str, "{}{}", delimiter, *it);
+		}
+		return str;
+	}
+
+	// joins the given strings with the delimiter and appends the result to the given str
+	inline static Str
+	str_join(Allocator allocator, const Str* begin, const Str* end, const Str& delimiter)
+	{
+		return str_join(str_with_allocator(allocator), begin, end, delimiter);
+	}
+
+	// joins the given strings with the delimiter and appends the result to the given str
+	inline static Str
+	str_join(const Str* begin, const Str* end, const Str& delimiter)
+	{
+		return str_join(str_new(), begin, end, delimiter);
+	}
 }
