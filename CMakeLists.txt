@@ -56,32 +56,16 @@ endif ()
 
 # external dependencies
 include(CPM)
-CPMAddPackage(
-	NAME             fmt
-	GIT_REPOSITORY   https://github.com/fmtlib/fmt.git
-	GIT_TAG          8.0.1
-	GIT_SHALLOW      TRUE
-)
+CPMUsePackageLock(package-lock.cmake)
+
+CPMGetPackage(fmt)
 
 add_subdirectory(mn)
 
 if (MN_BUILD_TESTS)
 	# unittests dependencies
-	CPMAddPackage(
-		NAME             doctest
-		GIT_REPOSITORY   https://github.com/onqtam/doctest.git
-		GIT_TAG          2.4.6
-		GIT_SHALLOW      TRUE
-		EXCLUDE_FROM_ALL TRUE
-	)
-
-	CPMAddPackage(
-		NAME             nanobench
-		GIT_REPOSITORY   https://github.com/martinus/nanobench.git
-		GIT_TAG          v4.3.5
-		GIT_SHALLOW      TRUE
-		EXCLUDE_FROM_ALL TRUE
-	)
+	CPMGetPackage(doctest)
+	CPMGetPackage(nanobench)
 
 	add_subdirectory(unittest)
 endif()

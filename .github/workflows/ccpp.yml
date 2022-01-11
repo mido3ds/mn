@@ -20,7 +20,7 @@ jobs:
             triplet: x64-linux
           - os: macos-latest
             triplet: x64-osx
-    
+
     steps:
     - uses: actions/checkout@v1
       with:
@@ -28,14 +28,21 @@ jobs:
     - name: install uuid
       if: matrix.os == 'ubuntu-latest'
       run: sudo apt install uuid-dev
+    - uses: seanmiddleditch/gha-setup-ninja@master
+    - uses: ilammy/msvc-dev-cmd@v1
+    - name: Cache CPM Dependencies
+      uses: actions/cache@v2
+      with:
+        key: cache-cpm-dependencies-${{hashFiles('package-lock.cmake')}}
+        path: ~/CPMCache
     - name: configure debug
-      run: cmake . -B build -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=Debug
+      run: cmake . -B build -G Ninja -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=Debug -DCPM_SOURCE_CACHE=~/CPMCache
     - name: build debug
       run: cmake --build build --config Debug
     - name: unittests debug
       run: ./build/bin/Debug/mn_unittest
     - name: configure release
-      run: cmake . -B build -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=Release
+      run: cmake . -B build -G Ninja -DBUILD_SHARED_LIBS=ON -DCMAKE_BUILD_TYPE=Release -DCPM_SOURCE_CACHE=~/CPMCache
     - name: build release
       run: cmake --build build --config Release
     - name: unittests release
