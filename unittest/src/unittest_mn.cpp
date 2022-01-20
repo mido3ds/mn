@@ -1496,17 +1496,21 @@ TEST_CASE("str_join")
 
 TEST_CASE("folder_make_recursive")
 {
-	for (auto path : {
-		"a/b/c",
-		"a/b//",
-		"a/b/",
-		"a/",
-		"a",
-	})
-	{
-		CHECK(mn::folder_make_recursive(path));
-		CHECK(mn::path_is_folder(path));
-	}
+	CHECK(mn::folder_make_recursive("a/b/c"));
+	CHECK(mn::path_is_folder("a/b/c"));
+
+	CHECK(mn::folder_make_recursive("a/b//"));
+	CHECK(mn::path_is_folder("a/b//"));
+
+	CHECK(mn::folder_make_recursive("a/b/"));
+	CHECK(mn::path_is_folder("a/b/"));
+
+	CHECK(mn::folder_make_recursive("a/"));
+	CHECK(mn::path_is_folder("a/"));
+
+	CHECK(mn::folder_make_recursive("a"));
+	CHECK(mn::path_is_folder("a"));
+
 	CHECK(mn::folder_make_recursive(""));
 	CHECK(mn::folder_make_recursive("\\"));
 }
