@@ -1497,10 +1497,10 @@ TEST_CASE("str_join")
 TEST_CASE("folder_make_recursive")
 {
 	for (auto path : {
-		"a\\b\\c",
-		"a\\b\\\\",
-		"a\\b\\",
-		"a\\",
+		"a/b/c",
+		"a/b//",
+		"a/b/",
+		"a/",
 		"a",
 	})
 	{
