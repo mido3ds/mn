@@ -293,7 +293,9 @@ namespace mn
 	inline static T*
 	buf_insert(Buf<T>& self, size_t index, const R& value)
 	{
-		mn_assert(index < self.count);
+		mn_assert(index <= self.count);
+		if (index == self.count)
+			return buf_push(self, value);
 		if (self.count == self.cap)
 			buf_reserve(self, self.cap ? self.cap * 2 : 8);
 		::memmove(self.ptr + index + 1, self.ptr + index, (self.count - index) * sizeof(T));

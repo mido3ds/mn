@@ -106,14 +106,16 @@ TEST_CASE("buf insert and remove ordered")
 {
 	auto v = mn::buf_lit({1, 2, 3, 5});
 	mn::buf_insert(v, 3, 4);
+	mn::buf_insert(v, 5, 6);
 	for(size_t i = 0; i < v.count; ++i)
 		CHECK(v[i] == i + 1);
 	mn::buf_remove_ordered(v, 3);
-	CHECK(v.count == 4);
+	CHECK(v.count == 5);
 	CHECK(v[0] == 1);
 	CHECK(v[1] == 2);
 	CHECK(v[2] == 3);
 	CHECK(v[3] == 5);
+	CHECK(v[4] == 6);
 	mn::buf_free(v);
 }
 
