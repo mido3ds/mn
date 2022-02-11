@@ -329,7 +329,19 @@ namespace mn
 	bool
 	folder_make(const char* path)
 	{
-		return ::mkdir(path, 0777) == 0;
+		auto res = ::mkdir(path, 0777);
+		if (res == 0)
+		{
+			return true;
+		}
+		else
+		{
+			switch (errno)
+			{
+			case EEXIST: return path_is_folder(path);
+			default: return false;
+			}
+		}
 	}
 
 	bool

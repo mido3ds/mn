@@ -298,6 +298,31 @@ namespace mn
 		return folder_make(path.ptr);
 	}
 
+	// creates a new folder and all its parents if don't exist and returns whether it succeeded
+	inline static bool
+	folder_make_recursive(const Str& path)
+	{
+		auto normal_path = path_normalize(str_clone(path, memory::tmp()));
+		auto folders = str_split(normal_path, "/", true, memory::tmp());
+
+		auto folder_to_make = str_tmp();
+		for (const auto& folder : folders)
+		{
+			folder_to_make = path_join(folder_to_make, folder);
+			if (folder_make(folder_to_make) == false)
+				return false;
+		}
+
+		return true;
+	}
+
+	// creates a new folder and all its parents if don't exist and returns whether it succeeded
+	inline static bool
+	folder_make_recursive(const char* path)
+	{
+		return folder_make_recursive(mn::str_lit(path));
+	}
+
 	// removes a new folder and returns whether it succeeded
 	MN_EXPORT bool
 	folder_remove(const char* path);
