@@ -14,6 +14,14 @@
 
 #include <chrono>
 
+// sometimes, distros like debian use old glibc versions
+// gettid() was only defined in glibc v2.30+ (see https://man7.org/linux/man-pages/man2/gettid.2.html#VERSIONS)
+// the following defines the function using its corresponding syscall for earlier glibc versions
+#if __GLIBC__ == 2 && __GLIBC_MINOR__ < 30
+#include <sys/syscall.h>
+#define gettid() syscall(SYS_gettid)
+#endif
+
 namespace mn
 {
 	struct IMutex
