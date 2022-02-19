@@ -77,12 +77,6 @@ namespace mn
 			 err(E{})
 		{}
 
-		template<typename... TArgs>
-		Result(E e, TArgs&& ... args)
-			:val(std::forward<TArgs>(args)...),
-			 err(e)
-		{}
-
 		Result(const Result&) = delete;
 
 		Result(Result&&) = default;
@@ -92,37 +86,6 @@ namespace mn
 		Result& operator=(Result&&) = default;
 
 		~Result() = default;
-	};
-
-	// template specialization for the Err type
-	template<typename T>
-	struct Result<T, Err>
-	{
-		static_assert(!std::is_same_v<Err, T>, "Error can't be of the same type as value");
-
-		T val;
-		Err err;
-
-		Result(Err e):err(e) { mn_assert(err.msg.count > 0); ::memset(&val, 0, sizeof(val));}
-
-		template<typename... TArgs>
-		Result(TArgs&& ... args)
-			:val(std::forward<TArgs>(args)...)
-		{}
-
-		Result(const Result&) = delete;
-
-		Result(Result&&) = default;
-
-		Result& operator=(const Result&) = delete;
-
-		Result& operator=(Result&&) = default;
-
-		~Result() = default;
-
-		explicit operator bool() const { return !bool(err); }
-		bool operator==(bool v) const { return !bool(err) == v; }
-		bool operator!=(bool v) const { return !operator==(v); }
 	};
 
 	// destruct overload for result
@@ -130,9 +93,9 @@ namespace mn
 	inline static void
 	destruct(Result<T, TErr>& self)
 	{
-		// TODO: encode which value you're currently holding instead of assuming you either have error
-		// or value becaue you can have neither
-		if (self.err == false)
+		if (self.err)
+			destruct(self.err);
+		else
 			destruct(self.val);
 	}
 }
