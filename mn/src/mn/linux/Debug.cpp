@@ -2,7 +2,9 @@
 #include "mn/IO.h"
 
 #include <cxxabi.h>
+#if MN_BACKTRACE
 #include <execinfo.h>
+#endif
 
 #include <stdlib.h>
 
