@@ -243,6 +243,14 @@ if (MN_DEADLOCK)
 	)
 endif (MN_DEADLOCK)
 
+if (MN_BACKTRACE)
+	message(STATUS "feature: backtrace enabled")
+	target_compile_definitions(mn
+		PRIVATE
+			-DMN_BACKTRACE=1
+	)
+endif (MN_BACKTRACE)
+
 # enable C++17
 # disable any compiler specifc extensions
 # add d suffix in debug mode

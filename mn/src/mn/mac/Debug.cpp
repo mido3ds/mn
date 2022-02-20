@@ -11,8 +11,12 @@ namespace mn
 	size_t
 	callstack_capture(void** frames, size_t frames_count)
 	{
+		#if MN_BACKTRACE
 		::memset(frames, 0, frames_count * sizeof(frames));
 		return backtrace(frames, frames_count);
+		#else
+		return 0;
+		#endif
 	}
 
 	void
