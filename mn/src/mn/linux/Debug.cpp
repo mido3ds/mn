@@ -15,7 +15,6 @@ namespace mn
 		::memset(frames, 0, frames_count * sizeof(frames));
 		return backtrace(frames, frames_count);
 		#else
-		// backtrace isn't implemented in musl libc
 		return 0;
 		#endif
 	}

@@ -29,7 +29,7 @@ namespace mn
 	// callstack_capture captures the top frames_count callstack frames and writes it
 	// to the given frames pointer
 	size_t
-	callstack_capture(void** frames, size_t frames_count)
+	callstack_capture([[maybe_unused]] void** frames, [[maybe_unused]] size_t frames_count)
 	{
 		#if MN_BACKTRACE
 		::memset(frames, 0, frames_count * sizeof(frames));

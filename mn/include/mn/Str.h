@@ -342,8 +342,8 @@ namespace mn
 		if (f(c) == false)
 			return;
 		it = rune_prev(it);
-
-		while(1)
+	
+		for(; it != begin(self); it = rune_prev(it))
 		{
 			c = rune_read(it);
 			if(f(c) == false)
@@ -352,12 +352,6 @@ namespace mn
 				it = rune_next(it);
 				break;
 			}
-
-			// don't step back outside the buffer
-			if (it == begin(self))
-				break;
-
-			it = rune_prev(it);
 		}
 		size_t s = size_t(it - self.ptr);
 		str_resize(self, s);

@@ -314,11 +314,6 @@ TEST_CASE("str trim")
 	mn::str_trim(s);
 	CHECK(s == "r");
 	mn::str_free(s);
-
-	s = mn::str_from_c("ab");
-	mn::str_trim(s, "b");
-	CHECK(s == "a");
-	mn::str_free(s);
 }
 
 TEST_CASE("String lower case and upper case")
