@@ -342,7 +342,7 @@ namespace mn
 		if (f(c) == false)
 			return;
 		it = rune_prev(it);
-	
+
 		for(; it != begin(self); it = rune_prev(it))
 		{
 			c = rune_read(it);
