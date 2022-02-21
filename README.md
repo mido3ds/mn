@@ -10,6 +10,10 @@ You can communicate with me through e-mail moustapha.saad.abdelhamed@gmail.com
 
 The library is licensed under BSD-3 and you can find it here [MN](https://github.com/MoustaphaSaad/mn/)
 
+## Build
+Backtrace isn't currently supported on musl libc.
+To build on alpine-linux (or any musl libc based distro) you have to disable backtrace by setting cmake option `MN_BACKTRACE=OFF` during configure.
+
 ## Coding Style
 
 The coding style is simple. At its core is these principle

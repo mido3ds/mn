@@ -3,7 +3,7 @@
 
 #include <sys/socket.h>
 #include <sys/types.h>
-#include <sys/unistd.h>
+#include <unistd.h>
 #include <fcntl.h>
 #include <netdb.h>
 #include <poll.h>

@@ -29,6 +29,7 @@ option(MN_POOL_DOUBLE_FREE  "Enables mn pool double free check"                 
 option(MN_SHARED            "Forces mn to build as a shared library"                   ON)
 option(MN_ADDRESS_SANITIZER "Enables address sanitizer"                                OFF)
 option(MN_THREAD_SANITIZER  "Enables thread sanitizer"                                 OFF)
+option(MN_BACKTRACE         "Enables backtracing support"                              ON)
 
 if (MN_ADDRESS_SANITIZER AND MN_THREAD_SANITIZER)
 	message(FATAL_ERROR "address sanitizer and thread sanitizer cannot run at the same time")

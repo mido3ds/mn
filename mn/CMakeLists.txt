@@ -186,10 +186,22 @@ if (CMAKE_SYSTEM_PROCESSOR MATCHES "(x86)|(X86)|(amd64)|(AMD64)")
 		PUBLIC
 			ARCH_X86=1
 	)
-elseif (CMAKE_SYSTEM_PROCESSOR MATCHES "(arm64)|(arm32)")
+else ()
+	target_compile_definitions(mn
+		PUBLIC
+			ARCH_X86=0
+	)
+endif ()
+
+if (CMAKE_SYSTEM_PROCESSOR MATCHES "(arm64)|(arm32)")
 	target_compile_definitions(mn
 		PUBLIC
 			ARCH_ARM=1
+	)
+else ()
+	target_compile_definitions(mn
+		PUBLIC
+			ARCH_ARM=0
 	)
 endif ()
 
@@ -213,35 +225,31 @@ endif()
 target_link_libraries(mn
 	PRIVATE
 		"$<$<PLATFORM_ID:Windows>:dbghelp;ws2_32;bcrypt>"
-		"$<$<PLATFORM_ID:Linux>:pthread;rt;dl;uuid>"
+		"$<$<PLATFORM_ID:Linux>:pthread;rt;dl>"
 		"$<$<PLATFORM_ID:Darwin>:pthread;dl>")
 
+target_compile_definitions(mn PRIVATE -DMN_LEAK=$<BOOL:${MN_LEAK}>)
 if (MN_LEAK)
 	message(STATUS "feature: leak detector enabled")
-	target_compile_definitions(mn
-		PRIVATE
-			-DMN_LEAK=1
-	)
 	if(UNIX)
 		target_link_options(mn PUBLIC -rdynamic)
 	endif(UNIX)
 endif (MN_LEAK)
 
+target_compile_definitions(mn PRIVATE -DMN_POOL_DOUBLE_FREE=$<BOOL:${MN_POOL_DOUBLE_FREE}>)
 if (MN_POOL_DOUBLE_FREE)
 	message(STATUS "feature: pool double free check enabled")
-	target_compile_definitions(mn
-		PRIVATE
-			-DMN_POOL_DOUBLE_FREE=1
-	)
 endif (MN_POOL_DOUBLE_FREE)
 
+target_compile_definitions(mn PRIVATE -DMN_DEADLOCK=$<BOOL:${MN_DEADLOCK}>)
 if (MN_DEADLOCK)
 	message(STATUS "feature: deadlock check enabled")
-	target_compile_definitions(mn
-		PRIVATE
-			-DMN_DEADLOCK=1
-	)
 endif (MN_DEADLOCK)
+
+target_compile_definitions(mn PRIVATE -DMN_BACKTRACE=$<BOOL:${MN_BACKTRACE}>)
+if (MN_BACKTRACE)
+	message(STATUS "feature: backtrace enabled")
+endif (MN_BACKTRACE)
 
 # enable C++17
 # disable any compiler specifc extensions

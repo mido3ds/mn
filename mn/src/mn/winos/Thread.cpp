@@ -260,7 +260,7 @@ namespace mn
 	inline static void
 	_deadlock_detector_mutex_block([[maybe_unused]] void* mtx)
 	{
-		#ifdef MN_DEADLOCK
+		#if MN_DEADLOCK
 		auto self = _deadlock_detector();
 		auto thread_id = GetCurrentThreadId();
 
@@ -304,7 +304,7 @@ namespace mn
 	inline static void
 	_deadlock_detector_mutex_set_exclusive_owner([[maybe_unused]] void* mtx)
 	{
-		#ifdef MN_DEADLOCK
+		#if MN_DEADLOCK
 		auto self = _deadlock_detector();
 		auto thread_id = GetCurrentThreadId();
 
@@ -324,7 +324,7 @@ namespace mn
 	inline static void
 	_deadlock_detector_mutex_set_shared_owner([[maybe_unused]] void* mtx)
 	{
-		#ifdef MN_DEADLOCK
+		#if MN_DEADLOCK
 		auto self = _deadlock_detector();
 		auto thread_id = GetCurrentThreadId();
 
@@ -348,7 +348,7 @@ namespace mn
 	inline static void
 	_deadlock_detector_mutex_unset_owner([[maybe_unused]] void* mtx)
 	{
-		#ifdef MN_DEADLOCK
+		#if MN_DEADLOCK
 		auto self = _deadlock_detector();
 		auto thread_id = GetCurrentThreadId();
 

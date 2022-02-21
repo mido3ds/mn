@@ -2,23 +2,29 @@
 #include "mn/IO.h"
 
 #include <cxxabi.h>
+#if MN_BACKTRACE
 #include <execinfo.h>
+#endif
 
 #include <stdlib.h>
 
 namespace mn
 {
 	size_t
-	callstack_capture(void** frames, size_t frames_count)
+	callstack_capture([[maybe_unused]] void** frames, [[maybe_unused]] size_t frames_count)
 	{
+		#if MN_BACKTRACE
 		::memset(frames, 0, frames_count * sizeof(frames));
 		return backtrace(frames, frames_count);
+		#else
+		return 0;
+		#endif
 	}
 
 	void
 	callstack_print_to([[maybe_unused]] void** frames, [[maybe_unused]] size_t frames_count, [[maybe_unused]] mn::Stream out)
 	{
-		#if DEBUG
+		#if DEBUG && MN_BACKTRACE
 		constexpr size_t MAX_NAME_LEN = 255;
 		//+1 for null terminated string
 		char name_buffer[MAX_NAME_LEN+1];
