@@ -210,16 +210,9 @@ else()
 	message(FATAL_ERROR "Unidentified Compiler")
 endif()
 
-if (UNIX AND NOT APPLE)
-	find_package(PkgConfig REQUIRED)
-	pkg_search_module(UUID REQUIRED uuid)
-elseif(APPLE)
-	target_link_libraries(mn PRIVATE "-framework CoreFoundation")
-endif()
-
 target_link_libraries(mn
 	PRIVATE
-		"$<$<PLATFORM_ID:Windows>:dbghelp;ws2_32>"
+		"$<$<PLATFORM_ID:Windows>:dbghelp;ws2_32;bcrypt>"
 		"$<$<PLATFORM_ID:Linux>:pthread;rt;dl;uuid>"
 		"$<$<PLATFORM_ID:Darwin>:pthread;dl>")
 
