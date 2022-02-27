@@ -68,7 +68,9 @@ namespace mn
 		// creates a result instance from an error
 		Result(E e)
 			:err(e)
-		{}
+		{
+			::memset(&val, 0, sizeof(val));
+		}
 
 		// creates a result instance from a value
 		template<typename... TArgs>
