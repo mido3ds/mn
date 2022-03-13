@@ -1516,8 +1516,8 @@ TEST_CASE("folder_make_recursive")
 	CHECK(mn::folder_make_recursive(""));
 	CHECK(mn::folder_make_recursive("\\"));
 
-#ifndef _WIN32
-	CHECK(mn::folder_make_recursive("/tmp/whatever/root/a/"));
-	CHECK(mn::path_is_folder("/tmp/whatever/root/a/"));
-#endif
+	#if !defined(OS_WINDOWS)
+		CHECK(mn::folder_make_recursive("/tmp/whatever/root/a/"));
+		CHECK(mn::path_is_folder("/tmp/whatever/root/a/"));
+	#endif
 }
