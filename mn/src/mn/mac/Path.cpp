@@ -442,6 +442,10 @@ namespace mn
 	Str
 	folder_config(Allocator allocator)
 	{
-		return str_from_c("~/Library/Preferences", allocator);
+		// NOTE(mahmoud adas): we can't use `~` becausee macOS doesn't expand it on ::mkdir
+
+		// NOTE(mahmoud adas): if $HOME doesn't exist (why?) then config is the root one, which is still valid but requires authentication,
+		// it maybe useful to change $HOME for testing purposes, but is it always safe to read from env variable?
+		return strf(allocator, "{}/Library/Preferences", getenv("HOME"));
 	}
 }
