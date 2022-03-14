@@ -15,9 +15,8 @@ namespace mn
 		// $ man getrandom
 		// 	"Using getrandom() to read small buffers (<= 256 bytes) from the urandom source is the preferred mode of usage."
 		mn::Block buffer {&self, sizeof(self)};
-		ssize_t size = getrandom(buffer.ptr, buffer.size, 0);
+		[[maybe_unused]] const ssize_t size = getrandom(buffer.ptr, buffer.size, 0);
 		mn_assert((size_t)size == buffer.size);
-		(void)size;
 
 		// version 4
 		self.bytes[6] = (self.bytes[6] & 0x0f) | 0x40;
