@@ -743,9 +743,9 @@ namespace mn
 	inline static bool
 	chan_can_send(Chan<T> self)
 	{
-		mutex_lock(self->r_mtx);
-			bool res = (self->r.count < size_t(self->atomic_limit.load())) && (chan_closed(self) == false);
-		mutex_unlock(self->r_mtx);
+		mutex_lock(self->mtx);
+		bool res = (self->r.count < size_t(self->atomic_limit.load())) && (chan_closed(self) == false);
+		mutex_unlock(self->mtx);
 		return res;
 	}
 
