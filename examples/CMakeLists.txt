@@ -116,3 +116,9 @@ target_link_libraries(example-parallel-reduce
 	PRIVATE
 		MoustaphaSaad::mn
 )
+
+add_executable(example-queues example-queues.cpp)
+target_link_libraries(example-queues
+	PRIVATE
+		MoustaphaSaad::mn
+)

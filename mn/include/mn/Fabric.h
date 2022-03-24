@@ -755,11 +755,19 @@ namespace mn
 	chan_send_try(Chan<T> self, const T& v)
 	{
 		mutex_lock(self->mtx);
-		mn_defer{mutex_unlock(self->mtx);};
+
+		bool notify = false;
+		mn_defer
+		{
+			mutex_unlock(self->mtx);
+			if (notify)
+				cond_var_notify(self->read_cv);
+		};
 
 		if (self->r.count < self->limit)
 		{
 			ring_push_back(self->r, v);
+			notify = true;
 			return true;
 		}
 		return false;
@@ -815,12 +823,20 @@ namespace mn
 	chan_recv_try(Chan<T> self)
 	{
 		mutex_lock(self->mtx);
-		mn_defer{mutex_unlock(self->mtx);};
+
+		bool notify = false;
+		mn_defer
+		{
+			mutex_unlock(self->mtx);
+			if (notify)
+				cond_var_notify(self->write_cv);
+		};
 
 		if (self->r.count > 0)
 		{
 			T res = ring_front(self->r);
 			ring_pop_front(self->r);
+			notify = true;
 			return { res, true };
 		}
 		return { T{}, false };
