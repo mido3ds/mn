@@ -764,7 +764,7 @@ namespace mn
 				cond_var_notify(self->read_cv);
 		};
 
-		if (self->r.count < self->limit)
+		if (self->r.count < self->atomic_limit)
 		{
 			ring_push_back(self->r, v);
 			notify = true;
