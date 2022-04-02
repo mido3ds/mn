@@ -18,7 +18,7 @@ namespace mn
 	{
 		// NOTE(mahmoud adas): we can't use `~` becausee macOS doesn't expand it on ::mkdir
 		auto temp = NSTemporaryDirectory();
-		auto res = strf(allocator, "{}/Library/Preferences", [temp UTF8String]);
+		auto res = path_join(str_with_allocator(allocator), [temp UTF8String], "Library", "Preferences");
 		[temp release];
 		return res;
 	}
