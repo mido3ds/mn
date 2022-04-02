@@ -19,9 +19,6 @@
 
 #include <chrono>
 
-const char* get_home_path();
-const char* get_tmp_path();
-
 namespace mn
 {
 	Str
@@ -434,18 +431,5 @@ namespace mn
 		}
 
 		return i == files.count;
-	}
-
-	Str
-	folder_tmp(Allocator allocator)
-	{
-		return str_from_c(get_tmp_path(), allocator);
-	}
-
-	Str
-	folder_config(Allocator allocator)
-	{
-		// NOTE(mahmoud adas): we can't use `~` becausee macOS doesn't expand it on ::mkdir
-		return strf(allocator, "{}/Library/Preferences", get_home_path());
 	}
 }

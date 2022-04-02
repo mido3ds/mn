@@ -1,12 +1,22 @@
+#include "mn/Path.h"
+
 #import <Foundation/Foundation.h>
 
-const char*
-get_home_path()
+Str
+folder_tmp(Allocator allocator)
 {
-	return [NSHomeDirectory() UTF8String];
+	auto home = NSHomeDirectory();
+	auto res = str_from_c([home UTF8String], allocator);
+	[home release];
+	return res;
 }
 
-const char* get_tmp_path()
+Str
+folder_config(Allocator allocator)
 {
-	return [NSTemporaryDirectory() UTF8String];
+	// NOTE(mahmoud adas): we can't use `~` becausee macOS doesn't expand it on ::mkdir
+	auto temp = NSTemporaryDirectory();
+	auto res = strf(allocator, "{}/Library/Preferences", [temp UTF8String]);
+	[temp release];
+	return res;
 }
