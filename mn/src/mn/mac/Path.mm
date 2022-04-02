@@ -2,21 +2,24 @@
 
 #import <Foundation/Foundation.h>
 
-Str
-folder_tmp(Allocator allocator)
+namespace mn
 {
-	auto home = NSHomeDirectory();
-	auto res = str_from_c([home UTF8String], allocator);
-	[home release];
-	return res;
-}
+	Str
+	folder_tmp(Allocator allocator)
+	{
+		auto home = NSHomeDirectory();
+		auto res = str_from_c([home UTF8String], allocator);
+		[home release];
+		return res;
+	}
 
-Str
-folder_config(Allocator allocator)
-{
-	// NOTE(mahmoud adas): we can't use `~` becausee macOS doesn't expand it on ::mkdir
-	auto temp = NSTemporaryDirectory();
-	auto res = strf(allocator, "{}/Library/Preferences", [temp UTF8String]);
-	[temp release];
-	return res;
+	Str
+	folder_config(Allocator allocator)
+	{
+		// NOTE(mahmoud adas): we can't use `~` becausee macOS doesn't expand it on ::mkdir
+		auto temp = NSTemporaryDirectory();
+		auto res = strf(allocator, "{}/Library/Preferences", [temp UTF8String]);
+		[temp release];
+		return res;
+	}
 }
