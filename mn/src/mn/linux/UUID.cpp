@@ -5,23 +5,31 @@
 
 namespace mn
 {
-	UUID
-	uuid_generate()
+	inline static void
+	_crypto_rand(mn::Block buffer)
+	{
+		ssize_t s = 0;
+		while (s < buffer.size)
+		{
+			s += getrandom(buffer.ptr, buffer.size - s, 0);
+		}
+	}
+
+	inline static UUID
+	_rand_uuid()
 	{
 		UUID self{};
-
-		// use /dev/urandom to generate random uuid
-		// /dev/urandom is faster and as-secure-as /dev/random, see https://www.2uo.de/myths-about-urandom
-		// $ man getrandom
-		// 	"Using getrandom() to read small buffers (<= 256 bytes) from the urandom source is the preferred mode of usage."
-		mn::Block buffer {&self, sizeof(self)};
-		[[maybe_unused]] const ssize_t size = getrandom(buffer.ptr, buffer.size, 0);
-		mn_assert((size_t)size == buffer.size);
-
+		_crypto_rand({&self, sizeof(self)});
 		// version 4
 		self.bytes[6] = (self.bytes[6] & 0x0f) | 0x40;
 		// variant is 10
 		self.bytes[8] = (self.bytes[8] & 0x3f) | 0x80;
 		return self;
+	}
+
+	UUID
+	uuid_generate()
+	{
+		return _rand_uuid();
 	}
 } // namespace mn
