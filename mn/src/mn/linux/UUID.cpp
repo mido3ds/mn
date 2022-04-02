@@ -1,5 +1,4 @@
 #include "mn/UUID.h"
-#include "mn/Assert.h"
 
 #include <sys/random.h>
 
