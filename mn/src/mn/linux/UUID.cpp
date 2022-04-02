@@ -7,7 +7,7 @@ namespace mn
 	inline static void
 	_crypto_rand(mn::Block buffer)
 	{
-		ssize_t s = 0;
+		size_t s = 0;
 		while (s < buffer.size)
 		{
 			s += getrandom(buffer.ptr, buffer.size - s, 0);
